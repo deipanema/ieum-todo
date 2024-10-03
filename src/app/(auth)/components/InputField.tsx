@@ -1,20 +1,20 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { FieldValues, UseFormRegister, UseFormTrigger, UseFormWatch, FieldErrors, Path } from "react-hook-form";
+import { UseFormRegister, FieldErrors, UseFormTrigger, UseFormWatch } from "react-hook-form";
 
-interface InputFieldProps<T extends FieldValues> {
-  id: Path<T>;
+interface InputFieldProps {
+  id: string;
   label: string;
   type: string;
   placeholder: string;
-  register: UseFormRegister<T>;
-  errors: FieldErrors<T>;
-  trigger: UseFormTrigger<T>;
-  watch: UseFormWatch<T>;
+  register: UseFormRegister<any>;
+  errors: FieldErrors<any>;
+  trigger: UseFormTrigger<any>;
+  watch: UseFormWatch<any>;
 }
 
-export default function InputField<T extends FieldValues>({
+export default function InputField({
   id,
   label,
   type,
@@ -23,7 +23,7 @@ export default function InputField<T extends FieldValues>({
   errors,
   trigger,
   watch,
-}: InputFieldProps<T>) {
+}: InputFieldProps) {
   const [hasError, setHasError] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
   const watchedValue = watch(id);
