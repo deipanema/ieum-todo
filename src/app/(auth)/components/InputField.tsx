@@ -29,8 +29,8 @@ export default function InputField<T extends FieldValues>({
   const [isTouched, setIsTouched] = useState(false);
   const watchedValue = watch(id); // id는 Path<T> 타입이므로 올바르게 작동합니다.
   const prevValue = useRef(watchedValue);
-  const errorMessage = errors[id]?.message; // errors에서 id에 대한 오류 메시지를 가져옵니다.
-  const errorText = typeof errorMessage === "string" ? errorMessage : " "; // 오류 메시지가 문자열인지 확인합니다.
+  const error = errors[id];
+  const errorText = error && typeof error.message === "string" ? error.message : " ";
   const { ref, ...rest } = register(id); // register에서 id를 기반으로 ref와 나머지 속성을 가져옵니다.
 
   // 필드 값이 변경될 때마다 유효성 검사를 수행합니다.
@@ -74,7 +74,7 @@ export default function InputField<T extends FieldValues>({
         aria-required="true"
         onBlur={handleBlur} // 입력 필드에서 포커스가 벗어날 때 handleBlur를 호출합니다.
       />
-      <small className="mb-5 text-sm text-red-50">{isTouched && hasError ? errorText : " "}</small>
+      <small className="mb-5 text-sm text-red-50">{errorText}</small>
     </>
   );
 }
