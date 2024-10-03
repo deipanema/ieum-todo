@@ -86,7 +86,6 @@ export default function SignupForm() {
         errors={errors}
         trigger={trigger}
         watch={watch}
-        //serverError={serverErrors.email} // 서버 에러 메시지 전달
       />
       <InputField
         id="password"
