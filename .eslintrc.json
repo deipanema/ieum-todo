@@ -1,3 +1,24 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"]
+  "settings": {
+    "import/parsers": { "@typescript-eslint/parser": [".ts"] }
+  },
+  "extends": [
+    "next/core-web-vitals",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/typescript",
+    "plugin:import/recommended",
+    "prettier"
+  ],
+  "plugins": ["import"],
+  "rules": {
+    "semi": ["error", "always"],
+    "import/order": [
+      "error",
+      {
+        "groups": [["builtin", "external"], "internal", "parent", "sibling", "index"],
+        "newlines-between": "always"
+      }
+    ]
+  }
 }
