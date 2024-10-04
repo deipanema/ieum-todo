@@ -14,7 +14,7 @@ export default function Sidebar() {
   const { user } = useAuthStore();
 
   const toggleSidebar = () => {
-    setIsOpen(!isOpen);
+    setIsOpen((prev) => !prev);
   };
 
   const handleLogout = async () => {
@@ -31,7 +31,7 @@ export default function Sidebar() {
     <>
       {/* 사이드바 전체가 열렸을 때 */}
       <aside
-        className={`transition-transform duration-500 ease-in-out ${!isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`transition-all duration-500 ease-in-out lg:fixed ${!isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* 모바일 사이드바 */}
         <div className="flex w-full gap-4 border-b bg-white px-4 py-3 lg:hidden">
@@ -47,7 +47,7 @@ export default function Sidebar() {
             <Link href="/">
               <Image alt="logo-sidebar" width={106} height={35} src="/brand.webp" priority />
             </Link>
-            <button className="rounded-2 border-2 p-2" onClick={toggleSidebar}>
+            <button className="rounded-lg border-2 p-2" onClick={toggleSidebar}>
               <Image alt="sidebar-button" width={8} height={8} src="/sidebar-hide.svg" />
             </button>
           </div>
@@ -64,11 +64,11 @@ export default function Sidebar() {
             </div>
           </div>
           <div className="border-b border-b-slate-200 px-6 pb-6">
-            <button className="w-full rounded-xl bg-blue-500 py-3 text-white">+ 새 할 일</button>
+            <button className="w-full rounded-lg bg-blue-500 py-3 text-white">+ 새 할 일</button>
           </div>
 
           {/* 메뉴 항목 */}
-          <div className="flex gap-3 border-b border-b-slate-200 px-7 py-4">
+          <div className="flex gap-2.5 border-b border-b-slate-200 px-7 py-4">
             <Image alt="sidebar-home" width={13} height={13} src="/sidebar-home.svg" />
             <Link href="/">
               <span>대시보드</span>
@@ -84,12 +84,10 @@ export default function Sidebar() {
                 <Link
                   href="/dashboard/goal/891"
                   className="max-w-[231px] overflow-hidden text-ellipsis whitespace-nowrap"
-                >
-                  ・새 목표 쓰는 곳입니다.
-                </Link>
+                ></Link>
               </div>
             </div>
-            <button className="w-full rounded-xl border border-blue-500 bg-white py-3 text-blue-500">+ 새 목표</button>
+            <button className="w-full rounded-lg border border-blue-500 bg-white py-3 text-blue-500">+ 새 목표</button>
           </div>
         </div>
       </aside>
@@ -103,7 +101,7 @@ export default function Sidebar() {
         <Link href="/">
           <Image alt="sidebar-logo-hide" width={24} height={24} src="/sidebar-logo.png" />
         </Link>
-        <button className="rounded-2 border-2 p-2" onClick={toggleSidebar}>
+        <button className="rounded-lg border-2 p-2" onClick={toggleSidebar}>
           <Image alt="sidebar-button" width={8} height={8} src="/sidebar-hide-R.svg" />
         </button>
       </div>
