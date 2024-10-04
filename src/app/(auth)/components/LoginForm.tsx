@@ -44,7 +44,7 @@ export default function LoginForm() {
   };
 
   return (
-    <form className="flex flex-col gap-y-[0.5px]" aria-label="로그인 양식" onSubmit={handleSubmit(onSubmit)}>
+    <form className="flex flex-col" aria-label="로그인 양식" onSubmit={handleSubmit(onSubmit)}>
       <label htmlFor="email" className="sr-only">
         이메일
       </label>
@@ -54,7 +54,7 @@ export default function LoginForm() {
         placeholder="이메일"
         aria-required="true"
         required
-        className={`w-full rounded-tl-md rounded-tr-md border px-[10px] py-3 text-sm placeholder-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-300 sm:px-4 sm:text-base ${
+        className={`w-full rounded-tl-md rounded-tr-md border px-[10px] py-3 text-sm placeholder-slate-400 hover:bg-slate-50 focus:z-50 focus:outline-none focus:ring-1 focus:ring-blue-300 sm:px-4 sm:text-base ${
           errors.email ? "border-red-500 focus:ring-red-50" : "border-slate-300"
         }`}
         {...register("email")}
@@ -70,7 +70,7 @@ export default function LoginForm() {
         placeholder="비밀번호"
         {...register("password")}
         aria-required="true"
-        className={`z-10 w-full rounded-bl-md rounded-br-md border px-[10px] py-3 text-sm placeholder-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-300 sm:px-4 sm:text-base ${
+        className={`w-full rounded-bl-md rounded-br-md border px-[10px] py-3 text-sm placeholder-slate-400 hover:bg-slate-50 focus:z-50 focus:outline-none focus:ring-1 focus:ring-blue-300 sm:px-4 sm:text-base ${
           errors.password ? "border-red-50 focus:ring-red-50" : "border-slate-300"
         }`}
         onBlur={() => trigger("password")}
