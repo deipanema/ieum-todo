@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/AuthStore";
 export const login = async (email: string, password: string) => {
   try {
     const { data } = await api.post("/auth/login", { email, password });
+    console.log(data);
     document.cookie = `accessToken=${data.accessToken}; path=/; max-age=3600`;
     localStorage.setItem("refreshToken", data.refreshToken);
     useAuthStore.getState().setUser(data.user);
@@ -15,11 +16,17 @@ export const login = async (email: string, password: string) => {
   }
 };
 
-export const logout = () => {
-  document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-  localStorage.removeItem("refreshToken");
-  useAuthStore.getState().setUser(null);
-  useAuthStore.getState().setIsAuthenticated(false);
+export const logout = async () => {
+  try {
+    document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    localStorage.removeItem("refreshToken");
+    useAuthStore.getState().setUser(null);
+    useAuthStore.getState().setIsAuthenticated(false);
+    return true;
+  } catch (error) {
+    console.error("Logout failed:", error);
+    return false;
+  }
 };
 
 export const checkAuth = async () => {

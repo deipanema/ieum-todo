@@ -1,11 +1,11 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Sidebar from "@/components/Sidebar";
 
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <div>
-        <h1>Dashboard</h1>
-        안녕하세요.
+      <div className="lg:flex">
+        <Sidebar />
       </div>
     </ProtectedRoute>
   );
