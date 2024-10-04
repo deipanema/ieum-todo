@@ -11,6 +11,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
     "axios": "^1.7.7",
+    "framer-motion": "^11.11.0",
     "next": "14.2.14",
     "prettier": "^3.3.3",
     "react": "^18",
