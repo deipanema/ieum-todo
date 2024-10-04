@@ -31,5 +31,5 @@ export function middleware(request: NextRequest) {
 
 // matcher로 미들웨어가 적용될 경로 지정
 export const config = {
-  matcher: ["/", "/dashboard", "/login", "/signup"], // '/' 경로 포함
+  matcher: ["/", "/dashboard/:path*", "/login", "/signup"], // '/' 경로 포함
 };
