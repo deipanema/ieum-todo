@@ -68,7 +68,7 @@ export default function InputField<T extends FieldValues>({
         placeholder={placeholder}
         {...rest} // register로 받은 나머지 속성(onChange, onBlur, name 등)들을 전달합니다.
         ref={ref} // react-hook-form이 내부적으로 폼 요소에 접근할 수 있게 연결해 줍니다.
-        className={`sm:text mb-2 w-full rounded-sm border border-slate-300 bg-white px-[10px] py-[6px] text-sm placeholder-slate-400 shadow-[0_35px_60px_-15px_rgba(59,130,246,0.35)] hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-300 sm:px-4 sm:text-base ${
+        className={`mb-2 w-full rounded-sm border border-slate-300 bg-white px-[10px] py-[6px] text-sm placeholder-slate-400 shadow-[0_35px_60px_-15px_rgba(59,130,246,0.35)] hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-300 sm:px-4 sm:text-base ${
           isTouched && hasError ? "outline-none ring-1 ring-red-50" : ""
         }`}
         aria-required="true"
