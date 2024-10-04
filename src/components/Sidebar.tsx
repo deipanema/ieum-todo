@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 
-import { logout } from "@/utils/authUtils";
 import { useAuthStore } from "@/store/AuthStore";
+import { logout } from "@/utils/authUtils";
 
 export default function Sidebar() {
   const [goals, setGoals] = useState<string[]>([]);
@@ -80,13 +80,13 @@ export default function Sidebar() {
               <Image alt="logo-sidebar" width={106} height={35} src="/brand.webp" priority />
             </Link>
             <button className="rounded-lg border-2 p-2" onClick={toggleSidebar}>
-              <Image alt="sidebar-button" width={8} height={8} src="/sidebar-hide.svg" />
+              <Image alt="sidebar-button" width={8} height={8} src="/sidebar-hide.svg" className="h-2 w-2" />
             </button>
           </div>
 
           {/* 프로필 및 할 일 버튼 */}
           <div className="mb-6 flex gap-3 px-6">
-            <Image alt="profile-sidebar" width={64} height={64} src="/sidebar-profile.svg" />
+            <Image alt="profile-sidebar" width={64} height={64} src="/sidebar-profile.svg" priority />
             <div>
               <h2>{user?.name}</h2>
               <h2>{user?.email}</h2>

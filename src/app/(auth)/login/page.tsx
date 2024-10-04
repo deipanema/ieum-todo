@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import LoginFormContainer from "@/app/components/LoginFormContainer";
+import LoginFormContainer from "../components/LoginFormContainer";
 
 export default function LoginPage() {
   return (
