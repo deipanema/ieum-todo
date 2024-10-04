@@ -4,16 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { checkAuth, logout } from "@/utils/authUtils";
+
+import { logout } from "@/utils/authUtils";
 import { useAuthStore } from "@/store/AuthStore";
 
 export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false); // 사이드바 열림 상태 관리
-  const router = useRouter(); // useRouter 훅 사용
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
   const { user } = useAuthStore();
 
   const toggleSidebar = () => {
-    setIsOpen(!isOpen); // 사이드바 상태 토글
+    setIsOpen(!isOpen);
   };
 
   const handleLogout = async () => {
