@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -14,6 +15,8 @@ type FormFields = "nickname" | "email" | "password" | "passwordConfirm";
 type FormData = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -46,6 +49,7 @@ export default function SignupForm() {
       if (response.data) {
         clearErrors();
         reset();
+        router.push("/login");
         console.log("회원가입 성공 ✨", response.data);
       }
     } catch (error) {
@@ -124,8 +128,8 @@ const signupSchema = z
     path: ["passwordConfirm"],
   });
 
-const errorMessage: Record<string, { field: FormFields; message: string }> = {
-  "409": {
+const errorMessage: Record<number, { field: FormFields; message: string }> = {
+  409: {
     field: "email",
     message: "이미 사용 중인 이메일입니다.",
   },
