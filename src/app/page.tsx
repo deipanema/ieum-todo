@@ -1,10 +1,11 @@
 "use client";
 
-import LoadingSpinner from "@/components/LoadingSpinner";
-import { useAuthStore } from "@/store/AuthStore";
-import { checkAuth } from "@/utils/authUtils";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+
+import { useAuthStore } from "@/store/AuthStore";
+import { checkAuth } from "@/utils/authUtils";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function Home() {
   const router = useRouter();

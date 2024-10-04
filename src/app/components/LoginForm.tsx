@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
+
 import { login } from "@/utils/authUtils";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -19,7 +21,6 @@ export default function LoginForm() {
     formState: { errors, isSubmitting },
     clearErrors,
     trigger,
-    setError,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -35,14 +36,10 @@ export default function LoginForm() {
       } else {
         setLoginError("로그인에 실패했습니다. 다시 시도해 주세요.");
       }
-    } catch (error: any) {
-      console.error("로그인 중 오류 발생:", error);
-      if (error.response && error.response.status in errorMessage) {
-        const { field, message } = errorMessage[error.response.status];
-        setError(field, { type: "manual", message });
-      } else {
-        setLoginError("로그인 실패했습니다. 다시 시도해 주세요.");
-      }
+    } catch (error) {
+      const axiosError = error as AxiosError; // Type assertion
+      console.error("로그인 중 오류 발생:", axiosError);
+      setLoginError("로그인 실패했습니다. 다시 시도해 주세요.");
     }
   };
 
@@ -94,14 +91,3 @@ const schema = z.object({
   email: z.string().email({ message: "유효한 이메일 주소를 입력해주세요." }),
   password: z.string().min(8, { message: "비밀번호는 최소 8자 이상이어야 합니다." }),
 });
-
-const errorMessage: Record<number, { field: keyof FormData; message: string }> = {
-  400: {
-    field: "email",
-    message: "이메일 형식으로 작성해 주세요.",
-  },
-  404: {
-    field: "email",
-    message: "가입되지 않은 이메일입니다.",
-  },
-};
