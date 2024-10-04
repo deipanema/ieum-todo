@@ -2,13 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { logout } from "@/utils/authUtils";
 import { useAuthStore } from "@/store/AuthStore";
 
 export default function Sidebar() {
+  const [goals, setGoals] = useState<string[]>([]);
+  const [inputVisible, setInputVisible] = useState(false);
+  const [goalInput, setGoalInput] = useState("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { user } = useAuthStore();
@@ -26,6 +30,34 @@ export default function Sidebar() {
       console.error("로그아웃에 실패했습니다.");
     }
   };
+
+  const handleAddGoalClick = () => {
+    setInputVisible((prev) => !prev);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGoalInput(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      if (goalInput.trim()) {
+        setGoals((prevGoals) => [...prevGoals, goalInput]);
+        setGoalInput("");
+        setInputVisible(false);
+      }
+    }
+  };
+
+  const handleGoalClick = (index: number) => {
+    router.push(`/dashboard/goal/${index + 1}`);
+  };
+
+  useEffect(() => {
+    if (inputVisible && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [inputVisible]);
 
   return (
     <>
@@ -64,7 +96,7 @@ export default function Sidebar() {
             </div>
           </div>
           <div className="border-b border-b-slate-200 px-6 pb-6">
-            <button className="w-full rounded-lg bg-blue-500 py-3 text-white">+ 새 할 일</button>
+            <button className="w-full rounded-lg bg-blue-500 py-3 text-white outline-none">+ 새 할 일</button>
           </div>
 
           {/* 메뉴 항목 */}
@@ -80,14 +112,36 @@ export default function Sidebar() {
               <span>목표</span>
             </div>
             <div className="mb-6 max-h-[400px] overflow-y-auto pt-4">
-              <div className="flex flex-col gap-4">
-                <Link
-                  href="/dashboard/goal/891"
-                  className="max-w-[231px] overflow-hidden text-ellipsis whitespace-nowrap"
-                ></Link>
-              </div>
+              {goals && (
+                <ul className="flex flex-col gap-4">
+                  {goals.map((goal, index) => (
+                    <li
+                      key={index}
+                      onClick={() => handleGoalClick(index)}
+                      className="max-w-[231px] overflow-hidden text-ellipsis whitespace-nowrap"
+                    >
+                      <Link href={`/dashboard/goal/${index}`}>・{goal}</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {inputVisible && (
+                <input
+                  type="text"
+                  ref={inputRef}
+                  value={goalInput}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  className="block w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none"
+                />
+              )}
             </div>
-            <button className="w-full rounded-lg border border-blue-500 bg-white py-3 text-blue-500">+ 새 목표</button>
+            <button
+              onClick={handleAddGoalClick}
+              className="w-full rounded-lg border border-blue-500 bg-white py-3 text-blue-500 outline-none"
+            >
+              + 새 목표
+            </button>
           </div>
         </div>
       </aside>
