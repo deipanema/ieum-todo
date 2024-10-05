@@ -74,16 +74,11 @@ export default function SideBar() {
   const fetchGoals = async () => {
     try {
       const response = await api.get(`/goals`);
-      console.log(response);
       setGoals(response?.data.goals); // API로 받은 데이터를 상태에 저장
     } catch (error) {
       const axiosError = error as AxiosError;
       console.error("목표 목록 가져오기 실패:", axiosError.response ? axiosError.response.data : axiosError.message);
     }
-  };
-
-  const handleGoalClick = (index: number) => {
-    router.push(`/dashboard/goal/${index + 1}`);
   };
 
   useEffect(() => {
@@ -104,7 +99,7 @@ export default function SideBar() {
             className="flex h-6 w-6 cursor-pointer items-center justify-center px-[6px] py-2"
             onClick={() => router.push("/")}
           >
-            <Image src="/sidebar-kebab.svg" width={0} height={0} alt="kebab-button" className="h-auto w-auto" />
+            <Image src="/hamburger.svg" width={0} height={0} alt="hamburger-button" className="h-auto w-auto" />
           </div>
           <h2 className="cursor-pointer text-[18px] font-semibold">대시보드</h2>
         </div>
@@ -135,7 +130,7 @@ export default function SideBar() {
             <button className="w-full rounded-lg bg-blue-500 py-3 text-white outline-none">+ 새 할 일</button>
           </div>
           <div className="flex gap-2 border-b border-b-slate-200 px-6 py-4">
-            <Image src="/sidebar-home.svg" width={0} height={0} className="ml-2 h-auto w-[13px]" alt="sidebar-home" />
+            <Image src="/sidebar-home.svg" width={0} height={0} className="ml-1.5 h-auto w-[13px]" alt="sidebar-home" />
             <Link href="/">
               <span>대시보드</span>
             </Link>
@@ -147,13 +142,9 @@ export default function SideBar() {
             </div>
             <div className="mb-6 max-h-[400px] overflow-y-auto pt-4">
               <ul className="flex flex-col gap-4">
-                {goals.map((goal, index) => (
-                  <li
-                    key={index}
-                    onClick={() => handleGoalClick(index)}
-                    className="max-w-[231px] overflow-hidden text-ellipsis whitespace-nowrap"
-                  >
-                    <Link href={`/dashboard/goal/${index}`}>・{goal.title}</Link>
+                {goals.map((goal) => (
+                  <li key={goal.id} className="max-w-[231px] overflow-hidden text-ellipsis whitespace-nowrap">
+                    <Link href={`/dashboard/goal/${goal.id}`}>・{goal.title}</Link>
                   </li>
                 ))}
               </ul>
