@@ -1,36 +1,38 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { IoCloseOutline } from "react-icons/io5";
+import React, { ReactNode } from "react";
 
-import { useModalStore } from "@/store/modalSotre";
+import { useModalStore } from "@/store/modalStore";
 
-export default function Modal() {
-  const { isOpen, content, closeModal } = useModalStore();
-  const modalRef = useRef<HTMLDivElement>(null);
+type ModalProps = {
+  children: ReactNode;
+  type: "parent" | "child";
+};
 
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        closeModal();
-      }
-    };
+export default function Modal({ children, type }: ModalProps) {
+  const { isOpen, closeModal } = useModalStore();
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleOutsideClick);
+  if (!isOpen[type]) return null;
+
+  const handleClose = () => {
+    closeModal(type);
+  };
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (type === "parent" && e.target === e.currentTarget) {
+      handleClose();
     }
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, [isOpen, closeModal]);
-
-  if (!isOpen) return null;
+  };
 
   return (
-    <div className="fixed inset-0 z-30 flex h-screen w-screen items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={handleOverlayClick}>
       <div className="fixed inset-0 bg-black bg-opacity-50" />
-      <div ref={modalRef} className="z-30 overflow-auto rounded-lg bg-white shadow-xl">
-        {content}
+      <div className="relative z-50 w-full max-w-lg rounded-xl bg-white p-6">
+        {children}
+        <button onClick={handleClose} className="absolute right-5 top-6 text-2xl text-slate-500 hover:text-slate-800">
+          <IoCloseOutline />
+        </button>
       </div>
     </div>
   );

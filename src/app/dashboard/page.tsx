@@ -1,7 +1,8 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
+
+import CreateNewTodo from "@/components/CreateNewTodo";
+import LinkUpload from "@/components/LinkUpload";
 
 export default function Dashboard() {
   return (
@@ -49,6 +50,8 @@ export default function Dashboard() {
           </div>
         }
       </div>
+      <CreateNewTodo />
+      <LinkUpload />
     </main>
   );
 }

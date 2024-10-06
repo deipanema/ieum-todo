@@ -8,8 +8,7 @@ import Link from "next/link";
 import { logout } from "@/utils/authUtils";
 import { useAuthStore } from "@/store/AuthStore";
 import { getGoals, PostGoal } from "@/api/goalAPI";
-import { useModalStore } from "@/store/modalSotre";
-import CreateNewTodo from "@/components/CreateNewTodo";
+import { useModalStore } from "@/store/modalStore";
 
 export interface GoalType {
   id: number;
@@ -30,9 +29,9 @@ export default function SideBar() {
   const { user } = useAuthStore();
   const { openModal } = useModalStore();
 
-  const handleOpenModal = () => {
-    openModal(<CreateNewTodo />);
-  };
+  // const handleOpenModal = () => {
+  //   openModal(<CreateNewTodo closeParentsModal={() => closeModal} />);
+  // };
 
   const toggleSidebar = () => {
     setIsOpen((prev) => !prev);
@@ -116,7 +115,10 @@ export default function SideBar() {
             </div>
           </div>
           <div className="border-b border-b-slate-200 px-6 pb-6">
-            <button onClick={handleOpenModal} className="w-full rounded-lg bg-blue-500 py-3 text-white outline-none">
+            <button
+              onClick={() => openModal("parent")}
+              className="w-full rounded-lg bg-blue-500 py-3 text-white outline-none"
+            >
               + 새 할 일
             </button>
           </div>
