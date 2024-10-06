@@ -1,6 +1,14 @@
+import { Dispatch, SetStateAction } from "react";
+
+import { TodoType } from "./CreateNewTodo";
 import Modal from "./Modal";
 
-export default function LinkUpload() {
+type LinkUpload = {
+  todo?: TodoType;
+  setTodo?: Dispatch<SetStateAction<TodoType>>;
+};
+
+export default function LinkUpload({ todo, setTodo }: LinkUpload) {
   return (
     <Modal type="child">
       <h1 className="mb-6 text-lg font-semibold">링크 업로드</h1>
