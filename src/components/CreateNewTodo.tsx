@@ -3,9 +3,11 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import { useModalStore } from "@/store/modalSotre";
 import { getGoals } from "@/api/goalAPI";
 import { GoalType } from "@/app/dashboard/goal/[id]/page";
+import { useModalStore } from "@/store/modalStore";
+
+import Modal from "./Modal";
 
 export type TodoType = {
   title: string;
@@ -19,7 +21,11 @@ export default function CreateNewTodo() {
   const [todo, setTodo] = useState<TodoType>({ title: "", linkURL: "", goalId: 0 });
   const [goals, setGoals] = useState<GoalType[]>([]);
 
-  const closeModal = useModalStore((state) => state.closeModal);
+  const { openModal } = useModalStore();
+
+  // const handleLinkUploadOpenModal = () => {
+  //   openModal(<LinkUpload closeChildModal={() => closeModal} />);
+  // };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTodo({ ...todo, title: e.target.value });
@@ -27,7 +33,6 @@ export default function CreateNewTodo() {
 
   const fetchGoals = async () => {
     const goalsData = await getGoals();
-    //console.log(goalsData);
     if (goalsData) {
       setGoals(goalsData.data.goals);
     }
@@ -44,15 +49,7 @@ export default function CreateNewTodo() {
   }, []);
 
   return (
-    <div className="relative h-auto w-[520px] overflow-hidden rounded-xl bg-white p-6">
-      <Image
-        alt="모달 닫기 버튼"
-        width={24}
-        height={0}
-        className="absolute right-6 h-auto w-6 cursor-pointer"
-        src="/modal-close.svg"
-        onClick={closeModal}
-      />
+    <Modal type="parent">
       <h1 className="mb-6 text-lg font-semibold">할 일 생성</h1>
       <div className="flex select-none flex-col gap-6">
         <div>
@@ -73,7 +70,10 @@ export default function CreateNewTodo() {
               <Image alt="checkbox-icon" width={24} height={24} src="/modal-unchecked.svg" />
               <span>파일 업로드</span>
             </div>
-            <div className="flex w-fit cursor-pointer gap-[7px] rounded-lg border bg-slate-100 p-2">
+            <div
+              className="flex w-fit cursor-pointer gap-[7px] rounded-lg border bg-slate-100 p-2"
+              onClick={() => openModal("child")}
+            >
               <Image alt="checkbox-icon" width={24} height={24} src="/modal-unchecked.svg" />
               <span>링크 첨부</span>
             </div>
@@ -125,6 +125,6 @@ export default function CreateNewTodo() {
           확인
         </button>
       </div>
-    </div>
+    </Modal>
   );
 }
