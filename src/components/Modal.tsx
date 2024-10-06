@@ -27,9 +27,9 @@ export default function Modal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex h-screen w-screen items-center justify-center">
+    <div className="fixed inset-0 z-30 flex h-screen w-screen items-center justify-center">
       <div className="fixed inset-0 bg-black bg-opacity-50" />
-      <div ref={modalRef} className="z-50 overflow-auto rounded-lg bg-white shadow-xl">
+      <div ref={modalRef} className="z-30 overflow-auto rounded-lg bg-white shadow-xl">
         {content}
       </div>
     </div>

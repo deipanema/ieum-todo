@@ -9,7 +9,7 @@ import { logout } from "@/utils/authUtils";
 import { useAuthStore } from "@/store/AuthStore";
 import { getGoals, PostGoal } from "@/api/goalAPI";
 import { useModalStore } from "@/store/modalSotre";
-import CreateTodo from "@/components/CreateTodo";
+import CreateNewTodo from "@/components/CreateNewTodo";
 
 export interface GoalType {
   id: number;
@@ -31,7 +31,7 @@ export default function SideBar() {
   const { openModal } = useModalStore();
 
   const handleOpenModal = () => {
-    openModal(<CreateTodo />);
+    openModal(<CreateNewTodo />);
   };
 
   const toggleSidebar = () => {
