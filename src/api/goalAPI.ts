@@ -18,9 +18,7 @@ export const PostGoal = async (title: string) => {
     const response = await api.post(`/goals`, {
       title,
     });
-    if (response.status === 201) {
-      console.log("새 목표가 성공적으로 추가되었습니다! 🎉");
-    }
+    console.log(response);
   } catch (error) {
     const axiosError = error as AxiosError;
     console.error("목표 추가 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
