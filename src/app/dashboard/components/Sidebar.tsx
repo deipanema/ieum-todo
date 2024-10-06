@@ -49,14 +49,17 @@ export default function SideBar() {
     setGoalInput(e.target.value);
   };
 
+  const fetchAndSetGoals = async () => {
+    const goalList = await getGoals();
+    setGoals(goalList?.data.goals);
+  };
+
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && goalInput.trim()) {
+      await PostGoal(goalInput);
+      await fetchAndSetGoals();
       setGoalInput("");
       setInputVisible(false);
-
-      await PostGoal(goalInput);
-      const goalList = await getGoals();
-      setGoals(goalList?.data.goals);
     }
   };
 
@@ -67,7 +70,7 @@ export default function SideBar() {
   }, [inputVisible]);
 
   useEffect(() => {
-    getGoals();
+    fetchAndSetGoals();
   }, []);
 
   return (
