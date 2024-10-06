@@ -4,8 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { deleteGoal, getGoal, getGoals } from "@/api/goalAPI";
-import { useGoalStore } from "@/store/goalStore";
+import { deleteGoal, getGoal } from "@/api/goalAPI";
 
 import TodoItem from "../../components/TodoItem";
 
@@ -44,8 +43,7 @@ export default function Goalpage({ params }: GoalPage) {
   const [goal, setGoal] = useState<GoalType>();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null); // 드롭다운 참조
-  const { goalList, fetchGoals } = useGoalStore();
-
+  console.log(setTodos);
   const fetchInitialData = async () => {
     const goalResponse = await getGoal(Number(id));
     setGoal(goalResponse?.data);
