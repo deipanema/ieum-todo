@@ -1,7 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { deleteGoal, getGoal, getGoals } from "@/api/goalAPI";
+import { useGoalStore } from "@/store/goalStore";
 
 import TodoItem from "../../components/TodoItem";
 
@@ -9,26 +13,89 @@ type GoalPage = {
   params: { id: string };
 };
 
+export type TodosType = {
+  done: boolean;
+  fileUrl: string;
+  goal: { title: string; id: number };
+  id: number;
+  linkUrl: string;
+  noteId: string;
+  teamId: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: number;
+};
+
+export type GoalType = {
+  id: number;
+  teamId: string;
+  title: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export default function Goalpage({ params }: GoalPage) {
   const { id } = params;
+  const router = useRouter();
+
+  const [todos, setTodos] = useState<TodosType[]>([]);
+  const [goal, setGoal] = useState<GoalType>();
   const [isOpen, setIsOpen] = useState(false);
-  const [todos, setTodos] = useState<string[]>([]);
-  console.log(id, setTodos);
+  const dropdownRef = useRef<HTMLDivElement | null>(null); // 드롭다운 참조
+  const { goalList, fetchGoals } = useGoalStore();
+
+  const fetchInitialData = async () => {
+    const goalResponse = await getGoal(Number(id));
+    setGoal(goalResponse?.data);
+  };
 
   const handleToggleDropdown = () => {
     setIsOpen((prev) => !prev);
   };
+
+  const handleDelete = async () => {
+    const response = await deleteGoal(goal?.id as number);
+
+    if (response) {
+      router.push("/");
+    }
+  };
+
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
+
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // 드롭다운이 열려 있고, 클릭된 요소가 드롭다운 또는 케밥 버튼이 아닌 경우
+      if (isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false); // 드롭다운 닫기
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside); // 이벤트 리스너 추가
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside); // 이벤트 리스너 정리
+    };
+  }, [isOpen]);
 
   return (
     <main className="mt-[51px] h-auto min-h-[calc(100vh)] w-full select-none bg-slate-100 lg:mt-0 lg:h-screen">
       <div className="mx-auto w-[343px] p-6 sm:w-full 2xl:w-[1200px]">
         <h2 className="mb-3 text-[18px] font-semibold">목표</h2>
         <div className="my-6 flex h-full w-[306px] flex-col gap-4 rounded-xl bg-white px-6 py-4 sm:w-auto">
-          <div className="flex justify-between">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-800">
-              <Image src="/goal-flag.svg" width={24} height={24} alt="goal-icon" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="relative flex h-10 w-10 justify-center rounded-2xl bg-slate-800">
+                <Image src="/goal-flag.svg" width={24} height={24} alt="goal-icon" />
+              </div>
+              <h3 className="ml-2 text-left text-lg font-semibold">{goal?.title}</h3>
             </div>
-            <h2 className="text-[18px] font-semibold"></h2>
+
             <Image
               className="h-6 w-6 cursor-pointer"
               src="/goal-kebab.svg"
@@ -37,15 +104,18 @@ export default function Goalpage({ params }: GoalPage) {
               alt="kebab-icon"
               onClick={handleToggleDropdown}
             />
+
             {isOpen && (
-              <div className="absolute right-14 top-[120px] z-10 rounded-lg border bg-white">
-                <h6 className="cursor-pointer p-3 hover:bg-gray-200">수정하기</h6>
-                <h6 className="cursor-pointer p-3 hover:bg-gray-200">삭제하기</h6>
+              <div ref={dropdownRef} className="absolute right-28 top-32 z-10 rounded-lg border bg-white shadow-xl">
+                <p className="cursor-pointer p-3 hover:bg-slate-200">수정하기</p>
+                <p onClick={handleDelete} className="cursor-pointer p-3 hover:bg-slate-200">
+                  삭제하기
+                </p>
               </div>
             )}
           </div>
           <div>
-            <h3 className="mb-2 pl-[7px]">Progress</h3>
+            <h4 className="mb-2 pl-[7px]">Progress</h4>
           </div>
         </div>
         <div className="my-6 flex h-full w-[306px] flex-col gap-4 rounded-xl bg-blue-100 px-6 py-4 sm:w-auto">
@@ -61,11 +131,13 @@ export default function Goalpage({ params }: GoalPage) {
               <p className="z-10 min-w-[74px] grow cursor-pointer text-right text-[14px] text-blue-500">+ 할일 추가</p>
             </div>
             <ul>
-              {todos.map((todo, index) => (
-                <TodoItem key={index} />
-              ))}
+              {todos
+                .filter((todo) => todo.done === false)
+                .map((todo) => (
+                  <TodoItem key={todo.id} todo={todo} goal={false} />
+                ))}
             </ul>
-            {!todos.length && (
+            {todos.filter((done) => done.done === false).length === 0 && (
               <div className="absolute -mx-6 -my-4 flex h-full w-full items-center justify-center text-sm text-slate-500">
                 해야할 일이 아직 없어요.
               </div>
@@ -76,11 +148,14 @@ export default function Goalpage({ params }: GoalPage) {
               <h2 className="text-[18px] font-semibold">Done</h2>
             </div>
             <ul>
-              {todos.map((todo, index) => (
-                <TodoItem key={index} />
-              ))}
+              {todos
+                .filter((done) => done.done === true)
+
+                .map((todo) => (
+                  <TodoItem key={todo.id} todo={todo} goal={false} />
+                ))}
             </ul>
-            {!todos.length && (
+            {todos.filter((done) => done.done === true).length === 0 && (
               <div className="absolute -mx-6 -my-4 flex h-full w-full items-center justify-center text-sm text-slate-500">
                 다 한 일이 아직 없어요.
               </div>

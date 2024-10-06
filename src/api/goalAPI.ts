@@ -26,3 +26,24 @@ export const PostGoal = async (title: string) => {
     console.error("목표 추가 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
   }
 };
+
+export const getGoal = async (id: number) => {
+  try {
+    const response = await api.get(`/goals/${id}`);
+    return response;
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    console.error("목표 추가 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+  }
+};
+
+export const deleteGoal = async (id: number) => {
+  try {
+    const response = await api.delete(`/goals/${id}`);
+    console.log(response);
+    return response;
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    console.error("목표 삭제 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+  }
+};
