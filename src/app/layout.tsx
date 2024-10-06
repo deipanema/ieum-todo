@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ReactNode } from "react";
 
+import Modal from "@/components/Modal";
+
 const pretendard = localFont({
   src: "./fonts/PretendardVariable.woff2",
   display: "swap",
@@ -22,7 +24,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${pretendard.variable} font-pretendard`}>{children}</body>
+      <body className={`${pretendard.variable} font-pretendard`}>
+        {children}
+        <Modal />
+      </body>
     </html>
   );
 }

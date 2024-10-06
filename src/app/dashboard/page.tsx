@@ -32,7 +32,7 @@ export default function Dashboard() {
                     <span className="text-3xl font-semibold">0</span> %
                   </h2>
                 </div>
-                <div className="absolute left-[40%] top-11 z-10 flex 2xl:left-[50%]">
+                <div className="absolute left-[40%] top-11 flex 2xl:left-[50%]">
                   <Image src="/dashboard-progress-circle.svg" width={166} height={166} alt="progress-circle-icon" />
                 </div>
               </div>
