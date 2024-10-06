@@ -8,7 +8,6 @@ import Link from "next/link";
 import { logout } from "@/utils/authUtils";
 import { useAuthStore } from "@/store/AuthStore";
 import { getGoals, PostGoal } from "@/api/goalAPI";
-import { useModalStore } from "@/store/modalSotre";
 
 export interface GoalType {
   id: number;
