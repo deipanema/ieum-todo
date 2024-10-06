@@ -9,6 +9,7 @@ import { logout } from "@/utils/authUtils";
 import { useAuthStore } from "@/store/AuthStore";
 import { getGoals, PostGoal } from "@/api/goalAPI";
 import { useModalStore } from "@/store/modalStore";
+import CreateNewTodo from "@/components/CreateNewTodo";
 
 export interface GoalType {
   id: number;
@@ -173,6 +174,7 @@ export default function SideBar() {
           </button>
         </div>
       )}
+      <CreateNewTodo />
     </>
   );
 }
