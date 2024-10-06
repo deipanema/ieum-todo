@@ -4,11 +4,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AxiosError } from "axios";
 
 import { logout } from "@/utils/authUtils";
 import { useAuthStore } from "@/store/AuthStore";
-import api from "@/lib/api";
+import { getGoals, PostGoal } from "@/api/goalAPI";
 
 export interface GoalType {
   id: number;
@@ -52,32 +51,12 @@ export default function SideBar() {
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && goalInput.trim()) {
-      try {
-        const response = await api.post(`/goals`, {
-          title: goalInput,
-        });
-        fetchGoals();
+      setGoalInput("");
+      setInputVisible(false);
 
-        if (response.status === 201) {
-          console.log("새 목표가 성공적으로 추가되었습니다! 🎉");
-          setGoalInput(""); // 입력 필드 비우기
-          setInputVisible(false); // 입력 필드 숨기기
-        }
-      } catch (error) {
-        const axiosError = error as AxiosError;
-        console.error("목표 추가 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
-      }
-    }
-  };
-
-  // 목표 목록 가져오기 (GET)
-  const fetchGoals = async () => {
-    try {
-      const response = await api.get(`/goals`);
-      setGoals(response?.data.goals); // API로 받은 데이터를 상태에 저장
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      console.error("목표 목록 가져오기 실패:", axiosError.response ? axiosError.response.data : axiosError.message);
+      await PostGoal(goalInput);
+      const goalList = await getGoals();
+      setGoals(goalList?.data.goals);
     }
   };
 
@@ -88,7 +67,7 @@ export default function SideBar() {
   }, [inputVisible]);
 
   useEffect(() => {
-    fetchGoals();
+    getGoals();
   }, []);
 
   return (
