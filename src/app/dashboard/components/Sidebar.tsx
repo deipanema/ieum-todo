@@ -8,6 +8,8 @@ import Link from "next/link";
 import { logout } from "@/utils/authUtils";
 import { useAuthStore } from "@/store/AuthStore";
 import { getGoals, PostGoal } from "@/api/goalAPI";
+import { useModalStore } from "@/store/modalSotre";
+import CreateTodo from "@/components/CreateTodo";
 
 export interface GoalType {
   id: number;
@@ -26,6 +28,11 @@ export default function SideBar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { user } = useAuthStore();
+  const { openModal } = useModalStore();
+
+  const handleOpenModal = () => {
+    openModal(<CreateTodo />);
+  };
 
   const toggleSidebar = () => {
     setIsOpen((prev) => !prev);
@@ -109,7 +116,9 @@ export default function SideBar() {
             </div>
           </div>
           <div className="border-b border-b-slate-200 px-6 pb-6">
-            <button className="w-full rounded-lg bg-blue-500 py-3 text-white outline-none">+ 새 할 일</button>
+            <button onClick={handleOpenModal} className="w-full rounded-lg bg-blue-500 py-3 text-white outline-none">
+              + 새 할 일
+            </button>
           </div>
           <div className="flex gap-2 border-b border-b-slate-200 px-6 py-4">
             <Image src="/sidebar-home.svg" width={0} height={0} className="ml-1.5 h-auto w-[13px]" alt="sidebar-home" />
