@@ -21,12 +21,9 @@ export default function CreateNewTodo() {
   const [isOpenGoals, setIsOpenGoals] = useState(false);
   const [todo, setTodo] = useState<TodoType>({ title: "", linkURL: "", goalId: 0 });
   const [goals, setGoals] = useState<GoalType[]>([]);
+  //  const [link, setLink] = useState<string | null>(null);
 
   const { openModal } = useModalStore();
-
-  // const handleLinkUploadOpenModal = () => {
-  //   openModal(<LinkUpload closeChildModal={() => closeModal} />);
-  // };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTodo({ ...todo, title: e.target.value });
@@ -43,6 +40,10 @@ export default function CreateNewTodo() {
   const handleGoalSelect = (goalId: number) => {
     setTodo({ ...todo, goalId });
     setIsOpenGoals(false);
+  };
+
+  const handleLinkConfirm = (linkValue: string) => {
+    setTodo({ ...todo, linkURL: linkValue });
   };
 
   useEffect(() => {
@@ -73,10 +74,17 @@ export default function CreateNewTodo() {
                 <span>파일 업로드</span>
               </div>
               <div
-                className="flex w-fit cursor-pointer gap-[7px] rounded-lg border bg-slate-100 p-2"
+                className={`flex w-fit cursor-pointer gap-[7px] rounded-md border p-2 ${
+                  !todo.linkURL ? "bg-slate-100 text-black" : "bg-black text-white"
+                }`}
                 onClick={() => openModal("child")}
               >
-                <Image alt="checkbox-icon" width={24} height={24} src="/modal-unchecked.svg" />
+                <Image
+                  src={todo.linkURL ? "/modal-checked.svg" : "/modal-unchecked.svg"}
+                  width={todo.linkURL ? "18" : "24"}
+                  height={todo.linkURL ? "18" : "24"}
+                  alt="checkbox-icon"
+                />
                 <span>링크 첨부</span>
               </div>
             </div>
@@ -121,14 +129,14 @@ export default function CreateNewTodo() {
             )}
           </div>
           <button
-            className={`className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200`}
-            disabled={todo.title === "" || todo.goalId === undefined}
+            className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
+            disabled={todo.title?.trim() === "" || todo.goalId === undefined}
           >
             확인
           </button>
         </div>
       </Modal>
-      <LinkUpload todo={todo} setTodo={setTodo} />
+      <LinkUpload todo={todo} setTodo={setTodo} onConfirm={handleLinkConfirm} />
     </>
   );
 }
