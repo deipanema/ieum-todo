@@ -1,7 +1,31 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import { getGoals } from "@/api/goalAPI";
+
+import { GoalType } from "./goal/[id]/page";
+import TodoCard from "./components/TodoCard";
 
 export default function Dashboard() {
+  const [goals, setGoals] = useState<GoalType[]>();
+
+  // 목표 데이터를 가져오는 useEffect
+  useEffect(() => {
+    async function fetchGoals() {
+      try {
+        const response = await getGoals();
+        setGoals(response?.data.goals); // 가져온 목표 데이터를 상태로 설정
+      } catch (error) {
+        console.error("목표 데이터를 가져오는 중 오류가 발생했습니다:", error);
+      }
+    }
+
+    fetchGoals(); // 컴포넌트가 렌더링될 때 목표 데이터 가져오기
+  }, []);
+  console.log(goals);
+
   return (
     <main className="relative">
       <div className="mt-[51px] min-h-[calc(100vh-51px)] w-full select-none bg-slate-100 lg:mt-0">
@@ -42,7 +66,13 @@ export default function Dashboard() {
                 </div>
                 <h2 className="text-lg font-semibold">목표 별 할 일</h2>
               </div>
-              <div className="flex max-h-[675px] grid-cols-2 flex-col gap-4 overflow-y-auto p-2 sm:grid"></div>
+              <div className="flex max-h-[675px] grid-cols-2 flex-col gap-4 overflow-y-auto p-2 sm:grid">
+                {goals?.map((goal) => (
+                  <div key={goal.id} className="col-span-2">
+                    <TodoCard id={goal.id} />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         }

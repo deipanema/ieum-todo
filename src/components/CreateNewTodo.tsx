@@ -6,7 +6,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { getGoals } from "@/api/goalAPI";
 import { GoalType } from "@/app/dashboard/goal/[id]/page";
 import { useModalStore } from "@/store/modalStore";
-import { PostFile, PostTodo } from "@/api/todoAPI";
+import { PostFile, PostTodos } from "@/api/todoAPI";
 
 import Modal from "./Modal";
 import LinkUpload from "./LinkUpload";
@@ -77,7 +77,10 @@ export default function CreateNewTodo() {
   const handleConfirm = async () => {
     try {
       const todoData: TodoType = { ...todo, linkUrl: modalData.childData };
-      const response = await PostTodo(todoData);
+      const response = await PostTodos(todoData);
+
+      console.log("🌈");
+      console.log(response);
 
       if (response) {
         console.log("할 일이 성공적으로 생성되었습니다:", response);
