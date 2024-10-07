@@ -28,11 +28,7 @@ export default function SideBar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { user } = useAuthStore();
-  const { openModal } = useModalStore();
-
-  // const handleOpenModal = () => {
-  //   openModal(<CreateNewTodo closeParentsModal={() => closeModal} />);
-  // };
+  const { openParentModal } = useModalStore();
 
   const toggleSidebar = () => {
     setIsOpen((prev) => !prev);
@@ -116,10 +112,7 @@ export default function SideBar() {
             </div>
           </div>
           <div className="border-b border-b-slate-200 px-6 pb-6">
-            <button
-              onClick={() => openModal("parent")}
-              className="w-full rounded-lg bg-blue-500 py-3 text-white outline-none"
-            >
+            <button onClick={openParentModal} className="w-full rounded-lg bg-blue-500 py-3 text-white outline-none">
               + 새 할 일
             </button>
           </div>

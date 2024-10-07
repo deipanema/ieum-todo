@@ -1,17 +1,28 @@
-"use client";
-
 import { create } from "zustand";
 
-type ModalType = "parent" | "child";
-
-interface ModalState {
-  isOpen: Record<ModalType, boolean>;
-  openModal: (type: ModalType) => void;
-  closeModal: (type: ModalType) => void;
+interface ModalData {
+  parentData?: string;
+  childData?: string;
 }
 
-export const useModalStore = create<ModalState>((set) => ({
-  isOpen: { parent: false, child: false },
-  openModal: (type) => set((state) => ({ isOpen: { ...state.isOpen, [type]: true } })),
-  closeModal: (type) => set((state) => ({ isOpen: { ...state.isOpen, [type]: false } })),
+interface ModalStore {
+  isParentOpen: boolean;
+  isChildOpen: boolean;
+  modalData: ModalData;
+  openParentModal: () => void;
+  closeParentModal: () => void;
+  openChildModal?: () => void;
+  closeChildModal: () => void;
+  setModalData: (data: Partial<ModalData>) => void;
+}
+
+export const useModalStore = create<ModalStore>((set) => ({
+  isParentOpen: false,
+  isChildOpen: false,
+  modalData: {},
+  openParentModal: () => set({ isParentOpen: true }),
+  closeParentModal: () => set({ isParentOpen: false, isChildOpen: false, modalData: {} }),
+  openChildModal: () => set({ isChildOpen: true }),
+  closeChildModal: () => set({ isChildOpen: false }),
+  setModalData: (data) => set((state) => ({ modalData: { ...state.modalData, ...data } })),
 }));

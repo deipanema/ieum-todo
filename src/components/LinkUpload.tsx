@@ -1,63 +1,49 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
+import { useModalStore } from "@/store/modalStore";
 
 import { TodoType } from "./CreateNewTodo";
 import Modal from "./Modal";
 
-type LinkUpload = {
-  todo?: TodoType;
-  setTodo?: Dispatch<SetStateAction<TodoType>>;
-  onConfirm: (link: string) => void;
+type LinkUploadProps = {
+  setTodo: React.Dispatch<React.SetStateAction<TodoType>>;
 };
-
-export default function LinkUpload({ todo, setTodo, onConfirm }: LinkUpload) {
-  const [link, setLink] = useState(""); // input의 값을 관리할 상태
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (setTodo) {
-      setTodo({
-        ...todo,
-        linkURL: link,
-        title: todo?.title || "",
-        goalId: todo?.goalId ?? 0,
-      });
-      console.log("할일 생성 모달 제목:", todo);
-    } else {
-      console.error("setTodo가 정의되지 않았습니다.");
-    }
-  };
+export default function LinkUpload({ setTodo }: LinkUploadProps) {
+  const { isChildOpen, closeChildModal, setModalData, modalData } = useModalStore();
 
   const handleConfirm = () => {
-    if (link) {
-      onConfirm(link); // Pass the link back to the parent
-    }
+    setTodo((prevTodo) => ({
+      ...prevTodo,
+      linkUrl: modalData.childData || prevTodo.linkUrl,
+    }));
+    closeChildModal();
   };
+
+  if (!isChildOpen) return null;
 
   return (
     <>
-      <Modal type="child" onConfirm={handleConfirm}>
+      <Modal type="child">
         <h1 className="mb-6 text-lg font-semibold">링크 업로드</h1>
-        <form onSubmit={handleSubmit} className="flex select-none flex-col gap-6">
+        <form onSubmit={(e) => e.preventDefault()} className="flex select-none flex-col gap-6">
           <div>
             <h2 className="mb-3 font-semibold">제목</h2>
             <input
               type="text"
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
+              value={modalData.childData || ""}
+              onChange={(e) => setModalData({ childData: e.target.value })}
               className="w-full rounded-xl bg-slate-50 px-6 py-3 focus:outline-none"
               placeholder="영상이나 글, 파일의 링크를 넣어주세요"
             />
           </div>
           <div>
-            {/* <button
+            <button
+              onClick={handleConfirm}
               className="w-full rounded-xl bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
-              disabled={link !== "" ? false : true}
+              disabled={!modalData.childData}
             >
               확인
-            </button> */}
+            </button>
           </div>
         </form>
       </Modal>
