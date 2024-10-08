@@ -8,6 +8,7 @@ import { getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
 
 import Todos from "./Todos";
+import AddTodo from "./AddTodo";
 
 export type TodoCardProps = {
   id: number;
@@ -74,13 +75,13 @@ export default function TodoCard({ id }: TodoCardProps) {
   return (
     <div className="h-auto min-h-[231px] w-full select-none rounded-2xl bg-blue-50 p-6">
       <div className="flex justify-between">
-        <h1
+        <h2
           className="mb-2 cursor-pointer text-2xl font-bold hover:underline"
           onClick={() => router.push(`/dashboard/goal/${goals?.id}`)}
         >
           {goals?.title}
-        </h1>
-        <span className="cursor-pointer text-xl text-blue-500">+ 할일 추가</span>
+        </h2>
+        <AddTodo />
       </div>
 
       <div className="mb-4">{/* <ProgressBar progress={progress} /> */}</div>
@@ -88,7 +89,7 @@ export default function TodoCard({ id }: TodoCardProps) {
       <div className="flex w-full flex-col gap-6 sm:flex-row sm:gap-0">
         {/* To Do Section */}
         <div className="w-full">
-          <h2 className="mb-3 text-lg font-semibold">To do</h2>
+          <h3 className="mb-3 text-lg font-semibold">To do</h3>
           <ul>
             {filterTodos(false).length > 0 ? (
               filterTodos(false).map((todo) => <Todos key={todo.id} todo={todo} isGoal={false} isInGoalSection />)
@@ -99,7 +100,7 @@ export default function TodoCard({ id }: TodoCardProps) {
         </div>
         {/* Done Section */}
         <div className="w-full">
-          <h2 className="mb-3 text-sm font-semibold">Done</h2>
+          <h3 className="mb-3 text-sm font-semibold">Done</h3>
           <ul>
             {filterTodos(true).length > 0 ? (
               filterTodos(true).map((doneTodo) => (

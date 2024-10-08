@@ -6,7 +6,7 @@ import api from "@/lib/api";
 export const getGoals = async (size: number = 500) => {
   try {
     const response = await api.get(`/goals?size=${size}`);
-    return response;
+    return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
     console.error("목표 목록 가져오기 실패:", axiosError.response ? axiosError.response.data : axiosError.message);

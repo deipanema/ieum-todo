@@ -16,7 +16,7 @@ export default function Dashboard() {
     async function fetchGoals() {
       try {
         const response = await getGoals();
-        setGoals(response?.data.goals); // 가져온 목표 데이터를 상태로 설정
+        setGoals(response?.goals); // 가져온 목표 데이터를 상태로 설정
       } catch (error) {
         console.error("목표 데이터를 가져오는 중 오류가 발생했습니다:", error);
       }
