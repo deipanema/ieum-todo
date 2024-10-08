@@ -54,14 +54,8 @@ export default function TodoCard({ id }: TodoCardProps) {
         const goalResponse = await getGoal(id);
         setGoals(goalResponse);
 
-        //  console.log();
-
         if (goalResponse?.id) {
-          //   console.log(goals?.id);
-          //   console.log(goals);
           const todoResponse = await getTodos(goalResponse?.id);
-          console.log("🪐");
-          //console.log();
           setTodos(todoResponse.todos ?? []);
         }
       } catch (error) {
