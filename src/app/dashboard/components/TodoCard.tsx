@@ -54,9 +54,15 @@ export default function TodoCard({ id }: TodoCardProps) {
         const goalResponse = await getGoal(id);
         setGoals(goalResponse);
 
+        //  console.log();
+
         if (goalResponse?.id) {
+          //   console.log(goals?.id);
+          //   console.log(goals);
           const todoResponse = await getTodos(goalResponse?.id);
-          setTodos(todoResponse ?? []);
+          console.log("🪐");
+          //console.log();
+          setTodos(todoResponse.todos ?? []);
         }
       } catch (error) {
         console.error("데이터를 가져오는 중 오류 발생:", error);

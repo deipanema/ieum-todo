@@ -48,8 +48,8 @@ export default function GoalPage({ params }: GoalPageProps) {
   const fetchInitialData = async () => {
     try {
       const goalResponse = await getGoal(Number(id));
-      setGoal(goalResponse?.data);
-      setTodos(goalResponse?.data?.todos || []); // 할 일 리스트가 목표 안에 있다고 가정
+      setGoal(goalResponse);
+      //setTodos(goalResponse?.todos || []); // 할 일 리스트가 목표 안에 있다고 가정
     } catch (error) {
       console.error("데이터를 가져오는 중 오류 발생:", error);
     }
@@ -60,6 +60,7 @@ export default function GoalPage({ params }: GoalPageProps) {
   };
 
   const handleDelete = async () => {
+    // console.log(goal);
     try {
       const response = await deleteGoal(goal?.id as number);
       if (response) {

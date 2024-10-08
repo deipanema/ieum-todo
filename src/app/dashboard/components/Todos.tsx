@@ -84,10 +84,10 @@ export default function Todos({ todo, isGoal = true, isInGoalSection }: TodoProp
           <a href={todo.linkUrl.includes("https://") ? todo.linkUrl : `https://${todo.linkUrl}`} target="_blank">
             <Image
               className="cursor-pointer"
-              src="/todo-link.png"
+              src="/todo-link.webp"
               width={24}
               height={24}
-              alt="kebab-icon"
+              alt="link-icon"
               title="첨부 링크"
             />
           </a>

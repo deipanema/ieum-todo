@@ -3,7 +3,7 @@ import { AxiosError } from "axios";
 import api from "@/lib/api";
 
 // 목표 목록 가져오기 (GET)
-export const getGoals = async (size: number = 3) => {
+export const getGoals = async (size: number = 500) => {
   try {
     const response = await api.get(`/goals?size=${size}`);
     return response;
@@ -28,6 +28,8 @@ export const PostGoal = async (title: string) => {
 export const getGoal = async (id: number) => {
   try {
     const response = await api.get(`/goals/${id}`);
+    console.log("🚀");
+    console.log(response.data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
@@ -36,6 +38,7 @@ export const getGoal = async (id: number) => {
 };
 
 export const deleteGoal = async (id: number) => {
+  console.log(id);
   try {
     const response = await api.delete(`/goals/${id}`);
     console.log(response);
