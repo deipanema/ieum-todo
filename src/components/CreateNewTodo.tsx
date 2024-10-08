@@ -68,13 +68,14 @@ export default function CreateNewTodo() {
       setIsFileUpload(true);
     }
   };
-  console.log("💕" + JSON.stringify(goals));
-  console.log("💤" + JSON.stringify(todo));
 
   const handleGoalSelect = (goalId: number) => {
     setTodo({ ...todo, goalId });
     setIsOpenGoals(false);
   };
+
+  console.log("💕" + JSON.stringify(goals));
+  console.log("💤" + JSON.stringify(todo));
 
   const handleConfirm = async () => {
     try {
@@ -93,6 +94,17 @@ export default function CreateNewTodo() {
   useEffect(() => {
     fetchGoals();
   }, []);
+
+  useEffect(() => {
+    fetchGoals();
+
+    if (modalData.currentGoalId) {
+      setTodo((prevTodo) => ({
+        ...prevTodo,
+        goalId: modalData.currentGoalId !== undefined ? modalData.currentGoalId : prevTodo.goalId, // undefined 처리
+      }));
+    }
+  }, [modalData.currentGoalId]);
 
   if (!isParentOpen) return null;
 
