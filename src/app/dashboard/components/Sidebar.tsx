@@ -57,10 +57,9 @@ export default function SideBar() {
     setGoals(goalList?.data.goals);
   };
 
-  console.log(goals);
-
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && goalInput.trim()) {
+      console.log(goalInput);
       await PostGoal(goalInput);
       await fetchAndSetGoals();
       setGoalInput("");

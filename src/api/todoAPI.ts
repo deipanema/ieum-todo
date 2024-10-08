@@ -69,3 +69,13 @@ export const patchTodo = async (
     console.error("할 일 수정 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
   }
 };
+
+export const deleteTodos = async (id: number) => {
+  try {
+    const response = await api.delete(`/todos/${id}`);
+    return response;
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    console.error("목표 삭제 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+  }
+};

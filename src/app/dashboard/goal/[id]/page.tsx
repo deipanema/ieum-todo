@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { deleteGoal, getGoal } from "@/api/goalAPI";
+import { getTodos } from "@/api/todoAPI";
 
 import Todos from "../../components/Todos";
 
@@ -40,7 +41,7 @@ export default function GoalPage({ params }: GoalPageProps) {
   const router = useRouter();
 
   const [todos, setTodos] = useState<TodoType[]>([]);
-  const [goal, setGoal] = useState<GoalType | null>(null);
+  const [goals, setGoals] = useState<GoalType | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -48,12 +49,20 @@ export default function GoalPage({ params }: GoalPageProps) {
   const fetchInitialData = async () => {
     try {
       const goalResponse = await getGoal(Number(id));
-      setGoal(goalResponse);
-      //setTodos(goalResponse?.todos || []); // 할 일 리스트가 목표 안에 있다고 가정
+      setGoals(goalResponse);
+
+      if (goalResponse) {
+        const todoResponse = await getTodos(goalResponse?.id);
+        console.log("🪐");
+        //console.log();
+        setTodos(todoResponse.todos ?? []);
+      }
     } catch (error) {
       console.error("데이터를 가져오는 중 오류 발생:", error);
     }
   };
+
+  console.log(todos);
 
   const handleToggleDropdown = () => {
     setIsOpen((prev) => !prev);
@@ -62,7 +71,7 @@ export default function GoalPage({ params }: GoalPageProps) {
   const handleDelete = async () => {
     // console.log(goal);
     try {
-      const response = await deleteGoal(goal?.id as number);
+      const response = await deleteGoal(goals?.id as number);
       if (response) {
         router.push("/");
       }
@@ -95,12 +104,12 @@ export default function GoalPage({ params }: GoalPageProps) {
       <div className="mx-auto w-[343px] p-6 sm:w-full 2xl:w-[1200px]">
         <h2 className="mb-3 text-[18px] font-semibold">목표</h2>
         <div className="my-6 flex h-full w-[306px] flex-col gap-4 rounded-xl bg-white px-6 py-4 sm:w-auto">
-          <div className="flex items-center justify-between">
+          <div className="relative flex items-center justify-between">
             <div className="flex items-center">
-              <div className="relative flex h-10 w-10 justify-center rounded-2xl bg-slate-800">
+              <div className="flex h-10 w-10 justify-center rounded-2xl bg-slate-800">
                 <Image src="/goal-flag.svg" width={24} height={24} alt="goal-icon" />
               </div>
-              <h3 className="ml-2 text-left text-lg font-semibold">{goal?.title}</h3>
+              <h3 className="ml-2 text-left text-lg font-semibold">{goals?.title}</h3>
             </div>
 
             <Image
@@ -113,7 +122,7 @@ export default function GoalPage({ params }: GoalPageProps) {
             />
 
             {isOpen && (
-              <div ref={dropdownRef} className="absolute right-28 top-32 z-10 rounded-lg border bg-white shadow-xl">
+              <div ref={dropdownRef} className="absolute right-3 top-9 z-10 rounded-lg border bg-white shadow-xl">
                 <p className="cursor-pointer p-3 hover:bg-slate-200">수정하기</p>
                 <p onClick={handleDelete} className="cursor-pointer p-3 hover:bg-slate-200">
                   삭제하기
@@ -143,7 +152,7 @@ export default function GoalPage({ params }: GoalPageProps) {
               {todos
                 .filter((todo) => !todo.done)
                 .map((todo) => (
-                  <Todos key={todo.id} todo={todo} isGoal={false} />
+                  <Todos key={todo.id} todo={todo} id={goals?.id} isGoal={false} />
                 ))}
             </ul>
             {todos.filter((todo) => !todo.done).length === 0 && (
