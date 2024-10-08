@@ -152,7 +152,7 @@ export default function GoalPage({ params }: GoalPageProps) {
               {todos
                 .filter((todo) => !todo.done)
                 .map((todo) => (
-                  <Todos key={todo.id} todo={todo} id={goals?.id} isGoal={false} />
+                  <Todos key={todo.id} todo={todo} isGoal={false} />
                 ))}
             </ul>
             {todos.filter((todo) => !todo.done).length === 0 && (
