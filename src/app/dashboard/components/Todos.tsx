@@ -98,7 +98,7 @@ export default function Todos({ todo, isGoal = true, isInGoalSection }: TodoProp
       <div
         className={`absolute ${isInGoalSection && "rounded-3xl bg-blue-50"} ${
           isGoal ? "top-[25%]" : "top-0"
-        } right-1 flex gap-[4px]`}
+        } right-1 flex gap-1`}
       >
         {todo.fileUrl && (
           <a href={todo.fileUrl.includes("https://") ? todo.fileUrl : `https://${todo.fileUrl}`}>
@@ -143,7 +143,7 @@ export default function Todos({ todo, isGoal = true, isInGoalSection }: TodoProp
           />
         )}
         <Image
-          className=""
+          className="cursor-pointer"
           src="/todo-kebab.svg"
           width={24}
           height={24}
@@ -154,7 +154,7 @@ export default function Todos({ todo, isGoal = true, isInGoalSection }: TodoProp
         {isOpen && (
           <div
             ref={dropdownRef}
-            className="absolute right-3 top-9 z-10 w-24 cursor-pointer rounded-lg border bg-white text-center shadow-xl"
+            className="absolute right-3 top-7 z-10 w-24 cursor-pointer rounded-lg border bg-white text-center shadow-xl"
           >
             <p className="cursor-pointer p-3 hover:bg-slate-200">수정하기</p>
             <p onClick={handleDelete} className="cursor-pointer p-3 hover:bg-slate-200">

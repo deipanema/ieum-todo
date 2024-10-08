@@ -27,7 +27,7 @@ export default function Modal({ children, type }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black bg-opacity-50" onClick={handleClose} />
+      <div className="fixed inset-0 bg-black bg-opacity-5" onClick={handleClose} />
       <div className="relative z-50 w-full max-w-lg rounded-xl bg-white p-6">
         {children}
         <button onClick={handleClose} className="absolute right-5 top-6 text-2xl text-slate-500 hover:text-slate-800">

@@ -39,8 +39,9 @@ export default function CreateNewTodo() {
 
   const fetchGoals = async () => {
     const goalsData = await getGoals();
+
     if (goalsData) {
-      setGoals(goalsData.data.goals);
+      setGoals(goalsData.goals);
     }
   };
 
@@ -66,8 +67,9 @@ export default function CreateNewTodo() {
       setFileTitle(selectedFile.name);
       setIsFileUpload(true);
     }
-    console.log("🚀" + JSON.stringify(todo));
   };
+  console.log("💕" + JSON.stringify(goals));
+  console.log("💤" + JSON.stringify(todo));
 
   const handleGoalSelect = (goalId: number) => {
     setTodo({ ...todo, goalId });
@@ -78,9 +80,6 @@ export default function CreateNewTodo() {
     try {
       const todoData: TodoType = { ...todo, linkUrl: modalData.childData };
       const response = await PostTodos(todoData);
-
-      console.log("🌈");
-      console.log(response);
 
       if (response) {
         console.log("할 일이 성공적으로 생성되었습니다:", response);

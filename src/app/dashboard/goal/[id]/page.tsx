@@ -8,6 +8,7 @@ import { deleteGoal, getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
 
 import Todos from "../../components/Todos";
+import AddTodo from "../../components/AddTodo";
 
 type GoalPageProps = {
   params: { id: string };
@@ -144,9 +145,9 @@ export default function GoalPage({ params }: GoalPageProps) {
         <div className="flex select-none flex-col items-start gap-6 sm:flex-row 2xl:flex-row">
           {/* To do Section */}
           <div className="relative flex min-h-[250px] w-full flex-col gap-4 rounded-xl bg-white px-6 py-4 2xl:w-[588px]">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2">
               <h2 className="text-[18px] font-semibold">To do</h2>
-              <p className="z-10 min-w-[74px] grow cursor-pointer text-right text-[14px] text-blue-500">+ 할일 추가</p>
+              <AddTodo />
             </div>
             <ul>
               {todos

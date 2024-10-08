@@ -54,7 +54,7 @@ export default function SideBar() {
 
   const fetchAndSetGoals = async () => {
     const goalList = await getGoals();
-    setGoals(goalList?.data.goals);
+    setGoals(goalList?.goals);
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
