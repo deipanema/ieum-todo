@@ -157,9 +157,7 @@ export default function GoalPage({ params }: GoalPageProps) {
                 ))}
             </ul>
             {todos.filter((todo) => !todo.done).length === 0 && (
-              <div className="absolute -mx-6 -my-4 flex h-full w-full items-center justify-center text-sm text-slate-500">
-                해야할 일이 아직 없어요.
-              </div>
+              <div className="mx-auto my-auto text-sm text-slate-500">해야할 일이 아직 없어요.</div>
             )}
           </div>
           {/* Done Section */}
@@ -175,9 +173,7 @@ export default function GoalPage({ params }: GoalPageProps) {
                 ))}
             </ul>
             {todos.filter((todo) => todo.done).length === 0 && (
-              <div className="absolute -mx-6 -my-4 flex h-full w-full items-center justify-center text-sm text-slate-500">
-                다 한 일이 아직 없어요.
-              </div>
+              <div className="mx-auto my-auto text-sm text-slate-500">다 한 일이 아직 없어요.</div>
             )}
           </div>
         </div>
