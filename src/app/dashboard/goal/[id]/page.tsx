@@ -147,7 +147,7 @@ export default function GoalPage({ params }: GoalPageProps) {
           <div className="relative flex min-h-[250px] w-full flex-col gap-4 rounded-xl bg-white px-6 py-4 2xl:w-[588px]">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-[18px] font-semibold">To do</h2>
-              <AddTodo />
+              <AddTodo goalId={Number(id)} />
             </div>
             <ul>
               {todos

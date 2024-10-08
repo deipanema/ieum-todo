@@ -1,12 +1,18 @@
 import { useModalStore } from "@/store/modalStore";
 
-export default function AddTodo() {
+type AddTodoProps = {
+  goalId?: number;
+};
+
+export default function AddTodo({ goalId }: AddTodoProps) {
   const { openParentModal } = useModalStore();
 
-  console.log("🚟");
+  const handleAddTodo = () => {
+    openParentModal(goalId);
+  };
 
   return (
-    <button className="cursor-pointer text-blue-500" onClick={openParentModal}>
+    <button className="cursor-pointer text-blue-500" onClick={handleAddTodo}>
       <span className="text-sm">+ 할일 추가</span>
     </button>
   );

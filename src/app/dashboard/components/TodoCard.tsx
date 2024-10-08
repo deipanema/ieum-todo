@@ -81,7 +81,7 @@ export default function TodoCard({ id }: TodoCardProps) {
         >
           {goals?.title}
         </h2>
-        <AddTodo />
+        <AddTodo goalId={Number(goals?.id)} />
       </div>
 
       <div className="mb-4">{/* <ProgressBar progress={progress} /> */}</div>
