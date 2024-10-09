@@ -1,33 +1,33 @@
 import { create } from "zustand";
 
 interface ModalData {
-  parentData?: string;
-  childData?: string;
+  firstData?: string;
+  secondData?: string;
   currentGoalId?: number;
 }
 
 interface ModalStore {
-  isParentOpen: boolean;
-  isChildOpen: boolean;
+  isFirstOpen: boolean;
+  isSecondOpen: boolean;
   modalData: ModalData;
-  openParentModal: (goalId?: number) => void;
-  closeParentModal: () => void;
-  openChildModal?: () => void;
-  closeChildModal: () => void;
+  openFirstModal: (goalId?: number) => void;
+  closeFirstModal: () => void;
+  openSecondModal?: () => void;
+  closeSecondModal: () => void;
   setModalData: (data: Partial<ModalData>) => void;
 }
 
 export const useModalStore = create<ModalStore>((set) => ({
-  isParentOpen: false,
-  isChildOpen: false,
+  isFirstOpen: false,
+  isSecondOpen: false,
   modalData: {},
-  openParentModal: (goalId?: number) =>
+  openFirstModal: (goalId?: number) =>
     set((state) => ({
-      isParentOpen: true,
+      isFirstOpen: true,
       modalData: { ...state.modalData, currentGoalId: goalId }, // goalId를 modalData에 저장
     })),
-  closeParentModal: () => set({ isParentOpen: false, isChildOpen: false, modalData: {} }),
-  openChildModal: () => set({ isChildOpen: true }),
-  closeChildModal: () => set({ isChildOpen: false }),
+  closeFirstModal: () => set({ isFirstOpen: false, isSecondOpen: false, modalData: {} }),
+  openSecondModal: () => set({ isSecondOpen: true }),
+  closeSecondModal: () => set({ isSecondOpen: false }),
   setModalData: (data) => set((state) => ({ modalData: { ...state.modalData, ...data } })),
 }));

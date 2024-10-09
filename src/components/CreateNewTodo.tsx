@@ -30,11 +30,11 @@ export default function CreateNewTodo() {
   const [isFileUpload, setIsFileUpload] = useState(false);
   const [fileTitle, setFileTitle] = useState("");
 
-  const { isParentOpen, closeParentModal, openChildModal, modalData, setModalData } = useModalStore();
+  const { isFirstOpen, closeFirstModal, openSecondModal, modalData, setModalData } = useModalStore();
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTodo({ ...todo, title: e.target.value });
-    setModalData({ parentData: e.target.value });
+    setModalData({ firstData: e.target.value });
   };
 
   const fetchGoals = async () => {
@@ -74,17 +74,14 @@ export default function CreateNewTodo() {
     setIsOpenGoals(false);
   };
 
-  console.log("💕" + JSON.stringify(goals));
-  console.log("💤" + JSON.stringify(todo));
-
   const handleConfirm = async () => {
     try {
-      const todoData: TodoType = { ...todo, linkUrl: modalData.childData };
+      const todoData: TodoType = { ...todo, linkUrl: modalData.secondData };
       const response = await PostTodos(todoData);
 
       if (response) {
         console.log("할 일이 성공적으로 생성되었습니다:", response);
-        closeParentModal();
+        closeFirstModal();
       }
     } catch (error) {
       console.error("할 일 생성 중 오류 발생:", error);
@@ -106,11 +103,11 @@ export default function CreateNewTodo() {
     }
   }, [modalData.currentGoalId]);
 
-  if (!isParentOpen) return null;
+  if (!isFirstOpen) return null;
 
   return (
     <>
-      <Modal type="parent">
+      <Modal type="first">
         <h1 className="mb-6 text-lg font-semibold">할 일 생성</h1>
         <div className="flex flex-col gap-6">
           <div>
@@ -144,7 +141,7 @@ export default function CreateNewTodo() {
                 className={`flex w-fit cursor-pointer gap-[7px] rounded-md border p-2 ${
                   !todo.linkUrl ? "bg-slate-100 text-black" : "bg-black text-white"
                 }`}
-                onClick={openChildModal}
+                onClick={openSecondModal}
               >
                 <Image
                   src={todo.linkUrl ? "/modal-checked.svg" : "/modal-unchecked.svg"}
