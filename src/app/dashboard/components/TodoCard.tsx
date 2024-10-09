@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 
 import { getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
+import CreateNewTodo from "@/components/CreateNewTodo";
+import useModal from "@/hook/useModal";
 
 import Todos from "./Todos";
-import AddTodo from "./AddTodo";
 
 export type TodoCardProps = {
   id: number;
@@ -45,6 +46,8 @@ export type TodosResponse = {
 
 export default function TodoCard({ id }: TodoCardProps) {
   const router = useRouter();
+  const { Modal, openModal, closeModal } = useModal();
+
   const [goals, setGoals] = useState<GoalType | null>(null);
   const [todos, setTodos] = useState<TodoType[]>([]); // 모든 할 일 목록 상태
 
@@ -81,7 +84,9 @@ export default function TodoCard({ id }: TodoCardProps) {
         >
           {goals?.title}
         </h2>
-        <AddTodo goalId={Number(goals?.id)} />
+        <button className="cursor-pointer text-blue-500" onClick={() => openModal("CREATE_NEW_TODO")}>
+          <span className="text-sm">+ 할일 추가</span>
+        </button>
       </div>
 
       <div className="mb-4">{/* <ProgressBar progress={progress} /> */}</div>
@@ -121,6 +126,9 @@ export default function TodoCard({ id }: TodoCardProps) {
           <Image src="/modal-arrowdown.svg" width={24} height={24} alt="button-arrow-icon" />
         </div>
       </div>
+      <Modal name="CREATE_NEW_TODO" title="할 일 생성">
+        <CreateNewTodo closeSidebarModal={closeModal} goalsId={goals?.id} />
+      </Modal>
     </div>
   );
 }

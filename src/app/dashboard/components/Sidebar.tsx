@@ -8,8 +8,8 @@ import Link from "next/link";
 import { logout } from "@/utils/authUtils";
 import { useAuthStore } from "@/store/AuthStore";
 import { getGoals, PostGoal } from "@/api/goalAPI";
-import { useModalStore } from "@/store/modalStore";
 import CreateNewTodo from "@/components/CreateNewTodo";
+import useModal from "@/hook/useModal";
 
 export interface GoalType {
   id: number;
@@ -22,13 +22,13 @@ export interface GoalType {
 
 export default function SideBar() {
   const [goals, setGoals] = useState<GoalType[]>([]);
+  const { Modal, openModal, closeModal } = useModal();
   const [inputVisible, setInputVisible] = useState(false);
   const [goalInput, setGoalInput] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { user } = useAuthStore();
-  const { openFirstModal } = useModalStore();
 
   const toggleSidebar = () => {
     setIsOpen((prev) => !prev);
@@ -114,7 +114,7 @@ export default function SideBar() {
           </div>
           <div className="border-b border-b-slate-200 px-6 pb-6">
             <button
-              onClick={() => openFirstModal()}
+              onClick={() => openModal("CREATE_NEW_TODO")}
               className="w-full rounded-lg bg-blue-500 py-3 text-white outline-none"
             >
               + 새 할 일
@@ -171,7 +171,9 @@ export default function SideBar() {
           </button>
         </div>
       )}
-      <CreateNewTodo />
+      <Modal name="CREATE_NEW_TODO" title="할 일 생성">
+        <CreateNewTodo closeSidebarModal={closeModal} />
+      </Modal>
     </>
   );
 }
