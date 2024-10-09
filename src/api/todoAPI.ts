@@ -3,7 +3,17 @@ import { AxiosError } from "axios";
 import api from "@/lib/api";
 import { TodoType } from "@/components/CreateNewTodo";
 
-export const PostFile = async (file: File) => {
+export const getAllData = async () => {
+  try {
+    const response = await api.get(`/todos`);
+    return response;
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    console.error("에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+  }
+};
+
+export const postFile = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
 
@@ -50,7 +60,6 @@ export const PostTodos = async ({ title, fileUrl, linkUrl, goalId }: TodoType) =
 export const getTodos = async (id: number) => {
   try {
     const response = await api.get(`/todos?goalId=${id}`);
-    console.log(response);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;

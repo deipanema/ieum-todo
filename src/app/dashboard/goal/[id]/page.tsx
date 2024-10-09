@@ -17,17 +17,17 @@ type GoalPageProps = {
 };
 
 export type TodoType = {
+  noteId: number | null;
   done: boolean;
-  fileUrl: string;
-  goal: GoalType;
-  id: number;
-  linkUrl: string;
-  noteId: number; // noteId를 number로 변경
-  teamId: string;
+  linkUrl: string | null;
+  fileUrl: string | null;
   title: string;
-  createdAt: string;
-  updatedAt: string;
+  id: number;
+  goal: GoalType;
   userId: number;
+  teamId: string;
+  updatedAt: string;
+  createdAt: string;
 };
 
 export type GoalType = {
@@ -155,7 +155,7 @@ export default function GoalPage({ params }: GoalPageProps) {
               {todos
                 .filter((todo) => !todo.done)
                 .map((todo) => (
-                  <Todos key={todo.id} todo={todo} isGoal={false} />
+                  <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
                 ))}
             </ul>
             {todos.filter((todo) => !todo.done).length === 0 && (
@@ -171,7 +171,7 @@ export default function GoalPage({ params }: GoalPageProps) {
               {todos
                 .filter((todo) => todo.done)
                 .map((todo) => (
-                  <Todos key={todo.id} todo={todo} isGoal={false} />
+                  <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
                 ))}
             </ul>
             {todos.filter((todo) => todo.done).length === 0 && (
