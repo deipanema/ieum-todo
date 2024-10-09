@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 
 import { deleteGoal, getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
+import EditGoalTitle from "@/components/EditGoalTitle";
+import { useModalStore } from "@/store/modalStore";
 
 import Todos from "../../components/Todos";
 import AddTodo from "../../components/AddTodo";
@@ -45,6 +47,7 @@ export default function GoalPage({ params }: GoalPageProps) {
   const [goals, setGoals] = useState<GoalType | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const { openFirstModal } = useModalStore();
 
   // 목표 및 할 일 데이터 가져오기
   const fetchInitialData = async () => {
@@ -54,8 +57,6 @@ export default function GoalPage({ params }: GoalPageProps) {
 
       if (goalResponse) {
         const todoResponse = await getTodos(goalResponse?.id);
-        console.log("🪐");
-        //console.log();
         setTodos(todoResponse.todos ?? []);
       }
     } catch (error) {
@@ -124,7 +125,9 @@ export default function GoalPage({ params }: GoalPageProps) {
 
             {isOpen && (
               <div ref={dropdownRef} className="absolute right-3 top-9 z-10 rounded-lg border bg-white shadow-xl">
-                <p className="cursor-pointer p-3 hover:bg-slate-200">수정하기</p>
+                <p onClick={() => openFirstModal()} className="cursor-pointer p-3 hover:bg-slate-200">
+                  수정하기
+                </p>
                 <p onClick={handleDelete} className="cursor-pointer p-3 hover:bg-slate-200">
                   삭제하기
                 </p>
@@ -178,6 +181,7 @@ export default function GoalPage({ params }: GoalPageProps) {
           </div>
         </div>
       </div>
+      <EditGoalTitle />
     </main>
   );
 }

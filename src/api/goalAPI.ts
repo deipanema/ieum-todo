@@ -28,8 +28,6 @@ export const PostGoal = async (title: string) => {
 export const getGoal = async (id: number) => {
   try {
     const response = await api.get(`/goals/${id}`);
-    console.log("🚀");
-    console.log(response.data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;

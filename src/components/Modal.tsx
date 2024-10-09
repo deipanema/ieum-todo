@@ -7,21 +7,21 @@ import { useModalStore } from "@/store/modalStore";
 
 type ModalProps = {
   children: ReactNode;
-  type: "parent" | "child";
+  type: "first" | "second";
 };
 
 export default function Modal({ children, type }: ModalProps) {
-  const { isParentOpen, isChildOpen, closeParentModal, closeChildModal, setModalData } = useModalStore();
+  const { isFirstOpen, isSecondOpen, closeFirstModal, closeSecondModal, setModalData } = useModalStore();
 
-  const isOpen = type === "parent" ? isParentOpen : isChildOpen;
-  const closeModal = type === "parent" ? closeParentModal : closeChildModal;
+  const isOpen = type === "first" ? isFirstOpen : isSecondOpen;
+  const closeModal = type === "first" ? closeFirstModal : closeSecondModal;
 
   if (!isOpen) return null;
 
   const handleClose = () => {
     closeModal();
-    if (type === "child") {
-      setModalData({ childData: undefined });
+    if (type === "second") {
+      setModalData({ secondData: undefined });
     }
   };
 

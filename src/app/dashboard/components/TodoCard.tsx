@@ -100,7 +100,7 @@ export default function TodoCard({ id }: TodoCardProps) {
         </div>
         {/* Done Section */}
         <div className="w-full">
-          <h3 className="mb-3 text-sm font-semibold">Done</h3>
+          <h3 className="mb-3 text-lg font-semibold">Done</h3>
           <ul>
             {filterTodos(true).length > 0 ? (
               filterTodos(true).map((doneTodo) => (
