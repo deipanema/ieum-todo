@@ -127,7 +127,7 @@ export default function TodoCard({ id }: TodoCardProps) {
         </div>
       </div>
       <Modal name="CREATE_NEW_TODO" title="할 일 생성">
-        <CreateNewTodo closeSidebarModal={closeModal} goalsId={goals?.id} />
+        <CreateNewTodo closeCreateNewTodo={closeModal} goalsId={goals?.id} />
       </Modal>
     </div>
   );

@@ -19,13 +19,27 @@ export const PostFile = async (file: File) => {
   }
 };
 
-export const PostTodos = async (todoData: TodoType) => {
+export const PostTodos = async ({ title, fileUrl, linkUrl, goalId }: TodoType) => {
   try {
-    // fileUrl이 없으면 todoData에서 제거
-    const { fileUrl, ...rest } = todoData;
-    const dataToSend = fileUrl ? { ...rest, fileUrl } : rest;
+    const payload: {
+      title: string;
+      goalId: number;
+      fileUrl?: string;
+      linkUrl?: string;
+    } = {
+      title,
+      goalId,
+    };
 
-    const response = await api.post(`/todos`, dataToSend);
+    if (fileUrl) {
+      payload.fileUrl = fileUrl;
+    }
+
+    if (linkUrl) {
+      payload.linkUrl = linkUrl;
+    }
+
+    const response = await api.post(`/todos`, payload);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;

@@ -172,7 +172,7 @@ export default function SideBar() {
         </div>
       )}
       <Modal name="CREATE_NEW_TODO" title="할 일 생성">
-        <CreateNewTodo closeSidebarModal={closeModal} />
+        <CreateNewTodo closeCreateNewTodo={closeModal} />
       </Modal>
     </>
   );
