@@ -5,16 +5,16 @@ import { useState } from "react";
 import { PostGoal } from "@/api/goalAPI";
 
 export type EditGoalTitleProps = {
-  closeEditModal: () => void;
+  closeEditTitle: () => void;
 };
 
-export default function EditGoalTitle({ closeEditModal }: EditGoalTitleProps) {
+export default function EditGoalTitle({ closeEditTitle }: EditGoalTitleProps) {
   const [title, setTitle] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await PostGoal(title);
-    closeEditModal();
+    closeEditTitle();
   };
 
   return (

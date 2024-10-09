@@ -4,7 +4,6 @@ import Image from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 import { getGoals } from "@/api/goalAPI";
-import { GoalType } from "@/app/dashboard/goal/[id]/page";
 import { PostFile, PostTodos } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 
@@ -17,16 +16,25 @@ export type TodoType = {
   goalId: number;
 };
 
+export type GoalType = {
+  id: number;
+  teamId: string;
+  title: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type FileType = {
   url?: string;
 };
 
 export type CreateNewTodoProps = {
-  closeSidebarModal: () => void;
+  closeCreateNewTodo: () => void;
   goalsId?: number;
 };
 
-export default function CreateNewTodo({ closeSidebarModal, goalsId }: CreateNewTodoProps) {
+export default function CreateNewTodo({ closeCreateNewTodo, goalsId }: CreateNewTodoProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isOpenGoals, setIsOpenGoals] = useState(false);
   const [todo, setTodo] = useState<TodoType>({ title: "", fileUrl: "", linkUrl: "", goalId: 0 });
@@ -78,13 +86,12 @@ export default function CreateNewTodo({ closeSidebarModal, goalsId }: CreateNewT
 
   const handleConfirm = async () => {
     try {
-      //const todoData: TodoType = { ...todo, linkUrl: "" };
       const response = await PostTodos(todo);
 
       if (response) {
         console.log("할 일이 성공적으로 생성되었습니다:", response);
       }
-      closeSidebarModal();
+      closeCreateNewTodo();
     } catch (error) {
       console.error("할 일 생성 중 오류 발생:", error);
     }
