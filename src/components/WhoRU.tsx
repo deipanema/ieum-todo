@@ -10,7 +10,7 @@ type ModalProps = {
   type: "first" | "second";
 };
 
-export default function Modal({ children, type }: ModalProps) {
+export default function WhoRU({ children, type }: ModalProps) {
   const { isFirstOpen, isSecondOpen, closeFirstModal, closeSecondModal, setModalData } = useModalStore();
 
   const isOpen = type === "first" ? isFirstOpen : isSecondOpen;

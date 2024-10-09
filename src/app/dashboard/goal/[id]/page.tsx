@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 import { deleteGoal, getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
 import EditGoalTitle from "@/components/EditGoalTitle";
-import { useModalStore } from "@/store/modalStore";
+import useModal from "@/hook/useModal";
+import CreateNewTodo from "@/components/CreateNewTodo";
 
 import Todos from "../../components/Todos";
-import AddTodo from "../../components/AddTodo";
 
 type GoalPageProps = {
   params: { id: string };
@@ -42,12 +42,12 @@ export type GoalType = {
 export default function GoalPage({ params }: GoalPageProps) {
   const { id } = params;
   const router = useRouter();
+  const { Modal, openModal, closeModal } = useModal();
 
   const [todos, setTodos] = useState<TodoType[]>([]);
   const [goals, setGoals] = useState<GoalType | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const { openFirstModal } = useModalStore();
 
   // 목표 및 할 일 데이터 가져오기
   const fetchInitialData = async () => {
@@ -64,14 +64,11 @@ export default function GoalPage({ params }: GoalPageProps) {
     }
   };
 
-  console.log(todos);
-
   const handleToggleDropdown = () => {
     setIsOpen((prev) => !prev);
   };
 
   const handleDelete = async () => {
-    // console.log(goal);
     try {
       const response = await deleteGoal(goals?.id as number);
       if (response) {
@@ -125,7 +122,7 @@ export default function GoalPage({ params }: GoalPageProps) {
 
             {isOpen && (
               <div ref={dropdownRef} className="absolute right-3 top-9 z-10 rounded-lg border bg-white shadow-xl">
-                <p onClick={() => openFirstModal()} className="cursor-pointer p-3 hover:bg-slate-200">
+                <p onClick={() => openModal("EDIT_GOAL_TITLE")} className="cursor-pointer p-3 hover:bg-slate-200">
                   수정하기
                 </p>
                 <p onClick={handleDelete} className="cursor-pointer p-3 hover:bg-slate-200">
@@ -150,7 +147,9 @@ export default function GoalPage({ params }: GoalPageProps) {
           <div className="relative flex min-h-[250px] w-full flex-col gap-4 rounded-xl bg-white px-6 py-4 2xl:w-[588px]">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-[18px] font-semibold">To do</h2>
-              <AddTodo goalId={Number(id)} />
+              <button className="cursor-pointer text-blue-500" onClick={() => openModal("CREATE_NEW_TODO")}>
+                <span className="text-sm">+ 할일 추가</span>
+              </button>
             </div>
             <ul>
               {todos
@@ -181,7 +180,12 @@ export default function GoalPage({ params }: GoalPageProps) {
           </div>
         </div>
       </div>
-      <EditGoalTitle />
+      <Modal name="CREATE_NEW_TODO" title="할 일 생성">
+        <CreateNewTodo closeSidebarModal={closeModal} goalsId={goals?.id} />
+      </Modal>
+      <Modal name="EDIT_GOAL_TITLE" title="목표 수정">
+        <EditGoalTitle closeEditModal={closeModal} />
+      </Modal>
     </main>
   );
 }

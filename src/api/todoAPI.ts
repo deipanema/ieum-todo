@@ -26,8 +26,6 @@ export const PostTodos = async (todoData: TodoType) => {
     const dataToSend = fileUrl ? { ...rest, fileUrl } : rest;
 
     const response = await api.post(`/todos`, dataToSend);
-    console.log("🥞");
-    console.log(response.data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
