@@ -3,27 +3,13 @@
 import { IoCloseOutline } from "react-icons/io5";
 import React, { ReactNode } from "react";
 
-import { useModalStore } from "@/store/modalStore";
-
 type ModalProps = {
   children: ReactNode;
   type: "first" | "second";
 };
 
-export default function WhoRU({ children, type }: ModalProps) {
-  const { isFirstOpen, isSecondOpen, closeFirstModal, closeSecondModal, setModalData } = useModalStore();
-
-  const isOpen = type === "first" ? isFirstOpen : isSecondOpen;
-  const closeModal = type === "first" ? closeFirstModal : closeSecondModal;
-
-  if (!isOpen) return null;
-
-  const handleClose = () => {
-    closeModal();
-    if (type === "second") {
-      setModalData({ secondData: undefined });
-    }
-  };
+export default function WhoRU({ children }: ModalProps) {
+  const handleClose = () => {};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
