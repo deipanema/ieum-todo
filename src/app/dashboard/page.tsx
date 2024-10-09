@@ -89,9 +89,10 @@ export default function Dashboard() {
                     <p className="min-w-[74px] cursor-pointer text-sm text-slate-600">{"모두 보기 >"}</p>
                   </Link>
                 </div>
-                {recentTodos.map((todo: TodoType) => (
-                  <Todos key={todo.id} todo={todo} setTodos={setRecentTodos} isGoal={true} />
-                ))}
+                {Array.isArray(recentTodos) &&
+                  recentTodos.map((todo: TodoType) => (
+                    <Todos key={todo.id} todo={todo} setTodos={setRecentTodos} isGoal={true} />
+                  ))}
               </div>
               {/* progress circle*/}
               <div className="relative flex h-[280px] w-full flex-col gap-4 rounded-xl bg-blue-500 px-6 py-4 text-white 2xl:w-[588px]">
@@ -102,7 +103,7 @@ export default function Dashboard() {
                     <span className="text-3xl font-semibold">0</span> %
                   </h2>
                 </div>
-                <div className="absolute left-[40%] top-11 flex 2xl:left-[50%]">
+                <div className="absolute left-[40%] top-11 flex select-none 2xl:left-[50%]">
                   <Image src="/dashboard-progress-circle.svg" width={166} height={166} alt="progress-circle-icon" />
                 </div>
               </div>

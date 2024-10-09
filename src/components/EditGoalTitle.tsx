@@ -1,21 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { PostGoal } from "@/api/goalAPI";
+import { PatchGoal } from "@/api/goalAPI";
+
+export type GoalType = {
+  id: number;
+  teamId: string;
+  title: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type EditGoalTitleProps = {
   closeEditTitle: () => void;
+  goals: GoalType;
 };
 
-export default function EditGoalTitle({ closeEditTitle }: EditGoalTitleProps) {
+export default function EditGoalTitle({ closeEditTitle, goals }: EditGoalTitleProps) {
   const [title, setTitle] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await PostGoal(title);
-    closeEditTitle();
+
+    try {
+      await PatchGoal(goals.id, title);
+      closeEditTitle();
+    } catch (error) {
+      console.error("Error updating goal:", error);
+    }
   };
+
+  useEffect(() => {
+    setTitle(goals.title);
+  }, [goals]);
 
   return (
     <form className="flex select-none flex-col gap-6" onSubmit={handleSubmit}>
@@ -26,6 +45,7 @@ export default function EditGoalTitle({ closeEditTitle }: EditGoalTitleProps) {
           onChange={(e) => setTitle(e.target.value)}
           className="w-full rounded-xl bg-[#F8FAFC] px-6 py-3 focus:outline-none"
           placeholder="목표의 새 타이틀"
+          autoFocus
         />
       </div>
       <div>
