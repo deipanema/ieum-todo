@@ -1,38 +1,76 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
-import { deleteTodos, patchTodo } from "@/api/todoAPI";
+import { deleteTodos, getAllData, patchTodo } from "@/api/todoAPI";
 
-import { TodoType } from "./TodoCard";
+export type GoalType = {
+  updatedAt: string;
+  createdAt: string;
+  title: string;
+  id: number;
+  userId: number;
+  teamId: string;
+};
+
+export type TodoType = {
+  noteId: number | null;
+  done: boolean;
+  linkUrl: string | null;
+  fileUrl: string | null;
+  title: string;
+  id: number;
+  goal: GoalType;
+  userId: number;
+  teamId: string;
+  updatedAt: string;
+  createdAt: string;
+};
+
+export type TodosResponse = {
+  totalCount: number;
+  nextCursor: number;
+  todos: TodoType[];
+};
 
 type TodoProps = {
   todo: TodoType;
+  setTodos: Dispatch<SetStateAction<TodoType[]>>;
   isGoal?: boolean;
   isInGoalSection?: boolean;
 };
 
-export default function Todos({ todo, isGoal = true, isInGoalSection }: TodoProps) {
+type toggleTodoStatusType = {
+  title: string;
+  goalId: number;
+  fileUrl: string;
+  linkUrl: string;
+  done: boolean;
+  todoId: number;
+};
+
+export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection = false }: TodoProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const toggleTodoStatus = async (
-    title: string,
-    goalId: number,
-    fileUrl: string,
-    linkUrl: string,
-    done: boolean,
-    todoId: number,
-  ) => {
+  const toggleTodoStatus = async ({ title, goalId, fileUrl, linkUrl, done, todoId }: toggleTodoStatusType) => {
     try {
       const updatedTodo = await patchTodo(title, goalId, fileUrl, linkUrl, !done, todoId);
-
       if (updatedTodo) {
-        //refreshTodo(); // 할 일 목록 새로고침
+        refreshTodo(); // 할 일 목록 새로고침
       }
     } catch (error) {
       console.error("할 일 상태 변경 중 오류 발생:", error);
+    }
+  };
+
+  const refreshTodo = async () => {
+    try {
+      const response = await getAllData(); // API로부터 최신 할 일 목록 가져오기
+      setTodos(response?.data); // 상태 업데이트
+    } catch (error) {
+      console.error("할 일 목록 새로고침 중 오류 발생:", error);
     }
   };
 
@@ -75,14 +113,23 @@ export default function Todos({ todo, isGoal = true, isInGoalSection }: TodoProp
             width={todo.done === true ? 18 : 24}
             height={todo.done === true ? 18 : 24}
             alt="checkbox-icon"
-            onClick={() => toggleTodoStatus(todo.title, todo.goal.id, todo.fileUrl, todo.linkUrl, todo.done, todo.id)}
+            onClick={() =>
+              toggleTodoStatus({
+                title: todo.title,
+                goalId: todo.goal.id,
+                fileUrl: todo.fileUrl as string,
+                linkUrl: todo.linkUrl as string,
+                done: todo.done,
+                todoId: todo.id,
+              })
+            }
           />
 
           <span className={`text-sm ${todo.done ? "line-through" : ""}`}>{todo.title}</span>
         </li>
         {isGoal && (
           <div className="flex items-center gap-2">
-            <Image className="ml-[35px]" src="/goal-summit.png" width={24} height={24} alt="goal-summit-icon" />
+            <Image className="ml-[35px]" src="/goal-summit.webp" width={24} height={24} alt="goal-summit-icon" />
             <p className="text-sm">{todo.goal.title}</p>
           </div>
         )}

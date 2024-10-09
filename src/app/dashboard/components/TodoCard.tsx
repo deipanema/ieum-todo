@@ -25,10 +25,10 @@ export type GoalType = {
 };
 
 export type TodoType = {
-  noteId: number;
+  noteId: number | null;
   done: boolean;
-  linkUrl: string;
-  fileUrl: string;
+  linkUrl: string | null;
+  fileUrl: string | null;
   title: string;
   id: number;
   goal: GoalType;
@@ -70,10 +70,10 @@ export default function TodoCard({ id }: TodoCardProps) {
     fetchData();
   }, [id]);
 
-  // 할 일 목록 필터링 함수
-  const filterTodos = (isDone: boolean) => {
-    return Array.isArray(todos) ? todos.filter((todo) => todo.done === isDone) : [];
-  };
+  // // 할 일 목록 필터링 함수
+  // const filterTodos = (isDone: boolean) => {
+  //   return Array.isArray(todos) ? todos.filter((todo) => todo.done === isDone) : [];
+  // };
 
   return (
     <div className="h-auto min-h-[231px] w-full select-none rounded-2xl bg-blue-50 p-6">
@@ -95,26 +95,49 @@ export default function TodoCard({ id }: TodoCardProps) {
         {/* To Do Section */}
         <div className="w-full">
           <h3 className="mb-3 text-lg font-semibold">To do</h3>
-          <ul>
+          {/* <ul>
             {filterTodos(false).length > 0 ? (
-              filterTodos(false).map((todo) => <Todos key={todo.id} todo={todo} isGoal={false} isInGoalSection />)
+              filterTodos(false).map((todo) => (
+                <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} isInGoalSection />
+              ))
             ) : (
               <li className="py-[30px] text-center text-sm text-slate-500">아직 해야할 일이 없어요</li>
             )}
+          </ul> */}
+          <ul>
+            {todos
+              .filter((todo) => !todo.done)
+              .map((todo) => (
+                <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
+              ))}
           </ul>
+          {todos.filter((todo) => !todo.done).length === 0 && (
+            <div className="mx-auto my-auto text-sm text-slate-500">해야할 일이 아직 없어요.</div>
+          )}
         </div>
         {/* Done Section */}
         <div className="w-full">
           <h3 className="mb-3 text-lg font-semibold">Done</h3>
-          <ul>
+          {/* <ul>
             {filterTodos(true).length > 0 ? (
               filterTodos(true).map((doneTodo) => (
-                <Todos key={doneTodo.id} todo={doneTodo} isGoal={false} isInGoalSection />
+                <Todos key={doneTodo.id} todo={doneTodo} setTodos={setTodos} isGoal={false} isInGoalSection />
               ))
             ) : (
               <li className="py-[30px] text-center text-sm text-slate-500">아직 다 한 일이 없어요</li>
             )}
+          </ul> */}
+
+          <ul>
+            {todos
+              .filter((todo) => todo.done)
+              .map((todo) => (
+                <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
+              ))}
           </ul>
+          {todos.filter((todo) => todo.done).length === 0 && (
+            <div className="mx-auto my-auto text-sm text-slate-500">다 한 일이 아직 없어요.</div>
+          )}
         </div>
       </div>
       <div className="mt-4 flex w-full justify-center">

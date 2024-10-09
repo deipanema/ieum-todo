@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 import { getGoals } from "@/api/goalAPI";
-import { PostFile, PostTodos } from "@/api/todoAPI";
+import { postFile, PostTodos } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 
 import LinkUpload from "./LinkUpload";
@@ -70,7 +70,7 @@ export default function CreateNewTodo({ closeCreateNewTodo, goalsId }: CreateNew
       return;
     }
 
-    const response = await PostFile(selectedFile);
+    const response = await postFile(selectedFile);
     if (response) {
       console.log(response);
       setTodo((prevTodo) => ({ ...prevTodo, fileUrl: response.url }));
