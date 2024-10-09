@@ -36,7 +36,6 @@ export const getGoal = async (id: number) => {
 };
 
 export const deleteGoal = async (id: number) => {
-  console.log(id);
   try {
     const response = await api.delete(`/goals/${id}`);
     console.log(response);
@@ -47,12 +46,12 @@ export const deleteGoal = async (id: number) => {
   }
 };
 
-// export const getMyGoal = async (id: number) => {
-//   try {
-//     const response = await api.get(`goals/${id}`);
-//     return response;
-//   } catch (error) {
-//     const axiosError = error as AxiosError;
-//     console.error("목표 삭제 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
-//   }
-// };
+export const PatchGoal = async (id: number, title: string) => {
+  try {
+    const response = await api.patch(`/goals/${id}`, { title });
+    return response;
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    console.error("목표 제목 수정 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+  }
+};

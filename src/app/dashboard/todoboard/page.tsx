@@ -49,7 +49,7 @@ export default function TodoboardPage() {
   const getTodos = async () => {
     const todosData = await getAllData();
 
-    if (todosData && todosData.data) {
+    if (todosData && todosData.data && Array.isArray(todosData.data.todos)) {
       setTodos(todosData.data.todos);
     }
   };
@@ -68,7 +68,6 @@ export default function TodoboardPage() {
   useEffect(() => {
     getTodos();
   }, []);
-
   return (
     <main className="mt-[51px] h-[calc(100vh-51px)] w-full bg-slate-100 lg:mt-0 lg:h-screen">
       <div className="mx-auto h-[calc(100vh-40px)] w-[343px] p-6 sm:w-full 2xl:w-[1200px]">
@@ -96,9 +95,8 @@ export default function TodoboardPage() {
               </div>
             </div>
             <ul>
-              {renderTodos().map((todo) => (
-                <Todos key={todo.id} todo={todo} setTodos={setTodos} />
-              ))}
+              {Array.isArray(renderTodos()) &&
+                renderTodos().map((todo) => <Todos key={todo.id} todo={todo} setTodos={setTodos} />)}
             </ul>
           </div>
         </div>

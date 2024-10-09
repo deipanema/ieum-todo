@@ -57,7 +57,7 @@ export default function GoalPage({ params }: GoalPageProps) {
 
       if (goalResponse) {
         const todoResponse = await getTodos(goalResponse?.id);
-        setTodos(todoResponse.todos ?? []);
+        setTodos(Array.isArray(todoResponse.todos) ? todoResponse.todos : []);
       }
     } catch (error) {
       console.error("데이터를 가져오는 중 오류 발생:", error);
@@ -79,15 +79,21 @@ export default function GoalPage({ params }: GoalPageProps) {
     }
   };
 
+  const handleEditGoal = () => {
+    if (goals) {
+      openModal("EDIT_GOAL_TITLE");
+    }
+    setIsOpen(false);
+  };
+
   useEffect(() => {
     fetchInitialData();
   }, []);
 
-  // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false); // 드롭다운 닫기
+        setIsOpen(false);
       }
     };
 
@@ -122,7 +128,7 @@ export default function GoalPage({ params }: GoalPageProps) {
 
             {isOpen && (
               <div ref={dropdownRef} className="absolute right-3 top-9 z-10 rounded-lg border bg-white shadow-xl">
-                <p onClick={() => openModal("EDIT_GOAL_TITLE")} className="cursor-pointer p-3 hover:bg-slate-200">
+                <p onClick={handleEditGoal} className="cursor-pointer p-3 hover:bg-slate-200">
                   수정하기
                 </p>
                 <p onClick={handleDelete} className="cursor-pointer p-3 hover:bg-slate-200">
@@ -152,13 +158,12 @@ export default function GoalPage({ params }: GoalPageProps) {
               </button>
             </div>
             <ul>
-              {todos
-                .filter((todo) => !todo.done)
-                .map((todo) => (
-                  <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
-                ))}
+              {Array.isArray(todos) &&
+                todos
+                  .filter((todo) => !todo.done)
+                  .map((todo) => <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />)}
             </ul>
-            {todos.filter((todo) => !todo.done).length === 0 && (
+            {Array.isArray(todos) && todos.filter((todo) => !todo.done).length === 0 && (
               <div className="mx-auto my-auto text-sm text-slate-500">해야할 일이 아직 없어요.</div>
             )}
           </div>
@@ -168,13 +173,12 @@ export default function GoalPage({ params }: GoalPageProps) {
               <h2 className="text-[18px] font-semibold">Done</h2>
             </div>
             <ul>
-              {todos
-                .filter((todo) => todo.done)
-                .map((todo) => (
-                  <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
-                ))}
+              {Array.isArray(todos) &&
+                todos
+                  .filter((todo) => todo.done)
+                  .map((todo) => <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />)}
             </ul>
-            {todos.filter((todo) => todo.done).length === 0 && (
+            {Array.isArray(todos) && todos.filter((todo) => todo.done).length === 0 && (
               <div className="mx-auto my-auto text-sm text-slate-500">다 한 일이 아직 없어요.</div>
             )}
           </div>
@@ -184,7 +188,7 @@ export default function GoalPage({ params }: GoalPageProps) {
         <CreateNewTodo closeCreateNewTodo={closeModal} goalsId={goals?.id} />
       </Modal>
       <Modal name="EDIT_GOAL_TITLE" title="목표 수정">
-        <EditGoalTitle closeEditTitle={closeModal} />
+        <EditGoalTitle closeEditTitle={closeModal} goals={goals as GoalType} />
       </Modal>
     </main>
   );

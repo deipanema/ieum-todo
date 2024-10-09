@@ -38,20 +38,13 @@ export type TodoType = {
   createdAt: string;
 };
 
-export type TodosResponse = {
-  totalCount: number;
-  nextCursor: number;
-  todos: TodoType[];
-};
-
 export default function TodoCard({ id }: TodoCardProps) {
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
 
   const [goals, setGoals] = useState<GoalType | null>(null);
-  const [todos, setTodos] = useState<TodoType[]>([]); // 모든 할 일 목록 상태
+  const [todos, setTodos] = useState<TodoType[]>([]);
 
-  // 목표와 할 일을 불러오는 useEffect
   useEffect(() => {
     async function fetchData() {
       try {
@@ -59,8 +52,10 @@ export default function TodoCard({ id }: TodoCardProps) {
         setGoals(goalResponse);
 
         if (goalResponse?.id) {
-          const todoResponse = await getTodos(goalResponse?.id);
-          setTodos(todoResponse.todos ?? []);
+          const todoResponse = await getTodos(goalResponse.id);
+          console.log("Todo Response:", todoResponse); // 디버깅
+          const fetchedTodos = Array.isArray(todoResponse?.todos) ? todoResponse.todos : [];
+          setTodos(fetchedTodos);
         }
       } catch (error) {
         console.error("데이터를 가져오는 중 오류 발생:", error);
@@ -70,10 +65,10 @@ export default function TodoCard({ id }: TodoCardProps) {
     fetchData();
   }, [id]);
 
-  // // 할 일 목록 필터링 함수
-  // const filterTodos = (isDone: boolean) => {
-  //   return Array.isArray(todos) ? todos.filter((todo) => todo.done === isDone) : [];
-  // };
+  const activeTodos = Array.isArray(todos) ? todos.filter((todo) => !todo.done) : [];
+  const completedTodos = Array.isArray(todos) ? todos.filter((todo) => todo.done) : [];
+
+  const showMore = activeTodos.length > 5 || completedTodos.length > 5;
 
   return (
     <div className="h-auto min-h-[231px] w-full select-none rounded-2xl bg-blue-50 p-6">
@@ -92,63 +87,46 @@ export default function TodoCard({ id }: TodoCardProps) {
       <div className="mb-4">{/* <ProgressBar progress={progress} /> */}</div>
 
       <div className="flex w-full flex-col gap-6 sm:flex-row sm:gap-0">
-        {/* To Do Section */}
         <div className="w-full">
           <h3 className="mb-3 text-lg font-semibold">To do</h3>
-          {/* <ul>
-            {filterTodos(false).length > 0 ? (
-              filterTodos(false).map((todo) => (
-                <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} isInGoalSection />
-              ))
-            ) : (
-              <li className="py-[30px] text-center text-sm text-slate-500">아직 해야할 일이 없어요</li>
-            )}
-          </ul> */}
           <ul>
-            {todos
-              .filter((todo) => !todo.done)
-              .map((todo) => (
-                <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
-              ))}
+            {activeTodos.slice(0, 5).map((todo) => (
+              <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
+            ))}
           </ul>
-          {todos.filter((todo) => !todo.done).length === 0 && (
-            <div className="mx-auto my-auto text-sm text-slate-500">해야할 일이 아직 없어요.</div>
+          {activeTodos.length === 0 && (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-sm text-slate-500">해야할 일이 아직 없어요.</div>
+            </div>
           )}
         </div>
-        {/* Done Section */}
         <div className="w-full">
           <h3 className="mb-3 text-lg font-semibold">Done</h3>
-          {/* <ul>
-            {filterTodos(true).length > 0 ? (
-              filterTodos(true).map((doneTodo) => (
-                <Todos key={doneTodo.id} todo={doneTodo} setTodos={setTodos} isGoal={false} isInGoalSection />
-              ))
-            ) : (
-              <li className="py-[30px] text-center text-sm text-slate-500">아직 다 한 일이 없어요</li>
-            )}
-          </ul> */}
-
           <ul>
-            {todos
-              .filter((todo) => todo.done)
-              .map((todo) => (
-                <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
-              ))}
+            {completedTodos.slice(0, 5).map((todo) => (
+              <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
+            ))}
           </ul>
-          {todos.filter((todo) => todo.done).length === 0 && (
-            <div className="mx-auto my-auto text-sm text-slate-500">다 한 일이 아직 없어요.</div>
+          {completedTodos.length === 0 && (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-sm text-slate-500">다 한 일이 아직 없어요.</div>
+            </div>
           )}
         </div>
       </div>
-      <div className="mt-4 flex w-full justify-center">
-        <div
-          className="rounded-4 flex w-[120px] cursor-pointer items-center justify-center bg-white py-[6px]"
-          onClick={() => router.push(`/dashboard/goal/${goals?.id}`)}
-        >
-          <span>더보기</span>
-          <Image src="/modal-arrowdown.svg" width={24} height={24} alt="button-arrow-icon" />
+
+      {showMore && (
+        <div className="mt-4 flex justify-center">
+          <button
+            className="flex w-[120px] cursor-pointer items-center justify-center rounded-2xl bg-white py-[6px]"
+            onClick={() => router.push(`/dashboard/goal/${goals?.id}`)}
+          >
+            <span>더보기</span>
+            <Image src="/modal-arrowdown.svg" width={24} height={24} alt="button-arrow-icon" />
+          </button>
         </div>
-      </div>
+      )}
+
       <Modal name="CREATE_NEW_TODO" title="할 일 생성">
         <CreateNewTodo closeCreateNewTodo={closeModal} goalsId={goals?.id} />
       </Modal>
