@@ -1,5 +1,4 @@
 "use client";
-
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -10,6 +9,7 @@ import { useAuthStore } from "@/store/AuthStore";
 import { getGoals, PostGoal } from "@/api/goalAPI";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
+import AnimatedText from "@/utils/AnimatedText";
 
 export interface GoalType {
   id: number;
@@ -107,9 +107,7 @@ export default function SideBar() {
             <div>
               <h2>{user?.name}</h2>
               <h2>{user?.email}</h2>
-              <button className="text-3 text-slate-400" onClick={handleLogout}>
-                로그아웃
-              </button>
+              <AnimatedText text="로그아웃" handleLogout={handleLogout} />
             </div>
           </div>
           <div className="border-b border-b-slate-200 px-6 pb-6">
