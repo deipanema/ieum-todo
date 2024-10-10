@@ -10,6 +10,7 @@ import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
 
 import Todos from "./Todos";
+import ProgressBar from "./ProgressBar";
 
 export type TodoCardProps = {
   id: number;
@@ -41,9 +42,17 @@ export type TodoType = {
 export default function TodoCard({ id }: TodoCardProps) {
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
-
+  const [progress, setProgress] = useState(0);
   const [goals, setGoals] = useState<GoalType | null>(null);
   const [todos, setTodos] = useState<TodoType[]>([]);
+
+  const activeTodos = Array.isArray(todos) ? todos.filter((todo) => !todo.done) : [];
+  const completedTodos = Array.isArray(todos) ? todos.filter((todo) => todo.done) : [];
+  const showMore = activeTodos.length > 5 || completedTodos.length > 5;
+
+  useEffect(() => {
+    setProgress(Math.round((completedTodos.length / todos.length) * 100));
+  }, [completedTodos.length, todos.length]);
 
   useEffect(() => {
     async function fetchData() {
@@ -65,11 +74,6 @@ export default function TodoCard({ id }: TodoCardProps) {
     fetchData();
   }, [id]);
 
-  const activeTodos = Array.isArray(todos) ? todos.filter((todo) => !todo.done) : [];
-  const completedTodos = Array.isArray(todos) ? todos.filter((todo) => todo.done) : [];
-
-  const showMore = activeTodos.length > 5 || completedTodos.length > 5;
-
   return (
     <div className="h-auto min-h-[231px] w-full select-none rounded-2xl bg-blue-50 p-6">
       <div className="flex justify-between">
@@ -84,7 +88,9 @@ export default function TodoCard({ id }: TodoCardProps) {
         </button>
       </div>
 
-      <div className="mb-4">{/* <ProgressBar progress={progress} /> */}</div>
+      <div className="mb-4">
+        <ProgressBar progress={progress} />{" "}
+      </div>
 
       <div className="flex w-full flex-col gap-6 sm:flex-row sm:gap-0">
         <div className="w-full">

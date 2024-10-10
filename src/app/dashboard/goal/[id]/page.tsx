@@ -11,6 +11,7 @@ import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 
 import Todos from "../../components/Todos";
+import ProgressBar from "../../components/ProgressBar";
 
 type GoalPageProps = {
   params: { id: string };
@@ -43,6 +44,7 @@ export default function GoalPage({ params }: GoalPageProps) {
   const { id } = params;
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
+  const [progress, setProgress] = useState(0);
 
   const [todos, setTodos] = useState<TodoType[]>([]);
   const [goals, setGoals] = useState<GoalType | null>(null);
@@ -57,7 +59,19 @@ export default function GoalPage({ params }: GoalPageProps) {
 
       if (goalResponse) {
         const todoResponse = await getTodos(goalResponse?.id);
-        setTodos(Array.isArray(todoResponse.todos) ? todoResponse.todos : []);
+
+        // todoResponse와 todoResponse.todos가 존재하는지 확인
+        const todosArray = Array.isArray(todoResponse?.todos) ? todoResponse.todos : [];
+        setTodos(todosArray);
+
+        // todoResponse와 todosArray의 길이가 0보다 큰지 확인
+        if (todoResponse?.totalCount && todosArray.length > 0) {
+          const completedTodos = todosArray.filter((todo: TodoType) => todo.done === true).length;
+          const ratio = (completedTodos / todoResponse.totalCount) * 100;
+          setProgress(ratio);
+        } else {
+          setProgress(0); // 데이터를 가져오지 못했을 때의 기본값 설정
+        }
       }
     } catch (error) {
       console.error("데이터를 가져오는 중 오류 발생:", error);
@@ -139,7 +153,7 @@ export default function GoalPage({ params }: GoalPageProps) {
           </div>
           <div>
             <h4 className="mb-2 pl-[7px]">Progress</h4>
-            {/* 추후 진행률 관련 컴포넌트 추가 가능 */}
+            <ProgressBar progress={progress} />
           </div>
         </div>
         <div className="my-6 flex h-full w-[306px] flex-col gap-4 rounded-xl bg-blue-100 px-6 py-4 sm:w-auto">

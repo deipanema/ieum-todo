@@ -103,7 +103,7 @@ export default function SideBar() {
             </button>
           </div>
           <div className="mb-6 flex gap-3 px-6">
-            <Image src="/sidebar-profile.svg" width={0} height={0} className="h-auto w-16" alt="profile-sidebar" />
+            <Image src="/avatar.jpg" width={100} height={24} className="h-auto w-16 rounded-lg" alt="profile-sidebar" />
             <div>
               <h2>{user?.name}</h2>
               <h2>{user?.email}</h2>

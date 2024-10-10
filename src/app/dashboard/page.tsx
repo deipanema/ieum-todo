@@ -10,6 +10,7 @@ import { getAllData } from "@/api/todoAPI";
 //import TodoCard, { TodoType } from "./components/TodoCard";
 import TodoCard from "./components/TodoCard";
 import Todos from "./components/Todos";
+import ProgressTracker from "./components/ProgressTracker";
 
 export type TodosResponse = {
   totalCount: number;
@@ -42,35 +43,35 @@ export type TodoType = {
 export default function Dashboard() {
   const [goals, setGoals] = useState<GoalType[] | undefined>([]);
   const [recentTodos, setRecentTodos] = useState<TodoType[]>([]);
-
-  // 할 일 목록을 가져오는 함수
-  const fetchRecentTodos = async () => {
-    try {
-      const response = await getAllData();
-      console.log(response?.data);
-      const sortedTodos = response?.data.todos.sort((a: TodoType, b: TodoType) => {
-        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-      });
-      setRecentTodos(sortedTodos.slice(0, 4)); // 최신 4개의 할 일만 저장
-    } catch (error) {
-      console.error("할 일 목록을 가져오는 중 오류가 발생했습니다:", error);
-    }
-  };
-
-  // 목표 데이터를 가져오는 함수
-  const fetchGoals = async () => {
-    try {
-      const response = await getGoals();
-      setGoals(response?.goals || []);
-    } catch (error) {
-      console.error("목표 데이터를 가져오는 중 오류가 발생했습니다:", error);
-    }
-  };
+  const [progressValue, setProgressValue] = useState(0);
+  const [ratio, setRatio] = useState(0);
 
   useEffect(() => {
-    fetchRecentTodos();
-    fetchGoals();
-  }, []);
+    // 데이터를 가져오는 함수
+    const fetchData = async () => {
+      try {
+        // Promise.all을 사용하여 두 개의 API 호출을 병렬로 처리
+        const [goalsResponse, todosResponse] = await Promise.all([getGoals(), getAllData()]);
+
+        // 목표 데이터 처리
+        setGoals(goalsResponse?.goals || []);
+
+        // 할 일 데이터 처리
+        const sortedTodos = todosResponse?.data.todos.sort((a: TodoType, b: TodoType) => {
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        });
+        setRecentTodos(sortedTodos.slice(0, 4)); // 최신 4개의 할 일만 저장
+
+        const total = todosResponse?.data.totalCount;
+        const dones = todosResponse?.data.todos.filter((todo: TodoType) => todo.done === true);
+        setRatio(Math.round((dones.length / total) * 100));
+      } catch (error) {
+        console.error("데이터를 가져오는 중 오류가 발생했습니다:", error);
+      }
+    };
+
+    fetchData();
+  }, []); // 컴포넌트가 마운트될 때 한 번만 실행
 
   return (
     <main className="relative">
@@ -94,19 +95,7 @@ export default function Dashboard() {
                     <Todos key={todo.id} todo={todo} setTodos={setRecentTodos} isGoal={true} />
                   ))}
               </div>
-              {/* progress circle*/}
-              <div className="relative flex h-[280px] w-full flex-col gap-4 rounded-xl bg-blue-500 px-6 py-4 text-white 2xl:w-[588px]">
-                <Image src="/dashboard-progress.webp" width={40} height={40} alt="progress-task-icon" />
-                <div>
-                  <h2>내 진행 상황</h2>
-                  <h2>
-                    <span className="text-3xl font-semibold">0</span> %
-                  </h2>
-                </div>
-                <div className="absolute left-[40%] top-11 flex select-none 2xl:left-[50%]">
-                  <Image src="/dashboard-progress-circle.svg" width={166} height={166} alt="progress-circle-icon" />
-                </div>
-              </div>
+              <ProgressTracker ratio={ratio} progressValue={progressValue} setProgressValue={setProgressValue} />
             </div>
             <div className="rounded-3 mt-6 flex h-auto w-[306px] flex-col gap-4 bg-white px-6 py-4 sm:w-auto">
               <div className="flex items-center gap-2">
