@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+.progress-ring-circle {
+  transition: stroke-dashoffset ease-in-out 1s;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
