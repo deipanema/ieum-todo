@@ -1,3 +1,5 @@
+"use client";
+
 export function setProgress(percent: number) {
   const circle = document.querySelector(".progress-ring-circle") as SVGCircleElement | null;
   if (circle) {

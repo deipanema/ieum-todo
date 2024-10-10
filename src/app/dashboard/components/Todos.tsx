@@ -4,6 +4,8 @@ import Image from "next/image";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
 import { deleteTodos, getAllData, patchTodo } from "@/api/todoAPI";
+import useModal from "@/hook/useModal";
+import CreateNewTodo from "@/components/CreateNewTodo";
 
 export type GoalType = {
   updatedAt: string;
@@ -53,6 +55,7 @@ type toggleTodoStatusType = {
 export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection = false }: TodoProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const { Modal, openModal, closeModal } = useModal();
 
   const toggleTodoStatus = async ({ title, goalId, fileUrl, linkUrl, done, todoId }: toggleTodoStatusType) => {
     try {
@@ -88,11 +91,10 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
     }
   };
 
-  // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false); // 드롭다운 닫기
+        setIsOpen(false);
       }
     };
 
@@ -190,18 +192,32 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
             title="수정 / 삭제"
             onClick={handleToggleDropdown}
           />
+
           {isOpen && (
             <div
               ref={dropdownRef}
               className="absolute right-3 top-7 z-10 w-24 cursor-pointer rounded-lg border bg-white text-center shadow-xl"
             >
-              <p className="cursor-pointer p-3 hover:bg-slate-200">수정하기</p>
+              <p className="cursor-pointer p-3 hover:bg-slate-200" onClick={() => openModal("EDIT_TODO")}>
+                수정하기
+              </p>
               <p onClick={handleDelete} className="cursor-pointer p-3 hover:bg-slate-200">
                 삭제하기
               </p>
             </div>
           )}
         </div>
+        <Modal name="EDIT_TODO" title="할 일 수정">
+          <CreateNewTodo
+            closeCreateNewTodo={closeModal}
+            todoId={todo.id}
+            goalsId={todo.goal.id}
+            title={todo.title}
+            fileUrl={todo.fileUrl || undefined}
+            linkUrl={todo.linkUrl || undefined}
+            isEdit
+          />
+        </Modal>
       </ul>
     </div>
   );

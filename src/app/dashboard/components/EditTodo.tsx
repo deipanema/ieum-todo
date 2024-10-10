@@ -1,19 +1,23 @@
-"use client";
-
 import Image from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 import { getGoals } from "@/api/goalAPI";
-import { editTodo, postFile, PostTodos } from "@/api/todoAPI";
+import { patchTodo, postFile, PostTodos } from "@/api/todoAPI";
+import LinkUpload from "@/components/LinkUpload";
 import useModal from "@/hook/useModal";
 
-import LinkUpload from "./LinkUpload";
-
 export type TodoType = {
+  noteId: number | null;
+  done: boolean; // 이 줄이 포함되어야 합니다.
+  linkUrl: string | null;
+  fileUrl: string | null;
   title: string;
-  fileUrl?: string;
-  linkUrl?: string;
-  goalId: number;
+  id: number;
+  goal: GoalType;
+  userId: number;
+  teamId: string;
+  updatedAt: string;
+  createdAt: string;
 };
 
 export type GoalType = {
@@ -29,36 +33,28 @@ export type FileType = {
   url?: string;
 };
 
-export type CreateNewTodoProps = {
-  closeCreateNewTodo: () => void;
+export type EditTodoProps = {
+  closeEditTodo: () => void;
   goalsId?: number;
   title?: string;
-  fileUrl?: string | undefined;
-  linkUrl?: string | undefined;
-  todoId?: number;
-  isEdit?: boolean;
+  todoId: number;
+  fileUrl?: string;
+  linkUrl?: string;
+  goalId?: number;
+  done?: boolean;
 };
 
-export default function CreateNewTodo({
-  closeCreateNewTodo,
-  goalsId,
-  title,
-  fileUrl,
-  linkUrl,
-  todoId,
-  isEdit,
-}: CreateNewTodoProps) {
+export default function EditTodo({ closeEditTodo, goalsId, title, fileUrl, linkUrl, todoId, done }: EditTodoProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isOpenGoals, setIsOpenGoals] = useState(false);
   const [goals, setGoals] = useState<GoalType[]>([]);
   const [isFileUpload, setIsFileUpload] = useState(false);
   const [fileTitle, setFileTitle] = useState("");
   const { Modal, openModal, closeModal } = useModal();
-  const [todo, setTodo] = useState<TodoType>({ title: "", fileUrl: "", linkUrl: "", goalId: 0 });
-  console.log(title);
+  const [newTodo, setNewTodo] = useState<TodoType>({ title: "", fileUrl: "", linkUrl: "", goalId: 0, done: false });
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTodo({ ...todo, title: e.target.value });
+    setNewTodo((prevTodo) => ({ ...prevTodo, title: e.target.value }));
   };
 
   const fetchGoals = async () => {
@@ -86,47 +82,30 @@ export default function CreateNewTodo({
 
     const response = await postFile(selectedFile);
     if (response) {
-      console.log(response);
-      setTodo((prevTodo) => ({ ...prevTodo, fileUrl: response.url }));
+      setNewTodo((prevNewTodo) => ({ ...prevNewTodo, fileUrl: response.url }));
       setFileTitle(selectedFile.name);
       setIsFileUpload(true);
     }
   };
 
-  const handleConfirm = async (type: string) => {
+  const handleConfirm = async () => {
     try {
-      if (type === "edit") {
-        console.log("수정 요청 삐용🚨", todo);
-        const response = await editTodo(
-          todo.title,
-          todo.goalId,
-          todo.fileUrl ? todo.fileUrl : null,
-          todo.linkUrl ? todo.linkUrl : null,
-          todoId as number,
-        );
+      const response = await patchTodo(
+        newTodo.title || "",
+        newTodo.goalId || 0,
+        todoId.toString(),
+        newTodo.fileUrl || undefined,
+        newTodo.linkUrl || undefined,
+        newTodo.done,
+      );
 
-        console.log("수정 응답:", response); // 응답 확인
-        if (response) {
-          closeCreateNewTodo();
-        } else {
-          console.error("수정 실패:", response);
-          setTodo((prevTodo) => ({ ...prevTodo, goalId: 0, linkUrl: "" }));
-        }
-      } else {
-        const response = await PostTodos(todo);
-
-        if (response) {
-          console.log("할 일이 성공적으로 생성되었습니다:", response);
-        }
+      if (response) {
+        console.log("할 일이 성공적으로 생성되었습니다:", response);
       }
+      closeEditTodo();
     } catch (error) {
       console.error("할 일 생성 중 오류 발생:", error);
     }
-  };
-
-  const handleGoalSelect = (goalId: number) => {
-    setTodo((prevTodo) => ({ ...prevTodo, goalId }));
-    setIsOpenGoals(false);
   };
 
   useEffect(() => {
@@ -134,17 +113,13 @@ export default function CreateNewTodo({
   }, []);
 
   useEffect(() => {
-    setTodo((prevTodo) => ({
-      ...prevTodo,
-      goalId: goalsId as number,
-      title: title || "",
-      linkUrl: linkUrl || "",
-      fileUrl: fileUrl || "",
-    }));
+    if (title) setNewTodo((prevTodo) => ({ ...prevTodo, title }));
     if (fileUrl) {
+      setFileTitle(fileUrl);
       setIsFileUpload(true);
     }
-  }, [title, fileUrl, linkUrl, goalsId]);
+    if (linkUrl) setNewTodo((prevTodo) => ({ ...prevTodo, linkUrl }));
+  }, [title, fileUrl, linkUrl]);
 
   return (
     <>
@@ -155,7 +130,7 @@ export default function CreateNewTodo({
             className="w-full rounded-xl bg-slate-50 px-6 py-3 focus:outline-none"
             placeholder="할 일의 제목을 적어주세요"
             maxLength={30}
-            value={todo.title}
+            value={newTodo.title}
             onChange={handleTitleChange}
             autoFocus
           />
@@ -178,14 +153,14 @@ export default function CreateNewTodo({
             </div>
             <div
               className={`flex w-fit cursor-pointer gap-[7px] rounded-md border p-2 ${
-                !todo.linkUrl ? "bg-slate-100 text-black" : "bg-black text-white"
+                !newTodo.linkUrl ? "bg-slate-100 text-black" : "bg-black text-white"
               }`}
               onClick={() => openModal("LINK_ATTACHMENT")}
             >
               <Image
-                src={todo.linkUrl ? "/modal-checked.svg" : "/modal-unchecked.svg"}
-                width={todo.linkUrl ? 18 : 24}
-                height={todo.linkUrl ? 18 : 24}
+                src={newTodo.linkUrl ? "/modal-checked.svg" : "/modal-unchecked.svg"}
+                width={newTodo.linkUrl ? 18 : 24}
+                height={newTodo.linkUrl ? 18 : 24}
                 alt="checkbox-icon"
               />
               <span>링크 첨부</span>
@@ -217,8 +192,8 @@ export default function CreateNewTodo({
             onClick={() => setIsOpenGoals((prev) => !prev)}
             className="flex w-full cursor-pointer justify-between rounded-xl bg-slate-50 px-[20px] py-3"
           >
-            <p className={`${todo.goalId ? "text-black" : "text-slate-400"}`}>
-              {todo.goalId ? goals.find((goal) => goal.id === todo.goalId)?.title : "목표를 선택해주세요"}
+            <p className={`${newTodo.goalId ? "text-black" : "text-slate-400"}`}>
+              {newTodo.goalId ? goals.find((goal) => goal.id === newTodo.goalId)?.title : "목표를 선택해주세요"}
             </p>
             <Image alt="arrowdown-icon" width={24} height={24} src="/modal-arrowdown.svg" />
           </div>
@@ -227,11 +202,7 @@ export default function CreateNewTodo({
             <div className="absolute z-50 max-h-[200px] w-full select-none overflow-y-scroll rounded-xl bg-white px-[20px] py-3">
               <ul>
                 {goals.map((goal) => (
-                  <li
-                    key={goal.id}
-                    className="cursor-pointer rounded-lg p-3 hover:bg-blue-100"
-                    onClick={() => handleGoalSelect(goal.id)}
-                  >
+                  <li key={goal.id} className="cursor-pointer rounded-lg p-3 hover:bg-blue-100">
                     {goal.title}
                   </li>
                 ))}
@@ -239,26 +210,16 @@ export default function CreateNewTodo({
             </div>
           )}
         </div>
-        {isEdit ? (
-          <button
-            onClick={() => handleConfirm("edit")}
-            className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
-            disabled={!todo.title.trim() || !todo.goalId}
-          >
-            수정
-          </button>
-        ) : (
-          <button
-            onClick={() => handleConfirm("create")}
-            className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
-            disabled={!todo.title.trim() || !todo.goalId}
-          >
-            확인
-          </button>
-        )}
+        <button
+          onClick={handleConfirm}
+          className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
+          disabled={!newTodo?.title?.trim() || !newTodo.goalId}
+        >
+          확인
+        </button>
       </div>
       <Modal name="LINK_ATTACHMENT" title="링크 업로드">
-        <LinkUpload closeSecond={closeModal} todo={todo} setTodo={setTodo} />
+        <LinkUpload closeSecond={closeModal} todo={newTodo} setTodo={setNewTodo} />
       </Modal>
     </>
   );
