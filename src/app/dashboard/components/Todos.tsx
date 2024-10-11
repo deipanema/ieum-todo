@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
-import { deleteTodos, getAllData, patchTodo } from "@/api/todoAPI";
+import { deleteTodos, patchTodo } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 
@@ -58,22 +58,16 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
   const { Modal, openModal, closeModal } = useModal();
 
   const toggleTodoStatus = async ({ title, goalId, fileUrl, linkUrl, done, todoId }: toggleTodoStatusType) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((prevTodo) => (prevTodo.id === todoId ? { ...prevTodo, done: !done } : prevTodo)),
+    );
     try {
-      const updatedTodo = await patchTodo(title, goalId, fileUrl, linkUrl, !done, todoId);
-      if (updatedTodo) {
-        refreshTodo(); // 할 일 목록 새로고침
-      }
+      await patchTodo(title, goalId, fileUrl, linkUrl, !done, todoId);
     } catch (error) {
       console.error("할 일 상태 변경 중 오류 발생:", error);
-    }
-  };
-
-  const refreshTodo = async () => {
-    try {
-      const response = await getAllData(); // API로부터 최신 할 일 목록 가져오기
-      setTodos(response?.data); // 상태 업데이트
-    } catch (error) {
-      console.error("할 일 목록 새로고침 중 오류 발생:", error);
+      setTodos((prevTodos) =>
+        prevTodos.map((prevTodo) => (prevTodo.id === todoId ? { ...prevTodo, done: done } : prevTodo)),
+      );
     }
   };
 
@@ -81,8 +75,13 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
     setIsOpen((prev) => !prev);
   };
 
+  const handleTodoUpdate = (updatedTodo: TodoType) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((prevTodo) => (prevTodo.id === updatedTodo.id ? { ...prevTodo, ...updatedTodo } : prevTodo)),
+    );
+  };
+
   const handleDelete = async () => {
-    // console.log(goal);
     try {
       const response = await deleteTodos(todo.id as number);
       return response;
@@ -198,7 +197,13 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
               ref={dropdownRef}
               className="absolute right-3 top-7 z-10 w-24 cursor-pointer rounded-lg border bg-white text-center shadow-xl"
             >
-              <p className="cursor-pointer p-3 hover:bg-slate-200" onClick={() => openModal("EDIT_TODO")}>
+              <p
+                className="cursor-pointer p-3 hover:bg-slate-200"
+                onClick={() => {
+                  openModal("EDIT_TODO");
+                  if (isOpen) setIsOpen(false);
+                }}
+              >
                 수정하기
               </p>
               <p onClick={handleDelete} className="cursor-pointer p-3 hover:bg-slate-200">
@@ -212,10 +217,12 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
             closeCreateNewTodo={closeModal}
             todoId={todo.id}
             goalsId={todo.goal.id}
+            goal={todo.goal}
             title={todo.title}
             fileUrl={todo.fileUrl || undefined}
             linkUrl={todo.linkUrl || undefined}
             isEdit
+            onUpdate={handleTodoUpdate}
           />
         </Modal>
       </ul>

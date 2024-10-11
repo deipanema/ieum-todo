@@ -62,7 +62,6 @@ export default function TodoCard({ id }: TodoCardProps) {
 
         if (goalResponse?.id) {
           const todoResponse = await getTodos(goalResponse.id);
-          console.log("Todo Response:", todoResponse); // 디버깅
           const fetchedTodos = Array.isArray(todoResponse?.todos) ? todoResponse.todos : [];
           setTodos(fetchedTodos);
         }
