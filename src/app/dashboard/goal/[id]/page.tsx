@@ -199,7 +199,7 @@ export default function GoalPage({ params }: GoalPageProps) {
         </div>
       </div>
       <Modal name="CREATE_NEW_TODO" title="할 일 생성">
-        <CreateNewTodo closeCreateNewTodo={closeModal} goalsId={goals?.id} />
+        <CreateNewTodo closeCreateNewTodo={closeModal} />
       </Modal>
       <Modal name="EDIT_GOAL_TITLE" title="목표 수정">
         <EditGoalTitle closeEditTitle={closeModal} goals={goals as GoalType} />

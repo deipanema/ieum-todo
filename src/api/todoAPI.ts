@@ -1,7 +1,13 @@
 import { AxiosError } from "axios";
 
 import api from "@/lib/api";
-import { TodoType } from "@/components/CreateNewTodo";
+
+export type TodoType = {
+  title: string;
+  linkUrl: string | null;
+  fileUrl: string | null;
+  goalId: number;
+};
 
 export const getAllData = async () => {
   try {
@@ -29,13 +35,18 @@ export const postFile = async (file: File) => {
   }
 };
 
-export const PostTodos = async ({ title, fileUrl, linkUrl, goalId }: TodoType) => {
+export const PostTodos = async (
+  title: string,
+  fileUrl: string | null,
+  linkUrl: string | null,
+  goalId: number,
+): Promise<TodoType | undefined> => {
   try {
     const payload: {
       title: string;
       goalId: number;
-      fileUrl?: string;
-      linkUrl?: string;
+      fileUrl?: string | null;
+      linkUrl?: string | null;
     } = {
       title,
       goalId,
@@ -49,11 +60,12 @@ export const PostTodos = async ({ title, fileUrl, linkUrl, goalId }: TodoType) =
       payload.linkUrl = linkUrl;
     }
 
-    const response = await api.post(`/todos`, payload);
+    const response = await api.post<TodoType>(`/todos`, payload);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
     console.error("에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+    return undefined; // 오류 발생 시 undefined 반환
   }
 };
 

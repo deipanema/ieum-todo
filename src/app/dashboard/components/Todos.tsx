@@ -131,7 +131,7 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
         {isGoal && (
           <div className="flex items-center gap-2">
             <Image className="ml-[35px]" src="/goal-summit.webp" width={24} height={24} alt="goal-summit-icon" />
-            <p className="text-sm">{todo.goal.title}</p>
+            <p className="text-sm">{todo.goal?.title}</p>
           </div>
         )}
 
@@ -216,7 +216,6 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
           <CreateNewTodo
             closeCreateNewTodo={closeModal}
             todoId={todo.id}
-            goalsId={todo.goal.id}
             goal={todo.goal}
             title={todo.title}
             fileUrl={todo.fileUrl || undefined}
