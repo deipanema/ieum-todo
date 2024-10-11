@@ -114,7 +114,6 @@ export default function CreateNewTodo({
 
     const response = await postFile(selectedFile);
     if (response) {
-      console.log(response);
       setTodo((prevTodo) => ({ ...prevTodo, fileUrl: response.url }));
       setFileTitle(selectedFile.name);
       setIsFileUpload(true);
@@ -124,7 +123,6 @@ export default function CreateNewTodo({
   const handleConfirm = async (type: string) => {
     try {
       if (type === "edit") {
-        console.log("수정 요청 삐용🚨", todo);
         const response = await editTodo(
           todo.title,
           todo?.goal?.id,
@@ -133,7 +131,6 @@ export default function CreateNewTodo({
           todoId as number,
         );
 
-        console.log("수정 응답:", response); // 응답 확인
         if (response) {
           if (onUpdate) {
             onUpdate(todo);
@@ -182,8 +179,6 @@ export default function CreateNewTodo({
       setIsFileUpload(true);
     }
   }, [isEdit, title, fileUrl, linkUrl, goal]);
-
-  console.log(title, goalsId);
 
   return (
     <>
