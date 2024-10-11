@@ -37,7 +37,6 @@ export type FileType = {
 
 export type CreateNewTodoProps = {
   closeCreateNewTodo: () => void;
-  goalsId?: number;
   goal?: GoalType;
   title?: string;
   fileUrl?: string | undefined;
@@ -49,7 +48,6 @@ export type CreateNewTodoProps = {
 
 export default function CreateNewTodo({
   closeCreateNewTodo,
-  goalsId,
   goal,
   title,
   fileUrl,
@@ -135,13 +133,12 @@ export default function CreateNewTodo({
           if (onUpdate) {
             onUpdate(todo);
           }
-          closeCreateNewTodo();
         } else {
           console.error("수정 실패:", response);
           setTodo((prevTodo) => ({ ...prevTodo, goalId: 0, linkUrl: "" }));
         }
       } else {
-        const response = await PostTodos(todo);
+        const response = await PostTodos(todo.title, todo.fileUrl, todo.linkUrl, todo.goal.id);
 
         if (response) {
           console.log("할 일이 성공적으로 생성되었습니다:", response);
@@ -149,6 +146,8 @@ export default function CreateNewTodo({
       }
     } catch (error) {
       console.error("할 일 생성 중 오류 발생:", error);
+    } finally {
+      closeCreateNewTodo();
     }
   };
 
