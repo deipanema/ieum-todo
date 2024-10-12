@@ -14,7 +14,7 @@ import Todos from "../../components/Todos";
 import ProgressBar from "../../components/ProgressBar";
 
 type GoalPageProps = {
-  params: { id: string };
+  params: { goalId: string };
 };
 
 export type TodoType = {
@@ -41,7 +41,8 @@ export type GoalType = {
 };
 
 export default function GoalPage({ params }: GoalPageProps) {
-  const { id } = params;
+  const { goalId } = params;
+
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
   const [progress, setProgress] = useState(0);
@@ -54,7 +55,7 @@ export default function GoalPage({ params }: GoalPageProps) {
   // 목표 및 할 일 데이터 가져오기
   const fetchInitialData = async () => {
     try {
-      const goalResponse = await getGoal(Number(id));
+      const goalResponse = await getGoal(Number(goalId));
       setGoals(goalResponse);
 
       if (goalResponse) {

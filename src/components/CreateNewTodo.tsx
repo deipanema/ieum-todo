@@ -118,24 +118,27 @@ export default function CreateNewTodo({
     }
   };
 
-  const handleConfirm = async (type: string) => {
+  const handleGoalSelect = (goalId: number, goalTitle: string) => {
+    setTodo((prevTodo) => ({
+      ...prevTodo,
+      goal: { ...prevTodo.goal, id: goalId, title: goalTitle },
+    }));
+    setIsOpenGoals(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     try {
-      if (type === "edit") {
-        const response = await editTodo(
-          todo.title,
-          todo?.goal?.id,
-          todo.fileUrl ? todo.fileUrl : null,
-          todo.linkUrl ? todo.linkUrl : null,
-          todoId as number,
-        );
+      if (isEdit && todoId) {
+        const response = await editTodo(todo.title, todo.goal.id, todo.fileUrl, todo.linkUrl, todoId);
 
         if (response) {
           if (onUpdate) {
-            onUpdate(todo);
+            onUpdate(response);
           }
         } else {
           console.error("수정 실패:", response);
-          setTodo((prevTodo) => ({ ...prevTodo, goalId: 0, linkUrl: "" }));
         }
       } else {
         const response = await PostTodos(todo.title, todo.fileUrl, todo.linkUrl, todo.goal.id);
@@ -144,19 +147,10 @@ export default function CreateNewTodo({
           console.log("할 일이 성공적으로 생성되었습니다:", response);
         }
       }
-    } catch (error) {
-      console.error("할 일 생성 중 오류 발생:", error);
-    } finally {
       closeCreateNewTodo();
+    } catch (error) {
+      console.error("할 일 생성/수정 중 오류 발생:", error);
     }
-  };
-
-  const handleGoalSelect = (goalId: number, goalTitle: string) => {
-    setTodo((prevTodo) => ({
-      ...prevTodo,
-      goal: { ...prevTodo.goal, id: goalId, title: goalTitle },
-    }));
-    setIsOpenGoals(false);
   };
 
   useEffect(() => {
@@ -181,7 +175,7 @@ export default function CreateNewTodo({
 
   return (
     <>
-      <div className="flex flex-col gap-6">
+      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
         <div>
           <h2 className="mb-3 font-semibold">제목</h2>
           <input
@@ -272,24 +266,14 @@ export default function CreateNewTodo({
             </div>
           )}
         </div>
-        {isEdit ? (
-          <button
-            onClick={() => handleConfirm("edit")}
-            className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
-            disabled={!todo.title.trim() || !todo.goal.id}
-          >
-            수정
-          </button>
-        ) : (
-          <button
-            onClick={() => handleConfirm("create")}
-            className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
-            disabled={!todo.title.trim() || !todo.goal.id}
-          >
-            확인
-          </button>
-        )}
-      </div>
+        <button
+          type="submit"
+          className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
+          disabled={!todo.title.trim() || !todo.goal.id}
+        >
+          {isEdit ? "수정" : "확인"}
+        </button>
+      </form>
       <Modal name="LINK_ATTACHMENT" title="링크 업로드">
         <LinkUpload closeSecond={closeModal} todo={todo} setTodo={setTodo} />
       </Modal>
