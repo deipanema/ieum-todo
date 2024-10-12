@@ -1,11 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
 import { deleteTodos, patchTodo } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
+import { getNotes } from "@/api/noteAPI";
+
+import NoteViewer from "./NoteViewer";
 
 export type GoalType = {
   updatedAt: string;
@@ -52,10 +56,35 @@ type toggleTodoStatusType = {
   todoId: number;
 };
 
+export interface NoteType {
+  content: string;
+  createdAt: string;
+  goal: {
+    id: number;
+    title: string;
+  };
+  id: number;
+  linkUrl: string;
+  teamId: string;
+  title: string;
+  todo: {
+    done: boolean;
+    fileUrl: string | null;
+    id: number;
+    linkUrl: string | null;
+    title: string;
+  };
+  updatedAt: string;
+  userId: number;
+}
+
 export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection = false }: TodoProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const { Modal, openModal, closeModal } = useModal();
+  const [isNoteOpen, setIsNoteOpen] = useState(false);
+  const [noteContent, setNoteContent] = useState<NoteType>();
 
   const toggleTodoStatus = async ({ title, goalId, fileUrl, linkUrl, done, todoId }: toggleTodoStatusType) => {
     setTodos((prevTodos) =>
@@ -71,8 +100,13 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
     }
   };
 
-  const handleToggleDropdown = () => {
-    setIsOpen((prev) => !prev);
+  const fetchNoteContent = async () => {
+    if (todo.noteId) {
+      const response = await getNotes(todo.noteId);
+      if (response) {
+        setNoteContent(response);
+      }
+    }
   };
 
   const handleTodoUpdate = (updatedTodo: TodoType) => {
@@ -104,9 +138,14 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    fetchNoteContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div>
-      <ul key={todo.id} className={`group relative rounded-2xl ${isGoal ? "hover:border" : "hover:underline"} `}>
+      <ul key={todo.id} className={`group relative rounded-2xl ${isGoal ? "hover:font-semibold" : "hover:underline"} `}>
         <li className="flex items-center gap-2">
           <Image
             className={`cursor-pointer ${todo.done ? "ml-1 mr-[2px]" : ""}`}
@@ -171,6 +210,7 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
             height={24}
             alt="노트 작성/수정"
             title="노트 작성/수정"
+            onClick={() => router.push(`/dashboard/note/${todo.id}?goalId=${todo.goal.id}`)}
           />
           {todo.noteId && (
             <Image
@@ -180,6 +220,7 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
               height={24}
               alt="노트 보기"
               title="노트 보기"
+              onClick={() => setIsNoteOpen((prev) => !prev)}
             />
           )}
           <Image
@@ -189,7 +230,9 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
             height={24}
             alt="수정/삭제"
             title="수정 / 삭제"
-            onClick={handleToggleDropdown}
+            onClick={() => {
+              setIsOpen((prev) => !prev);
+            }}
           />
 
           {isOpen && (
@@ -212,19 +255,20 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
             </div>
           )}
         </div>
-        <Modal name="EDIT_TODO" title="할 일 수정">
-          <CreateNewTodo
-            closeCreateNewTodo={closeModal}
-            todoId={todo.id}
-            goal={todo.goal}
-            title={todo.title}
-            fileUrl={todo.fileUrl || undefined}
-            linkUrl={todo.linkUrl || undefined}
-            isEdit
-            onUpdate={handleTodoUpdate}
-          />
-        </Modal>
       </ul>
+      <Modal name="EDIT_TODO" title="할 일 수정">
+        <CreateNewTodo
+          closeCreateNewTodo={closeModal}
+          todoId={todo.id}
+          goal={todo.goal}
+          title={todo.title}
+          fileUrl={todo.fileUrl || undefined}
+          linkUrl={todo.linkUrl || undefined}
+          isEdit
+          onUpdate={handleTodoUpdate}
+        />
+      </Modal>
+      <NoteViewer isNoteOpen={isNoteOpen} setIsNoteOpen={setIsNoteOpen} noteContent={noteContent} />
     </div>
   );
 }
