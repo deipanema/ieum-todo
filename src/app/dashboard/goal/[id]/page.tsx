@@ -119,7 +119,7 @@ export default function GoalPage({ params }: GoalPageProps) {
   }, [isOpen]);
 
   return (
-    <main className="mt-[51px] h-auto min-h-[calc(100vh)] w-full select-none bg-slate-100 lg:mt-0 lg:h-screen">
+    <div className="mt-[51px] h-auto min-h-[calc(100vh)] w-full select-none bg-slate-100 lg:mt-0 lg:h-screen">
       <div className="mx-auto w-[343px] p-6 sm:w-full 2xl:w-[1200px]">
         <h2 className="mb-3 text-[18px] font-semibold">목표</h2>
         <div className="my-6 flex h-full w-[306px] flex-col gap-4 rounded-xl bg-white px-6 py-4 sm:w-auto">
@@ -204,6 +204,6 @@ export default function GoalPage({ params }: GoalPageProps) {
       <Modal name="EDIT_GOAL_TITLE" title="목표 수정">
         <EditGoalTitle closeEditTitle={closeModal} goals={goals as GoalType} />
       </Modal>
-    </main>
+    </div>
   );
 }

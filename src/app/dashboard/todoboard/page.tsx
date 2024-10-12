@@ -69,7 +69,7 @@ export default function TodoboardPage() {
     getTodos();
   }, []);
   return (
-    <main className="mt-[51px] h-[calc(100vh-51px)] w-full bg-slate-100 lg:mt-0 lg:h-screen">
+    <div className="mt-[51px] h-[calc(100vh-51px)] w-full bg-slate-100 lg:mt-0 lg:h-screen">
       <div className="mx-auto h-[calc(100vh-40px)] w-[343px] p-6 sm:w-full 2xl:w-[1200px]">
         <div className="flex justify-between">
           <h2 className="mb-3 text-lg font-semibold">모든 할 일 {`(${todos.length})`}</h2>
@@ -104,6 +104,6 @@ export default function TodoboardPage() {
       <Modal name="CREATE_NEW_TODO" title="할 일 생성">
         <CreateNewTodo closeCreateNewTodo={closeModal} />
       </Modal>
-    </main>
+    </div>
   );
 }
