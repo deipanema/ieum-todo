@@ -104,7 +104,7 @@ export default function Dashboard() {
   });
 
   return (
-    <main className="relative">
+    <div className="relative">
       <div className="mt-[51px] min-h-[calc(100vh-51px)] w-full select-none bg-slate-100 lg:mt-0">
         <div className="mx-auto w-[343px] p-6 sm:w-full 2xl:w-[1200px]">
           <h2 className="mb-3 text-lg font-semibold">대시보드</h2>
@@ -142,6 +142,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
