@@ -5,11 +5,11 @@ import anime from "animejs";
 
 type AnimatedTextProps = {
   text: string; // 텍스트는 문자열로 정의
-  handleLogout: () => void; // 로그아웃 함수는 매개변수가 없고 리턴 값도 없는 함수
+  onClick?: () => void; // 로그아웃 함수는 매개변수가 없고 리턴 값도 없는 함수
 };
 
 // 애니메이션 컴포넌트 정의
-const AnimatedText = ({ text, handleLogout }: AnimatedTextProps) => {
+const AnimatedText = ({ text, onClick }: AnimatedTextProps) => {
   const textRef = useRef<HTMLButtonElement>(null); // 버튼 요소를 참조하기 위한 useRef 사용
 
   // 마우스가 버튼에 들어왔을 때 애니메이션 시작
@@ -39,7 +39,7 @@ const AnimatedText = ({ text, handleLogout }: AnimatedTextProps) => {
     <button
       className="text-3 text-slate-400 hover:underline"
       ref={textRef}
-      onClick={handleLogout}
+      onClick={onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
