@@ -133,7 +133,7 @@ export default function Dashboard() {
               </div>
               <h2 className="text-lg font-semibold">목표 별 할 일</h2>
             </div>
-            <div className="flex max-h-[675px] grid-cols-2 flex-col gap-4 overflow-y-auto p-2 sm:grid">
+            <div className="flex max-h-[465px] grid-cols-2 flex-col gap-4 overflow-y-auto p-2 sm:grid">
               {content}
               <div ref={ref}>
                 <LoadingSpinner />

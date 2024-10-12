@@ -107,7 +107,7 @@ export default function SideBar() {
             <div>
               <h2>{user?.name}</h2>
               <h2>{user?.email}</h2>
-              <AnimatedText text="로그아웃" handleLogout={handleLogout} />
+              <AnimatedText text="로그아웃" onClick={handleLogout} />
             </div>
           </div>
           <div className="border-b border-b-slate-200 px-6 pb-6">
@@ -129,7 +129,7 @@ export default function SideBar() {
               <Image src="/sidebar-flag.svg" width={24} height={24} alt="sidebar-flag" />
               <span>목표</span>
             </div>
-            <div className="mb-6 max-h-[400px] overflow-y-auto pt-4">
+            <div className="mb-6 max-h-[350px] overflow-y-auto pt-4">
               <ul className="flex flex-col gap-4">
                 {goals.map((goal) => (
                   <li key={goal.id} className="max-w-[231px] overflow-hidden text-ellipsis whitespace-nowrap">
