@@ -5,11 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { logout } from "@/utils/authUtils";
-import { useAuthStore } from "@/store/AuthStore";
-import { getGoals, PostGoal } from "@/api/goalAPI";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
 import AnimatedText from "@/utils/AnimatedText";
+import { useGoalStore } from "@/store/goalStore";
+import { useAuthStore } from "@/store/authStore";
 
 export interface GoalType {
   id: number;
@@ -21,7 +21,8 @@ export interface GoalType {
 }
 
 export default function SideBar() {
-  const [goals, setGoals] = useState<GoalType[]>([]);
+  const { goals, addGoal, refreshGoals } = useGoalStore();
+  //const [goal, setGoal] = useState<GoalType[]>([]);
   const { Modal, openModal, closeModal } = useModal();
   const [inputVisible, setInputVisible] = useState(false);
   const [goalInput, setGoalInput] = useState("");
@@ -29,6 +30,10 @@ export default function SideBar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { user } = useAuthStore();
+
+  useEffect(() => {
+    refreshGoals();
+  }, [refreshGoals]);
 
   const toggleSidebar = () => {
     setIsOpen((prev) => !prev);
@@ -44,24 +49,15 @@ export default function SideBar() {
     }
   };
 
-  const handleAddGoalClick = () => {
-    setInputVisible((prev) => !prev);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGoalInput(e.target.value);
-  };
-
-  const fetchAndSetGoals = async () => {
-    const goalList = await getGoals();
-    setGoals(goalList?.goals);
-  };
+  // const fetchAndSetGoals = async () => {
+  //   const goalList = await getGoals();
+  //   setGoals(goalList?.goals);
+  // };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && goalInput.trim()) {
-      console.log(goalInput);
-      await PostGoal(goalInput);
-      await fetchAndSetGoals();
+      await addGoal(goalInput);
+      //await fetchAndSetGoals();
       setGoalInput("");
       setInputVisible(false);
     }
@@ -73,9 +69,21 @@ export default function SideBar() {
     }
   }, [inputVisible]);
 
-  useEffect(() => {
-    fetchAndSetGoals();
-  }, []);
+  // useEffect(() => {
+  //   fetchAndSetGoals();
+
+  //   // 커스텀 이벤트 리스너 추가
+  //   const handleGoalUpdate = () => {
+  //     fetchAndSetGoals();
+  //   };
+
+  //   window.addEventListener("goalUpdated", handleGoalUpdate);
+
+  //   // 컴포넌트 언마운트 시 이벤트 리스너 제거
+  //   return () => {
+  //     window.removeEventListener("goalUpdated", handleGoalUpdate);
+  //   };
+  // }, []);
 
   return (
     <>
@@ -142,7 +150,9 @@ export default function SideBar() {
                   type="text"
                   ref={inputRef}
                   value={goalInput}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    setGoalInput(e.target.value);
+                  }}
                   onKeyDown={handleKeyDown}
                   className="block w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none"
                 />
@@ -150,7 +160,9 @@ export default function SideBar() {
             </div>
             <div>
               <button
-                onClick={handleAddGoalClick}
+                onClick={() => {
+                  setInputVisible((prev) => !prev);
+                }}
                 className="w-full rounded-lg border border-blue-500 bg-white py-3 text-blue-500 outline-none"
               >
                 + 새 목표

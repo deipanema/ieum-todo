@@ -2,16 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { PatchGoal } from "@/api/goalAPI";
-
-export type GoalType = {
-  id: number;
-  teamId: string;
-  title: string;
-  userId: number;
-  createdAt: string;
-  updatedAt: string;
-};
+import { useGoalStore, GoalType } from "@/store/goalStore";
 
 export type EditGoalTitleModalProps = {
   closeEditTitle: () => void;
@@ -20,17 +11,26 @@ export type EditGoalTitleModalProps = {
 
 export default function EditGoalTitleModal({ closeEditTitle, goals }: EditGoalTitleModalProps) {
   const [title, setTitle] = useState("");
+  const { updateGoal } = useGoalStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      await PatchGoal(goals.id, title);
+      await updateGoal(goals.id, title);
       closeEditTitle();
     } catch (error) {
       console.error("Error updating goal:", error);
     }
   };
+
+  //   try {
+  //     await PatchGoal(goals.id, title);
+  //     closeEditTitle();
+  //   } catch (error) {
+  //     console.error("Error updating goal:", error);
+  //   }
+  // };
 
   useEffect(() => {
     setTitle(goals.title);
