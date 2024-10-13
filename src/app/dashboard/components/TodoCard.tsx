@@ -14,6 +14,7 @@ import ProgressBar from "./ProgressBar";
 
 export type TodoCardProps = {
   id: number;
+  onTodoUpdate: (updatedTodo: TodoType) => void;
 };
 
 export type GoalType = {
@@ -39,7 +40,7 @@ export type TodoType = {
   createdAt: string;
 };
 
-export default function TodoCard({ id }: TodoCardProps) {
+export default function TodoCard({ id, onTodoUpdate }: TodoCardProps) {
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
   const [progress, setProgress] = useState(0);
@@ -49,6 +50,11 @@ export default function TodoCard({ id }: TodoCardProps) {
   const activeTodos = Array.isArray(todos) ? todos.filter((todo) => !todo.done) : [];
   const completedTodos = Array.isArray(todos) ? todos.filter((todo) => todo.done) : [];
   const showMore = activeTodos.length > 5 || completedTodos.length > 5;
+
+  const handleTodoUpdate = async (updatedTodo: TodoType) => {
+    onTodoUpdate(updatedTodo);
+    setTodos((prevTodos) => prevTodos.map((todo) => (todo.id === updatedTodo.id ? { ...todo, ...updatedTodo } : todo)));
+  };
 
   useEffect(() => {
     setProgress(Math.round((completedTodos.length / todos.length) * 100));
@@ -96,7 +102,7 @@ export default function TodoCard({ id }: TodoCardProps) {
           <h3 className="mb-3 text-lg font-semibold">To do</h3>
           <ul>
             {activeTodos.slice(0, 5).map((todo) => (
-              <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
+              <Todos key={todo.id} todo={todo} onTodoUpdate={handleTodoUpdate} isGoal={false} />
             ))}
           </ul>
           {activeTodos.length === 0 && (
@@ -109,7 +115,7 @@ export default function TodoCard({ id }: TodoCardProps) {
           <h3 className="mb-3 text-lg font-semibold">Done</h3>
           <ul>
             {completedTodos.slice(0, 5).map((todo) => (
-              <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />
+              <Todos key={todo.id} todo={todo} onTodoUpdate={handleTodoUpdate} isGoal={false} />
             ))}
           </ul>
           {completedTodos.length === 0 && (
@@ -133,7 +139,7 @@ export default function TodoCard({ id }: TodoCardProps) {
       )}
 
       <Modal name="CREATE_NEW_TODO" title="할 일 생성">
-        <CreateNewTodo closeCreateNewTodo={closeModal} />
+        <CreateNewTodo closeCreateNewTodo={closeModal} id={id} />
       </Modal>
     </div>
   );

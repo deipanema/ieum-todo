@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { deleteTodos, patchTodo } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
@@ -34,15 +34,9 @@ export type TodoType = {
   createdAt: string;
 };
 
-export type TodosResponse = {
-  totalCount: number;
-  nextCursor: number;
-  todos: TodoType[];
-};
-
 type TodoProps = {
   todo: TodoType;
-  setTodos: Dispatch<SetStateAction<TodoType[]>>;
+  onTodoUpdate: (updatedTodo: TodoType) => void;
   isGoal?: boolean;
   isInGoalSection?: boolean;
 };
@@ -78,7 +72,7 @@ export interface NoteType {
   userId: number;
 }
 
-export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection = false }: TodoProps) {
+export default function Todos({ todo, onTodoUpdate, isGoal = false, isInGoalSection = false }: TodoProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -87,16 +81,13 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
   const [noteContent, setNoteContent] = useState<NoteType>();
 
   const toggleTodoStatus = async ({ title, goalId, fileUrl, linkUrl, done, todoId }: toggleTodoStatusType) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((prevTodo) => (prevTodo.id === todoId ? { ...prevTodo, done: !done } : prevTodo)),
-    );
+    const updatedTodo = { ...todo, done: !done };
+    onTodoUpdate(updatedTodo);
     try {
-      await patchTodo(title, goalId, fileUrl, linkUrl, !done, todoId);
+      await patchTodo(title, goalId, !done, todoId, fileUrl, linkUrl);
     } catch (error) {
       console.error("할 일 상태 변경 중 오류 발생:", error);
-      setTodos((prevTodos) =>
-        prevTodos.map((prevTodo) => (prevTodo.id === todoId ? { ...prevTodo, done: done } : prevTodo)),
-      );
+      onTodoUpdate({ ...updatedTodo, done: done });
     }
   };
 
@@ -109,11 +100,11 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
     }
   };
 
-  const handleTodoUpdate = (updatedTodo: TodoType) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((prevTodo) => (prevTodo.id === updatedTodo.id ? { ...prevTodo, ...updatedTodo } : prevTodo)),
-    );
-  };
+  // const handleTodoUpdate = (updatedTodo: TodoType) => {
+  //   setTodos((prevTodos) =>
+  //     prevTodos.map((prevTodo) => (prevTodo.id === updatedTodo.id ? { ...prevTodo, ...updatedTodo } : prevTodo)),
+  //   );
+  // };
 
   const handleDelete = async () => {
     try {
@@ -265,7 +256,7 @@ export default function Todos({ todo, setTodos, isGoal = false, isInGoalSection 
           fileUrl={todo.fileUrl || undefined}
           linkUrl={todo.linkUrl || undefined}
           isEdit
-          onUpdate={handleTodoUpdate}
+          onUpdate={onTodoUpdate}
         />
       </Modal>
       <NoteViewer isNoteOpen={isNoteOpen} setIsNoteOpen={setIsNoteOpen} noteContent={noteContent} />

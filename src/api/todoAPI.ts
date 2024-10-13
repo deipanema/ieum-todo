@@ -82,24 +82,33 @@ export const getTodos = async (id: number) => {
 export const patchTodo = async (
   title: string,
   goalId: number,
-  fileUrl: string,
-  linkUrl: string,
   done: boolean,
   todoId: number,
+  fileUrl?: string | null,
+  linkUrl?: string | null,
 ) => {
   try {
-    const response = await api.patch(`todos/${todoId}`, {
+    const payload: {
+      title: string;
+      goalId: number;
+      fileUrl?: string | null;
+      linkUrl?: string | null;
+      done: boolean;
+      todoId: number;
+    } = {
       title,
-      fileUrl,
-      linkUrl,
       goalId,
+      fileUrl: fileUrl || null, // fileUrl이 undefined일 경우 null로 처리
+      linkUrl: linkUrl || null, // linkUrl이 undefined일 경우 null로 처리
       done,
       todoId,
-    });
+    };
+
+    const response = await api.patch(`todos/${todoId}`, payload);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
-    console.error("할 일 수정 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+    console.error("할 일 수정 중 에러 발생11:", axiosError.response ? axiosError.response.data : axiosError.message);
   }
 };
 
