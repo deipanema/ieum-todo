@@ -4,7 +4,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { deleteGoal, getGoal } from "@/api/goalAPI";
+import { useGoalStore } from "@/store/goalStore";
+import { deleteGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
@@ -14,7 +15,7 @@ import Todos from "../../components/Todos";
 import ProgressBar from "../../components/ProgressBar";
 
 type GoalPageProps = {
-  params: { id: string };
+  params: { goalId: string };
 };
 
 export type TodoType = {
@@ -41,68 +42,73 @@ export type GoalType = {
 };
 
 export default function GoalPage({ params }: GoalPageProps) {
-  const { id } = params;
+  const { goalId } = params;
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
   const [progress, setProgress] = useState(0);
-
+  const { goals } = useGoalStore();
   const [todos, setTodos] = useState<TodoType[]>([]);
-  const [goals, setGoals] = useState<GoalType | null>(null);
+  const [goal, setGoal] = useState<GoalType | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  // 목표 및 할 일 데이터 가져오기
-  const fetchInitialData = async () => {
-    try {
-      const goalResponse = await getGoal(Number(id));
-      setGoals(goalResponse);
+  useEffect(() => {
+    setGoal(goals.find((goal) => goal.id === Number(goalId)) || null);
+  }, [goals, goalId]);
 
-      if (goalResponse) {
-        const todoResponse = await getTodos(goalResponse?.id);
-
-        // todoResponse와 todoResponse.todos가 존재하는지 확인
-        const todosArray = Array.isArray(todoResponse?.todos) ? todoResponse.todos : [];
-        setTodos(todosArray);
-
-        // todoResponse와 todosArray의 길이가 0보다 큰지 확인
-        if (todoResponse?.totalCount && todosArray.length > 0) {
-          const completedTodos = todosArray.filter((todo: TodoType) => todo.done === true).length;
-          const ratio = (completedTodos / todoResponse.totalCount) * 100;
-          setProgress(ratio);
-        } else {
-          setProgress(0); // 데이터를 가져오지 못했을 때의 기본값 설정
-        }
-      }
-    } catch (error) {
-      console.error("데이터를 가져오는 중 오류 발생:", error);
+  // 할 일 데이터 가져오기
+  const fetchTodos = async () => {
+    if (goal) {
+      const todoResponse = await getTodos(goal.id);
+      const todosArray = Array.isArray(todoResponse?.todos) ? todoResponse.todos : [];
+      setTodos(todosArray);
+      updateProgress(todosArray);
     }
   };
 
-  const handleToggleDropdown = () => {
-    setIsOpen((prev) => !prev);
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
+  const updateProgress = (todosArray: TodoType[]) => {
+    if (todosArray.length > 0) {
+      const completedTodos = todosArray.filter((todo: TodoType) => todo.done === true).length;
+      const ratio = (completedTodos / todosArray.length) * 100;
+      setProgress(ratio);
+    } else {
+      setProgress(0);
+    }
   };
 
   const handleDelete = async () => {
-    try {
-      const response = await deleteGoal(goals?.id as number);
-      if (response) {
-        router.push("/");
+    if (goal) {
+      try {
+        const response = await deleteGoal(goal.id);
+        if (response) {
+          router.push("/");
+        }
+      } catch (error) {
+        console.error("목표 삭제 중 오류 발생:", error);
       }
-    } catch (error) {
-      console.error("목표 삭제 중 오류 발생:", error);
     }
   };
 
+  const handleTodoUpdate = (updatedTodo: TodoType) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((prevTodo) => (prevTodo.id === updatedTodo.id ? { ...prevTodo, ...updatedTodo } : prevTodo)),
+    );
+  };
+
   const handleEditGoal = () => {
-    if (goals) {
+    if (goal) {
       openModal("EDIT_GOAL_TITLE");
     }
     setIsOpen(false);
   };
 
   useEffect(() => {
-    fetchInitialData();
-  }, []);
+    updateProgress(todos);
+  }, [todos]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -128,7 +134,7 @@ export default function GoalPage({ params }: GoalPageProps) {
               <div className="flex h-10 w-10 justify-center rounded-2xl bg-slate-800">
                 <Image src="/goal-flag.svg" width={24} height={24} alt="goal-icon" />
               </div>
-              <h3 className="ml-2 text-left text-lg font-semibold">{goals?.title}</h3>
+              <h3 className="ml-2 text-left text-lg font-semibold">{goal?.title}</h3>
             </div>
 
             <Image
@@ -137,7 +143,9 @@ export default function GoalPage({ params }: GoalPageProps) {
               width={0}
               height={0}
               alt="kebab-icon"
-              onClick={handleToggleDropdown}
+              onClick={() => {
+                setIsOpen((prev) => !prev);
+              }}
             />
 
             {isOpen && (
@@ -175,7 +183,7 @@ export default function GoalPage({ params }: GoalPageProps) {
               {Array.isArray(todos) &&
                 todos
                   .filter((todo) => !todo.done)
-                  .map((todo) => <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />)}
+                  .map((todo) => <Todos key={todo.id} todo={todo} onTodoUpdate={handleTodoUpdate} isGoal={false} />)}
             </ul>
             {Array.isArray(todos) && todos.filter((todo) => !todo.done).length === 0 && (
               <div className="mx-auto my-auto text-sm text-slate-500">해야할 일이 아직 없어요.</div>
@@ -190,7 +198,7 @@ export default function GoalPage({ params }: GoalPageProps) {
               {Array.isArray(todos) &&
                 todos
                   .filter((todo) => todo.done)
-                  .map((todo) => <Todos key={todo.id} todo={todo} setTodos={setTodos} isGoal={false} />)}
+                  .map((todo) => <Todos key={todo.id} todo={todo} onTodoUpdate={handleTodoUpdate} isGoal={false} />)}
             </ul>
             {Array.isArray(todos) && todos.filter((todo) => todo.done).length === 0 && (
               <div className="mx-auto my-auto text-sm text-slate-500">다 한 일이 아직 없어요.</div>
@@ -202,7 +210,7 @@ export default function GoalPage({ params }: GoalPageProps) {
         <CreateNewTodo closeCreateNewTodo={closeModal} />
       </Modal>
       <Modal name="EDIT_GOAL_TITLE" title="목표 수정">
-        <EditGoalTitleModal closeEditTitle={closeModal} goals={goals as GoalType} />
+        <EditGoalTitleModal closeEditTitle={closeModal} goals={goal as GoalType} />
       </Modal>
     </div>
   );
