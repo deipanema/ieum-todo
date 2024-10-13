@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "react-toastify";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -49,8 +50,8 @@ export default function SignupForm() {
       if (response.data) {
         clearErrors();
         reset();
+        toast.success("회원가입이 완료되었습니다.");
         router.push("/login");
-        console.log("회원가입 성공 ✨", response.data);
       }
     } catch (error) {
       console.error("회원가입 서버 오류🚨", error);

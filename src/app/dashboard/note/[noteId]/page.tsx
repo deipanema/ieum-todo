@@ -1,9 +1,8 @@
 "use client";
-
+import { toast } from "react-toastify";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-//import Link from "next/link";
 
 import useModal from "@/hook/useModal";
 import { getNotes, patchNotes, postNotes } from "@/api/noteAPI";
@@ -63,7 +62,6 @@ export default function NotePage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [link, setLink] = useState<string>("");
-  //const [isOpenLink, setIsOpenLink] = useState(false);
   const { Modal, openModal, closeModal } = useModal();
   const [todo, setTodo] = useState<TodoType>();
   const todoId = Number(pathName.split("/").at(-1));
@@ -88,12 +86,14 @@ export default function NotePage() {
       const response = await postNotes(todoId, title, content, link ? link : null);
       if (response) {
         setNote(response);
+        toast.success("작성완료");
         router.back();
       }
     } else if (type === "edit") {
       const response = await patchNotes(Number(note?.id), title, content, link ? link : null);
       if (response) {
         setNote(response);
+        toast.success("수정완료");
         router.back();
       }
     }
@@ -109,7 +109,7 @@ export default function NotePage() {
   const saveDraft = () => {
     const tempData = { title, content, link };
     localStorage.setItem(`note${todoId}`, JSON.stringify(tempData));
-    console.log("임시 저장 되었습니다.");
+    toast.success("임시 저장이 완료되었습니다.");
   };
 
   const autoSaveDraft = () => {
@@ -130,11 +130,10 @@ export default function NotePage() {
       setTitle(title || "제목 없음");
       setContent(content || "");
       setLink(link || "");
-      console.log("데이터가 불러와졌습니다.");
       localStorage.removeItem(`note${todoId}`);
-      //toast.success("임시 저장된 노트를 불러왔습니다");
+      toast.success("임시 저장된 노트를 불러왔습니다.");
     } else {
-      //toast.info("저장된 노트가 없습니다");
+      toast.info("임시 저장된 노트가 없습니다.");
     }
   };
 

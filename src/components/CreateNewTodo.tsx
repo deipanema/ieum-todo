@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "react-toastify";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -111,12 +112,12 @@ export default function CreateNewTodo({
     const selectedFile = e.target.files?.[0];
 
     if (!selectedFile) {
-      console.error("파일이 선택되지 않았습니다.");
+      toast.error("파일이 선택되지 않았습니다.");
       return;
     }
 
     if (selectedFile.size > MAX_FILE_SIZE) {
-      console.error("파일은 3MB 이하만 업로드 가능합니다.");
+      toast.error("파일은 3MB 이하만 업로드 가능합니다.");
       setIsFileUpload(false);
       return;
     }
@@ -132,28 +133,24 @@ export default function CreateNewTodo({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    try {
-      if (isEdit && todoId) {
-        const response = await editTodo(todo.title, todo.goal.id, todo.fileUrl, todo.linkUrl, todoId);
+    if (isEdit && todoId) {
+      const response = await editTodo(todo.title, todo.goal.id, todo.fileUrl, todo.linkUrl, todoId);
 
-        if (response) {
-          if (onUpdate) {
-            onUpdate(response);
-          }
-        } else {
-          console.error("수정 실패:", response);
+      if (response) {
+        if (onUpdate) {
+          onUpdate(response);
         }
       } else {
-        const response = await PostTodos(todo.title, todo.fileUrl, todo.linkUrl, todo.goal.id);
-
-        if (response) {
-          console.log("할 일이 성공적으로 생성되었습니다:", response);
-        }
+        console.error("수정 실패:", response);
       }
-      closeCreateNewTodo();
-    } catch (error) {
-      console.error("할 일 생성/수정 중 오류 발생:", error);
+    } else {
+      const response = await PostTodos(todo.title, todo.fileUrl, todo.linkUrl, todo.goal.id);
+
+      if (response) {
+        toast.success("할 일이 성공적으로 생성되었습니다");
+      }
     }
+    closeCreateNewTodo();
   };
 
   const handleGoalSelect = (goalId: number, goalTitle: string) => {

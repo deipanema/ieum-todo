@@ -1,8 +1,11 @@
 "use client";
 
+import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
+import { AxiosError } from "axios";
 
 import { useGoalStore, GoalType } from "@/store/goalStore";
+import { ErrorType } from "@/api/goalAPI";
 
 export type EditGoalTitleModalProps = {
   closeEditTitle: () => void;
@@ -20,17 +23,10 @@ export default function EditGoalTitleModal({ closeEditTitle, goals }: EditGoalTi
       await updateGoal(goals.id, title);
       closeEditTitle();
     } catch (error) {
-      console.error("Error updating goal:", error);
+      const axiosError = error as AxiosError<ErrorType>;
+      toast.error(axiosError.message);
     }
   };
-
-  //   try {
-  //     await PatchGoal(goals.id, title);
-  //     closeEditTitle();
-  //   } catch (error) {
-  //     console.error("Error updating goal:", error);
-  //   }
-  // };
 
   useEffect(() => {
     setTitle(goals.title);
