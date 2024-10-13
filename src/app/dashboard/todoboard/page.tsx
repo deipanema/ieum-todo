@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import { getAllData } from "@/api/todoAPI";
+import { getAllData, patchTodo } from "@/api/todoAPI";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
 
@@ -54,6 +54,26 @@ export default function TodoboardPage() {
     }
   };
 
+  const handleTodoUpdate = useCallback(async (updatedTodo: TodoType) => {
+    try {
+      const response = await patchTodo(
+        updatedTodo.title,
+        updatedTodo.goal.id,
+        updatedTodo.done,
+        updatedTodo.id,
+        updatedTodo.fileUrl || "",
+        updatedTodo.linkUrl || ""
+      );
+      if (response) {
+        setTodos((prevTodos) =>
+          prevTodos.map((todo) => (todo.id === updatedTodo.id ? { ...todo, ...updatedTodo } : todo))
+        );
+      }
+    } catch (error) {
+      console.error("할 일 업데이트 중 오류 발생:", error);
+    }
+  }, []);
+
   const renderTodos = () => {
     switch (status) {
       case "Todo":
@@ -96,7 +116,9 @@ export default function TodoboardPage() {
             </div>
             <ul>
               {Array.isArray(renderTodos()) &&
-                renderTodos().map((todo) => <Todos key={todo.id} todo={todo} setTodos={setTodos} />)}
+                renderTodos().map((todo) => (
+                  <Todos key={todo.id} todo={todo} onTodoUpdate={handleTodoUpdate} />
+                ))}
             </ul>
           </div>
         </div>

@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
-import { getGoals } from "@/api/goalAPI";
+import { getGoal } from "@/api/goalAPI";
 import { editTodo, postFile, PostTodos } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 
@@ -44,6 +45,7 @@ export type CreateNewTodoProps = {
   todoId?: number;
   isEdit?: boolean;
   onUpdate?: (updatedTodo: TodoType) => void;
+  id?: number;
 };
 
 export default function CreateNewTodo({
@@ -55,10 +57,13 @@ export default function CreateNewTodo({
   todoId,
   isEdit,
   onUpdate,
+  id,
 }: CreateNewTodoProps) {
+  const pathName = usePathname();
+  const goalId = id ? Number(id) : Number(pathName.split("/").at(-1));
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isOpenGoals, setIsOpenGoals] = useState(false);
-  const [goals, setGoals] = useState<GoalType[]>([]);
+  const [goals] = useState<GoalType[]>([]);
   const [isFileUpload, setIsFileUpload] = useState(false);
   const [fileTitle, setFileTitle] = useState("");
   const { Modal, openModal, closeModal } = useModal();
@@ -88,10 +93,16 @@ export default function CreateNewTodo({
   };
 
   const fetchGoals = async () => {
-    const goalsData = await getGoals();
-
-    if (goalsData) {
-      setGoals(goalsData.goals);
+    try {
+      const goalResponse = await getGoal(goalId);
+      if (goalResponse) {
+        setTodo((prevTodo) => ({
+          ...prevTodo,
+          goal: goalResponse,
+        }));
+      }
+    } catch (error) {
+      console.error("목표를 가져오는 중 오류 발생:", error);
     }
   };
 
@@ -118,24 +129,19 @@ export default function CreateNewTodo({
     }
   };
 
-  const handleConfirm = async (type: string) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     try {
-      if (type === "edit") {
-        const response = await editTodo(
-          todo.title,
-          todo?.goal?.id,
-          todo.fileUrl ? todo.fileUrl : null,
-          todo.linkUrl ? todo.linkUrl : null,
-          todoId as number,
-        );
+      if (isEdit && todoId) {
+        const response = await editTodo(todo.title, todo.goal.id, todo.fileUrl, todo.linkUrl, todoId);
 
         if (response) {
           if (onUpdate) {
-            onUpdate(todo);
+            onUpdate(response);
           }
         } else {
           console.error("수정 실패:", response);
-          setTodo((prevTodo) => ({ ...prevTodo, goalId: 0, linkUrl: "" }));
         }
       } else {
         const response = await PostTodos(todo.title, todo.fileUrl, todo.linkUrl, todo.goal.id);
@@ -144,10 +150,9 @@ export default function CreateNewTodo({
           console.log("할 일이 성공적으로 생성되었습니다:", response);
         }
       }
-    } catch (error) {
-      console.error("할 일 생성 중 오류 발생:", error);
-    } finally {
       closeCreateNewTodo();
+    } catch (error) {
+      console.error("할 일 생성/수정 중 오류 발생:", error);
     }
   };
 
@@ -158,10 +163,6 @@ export default function CreateNewTodo({
     }));
     setIsOpenGoals(false);
   };
-
-  useEffect(() => {
-    fetchGoals();
-  }, []);
 
   useEffect(() => {
     if (isEdit && goal) {
@@ -179,9 +180,25 @@ export default function CreateNewTodo({
     }
   }, [isEdit, title, fileUrl, linkUrl, goal]);
 
+  useEffect(() => {
+    if (!isEdit) {
+      fetchGoals();
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchGoals();
+    if (goal) {
+      setTodo((prevTodo) => ({
+        ...prevTodo,
+        goal: goal,
+      }));
+    }
+  }, [goal]);
+
   return (
     <>
-      <div className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div>
           <h2 className="mb-3 font-semibold">제목</h2>
           <input
@@ -251,7 +268,7 @@ export default function CreateNewTodo({
             className="flex w-full cursor-pointer justify-between rounded-xl bg-slate-50 px-[20px] py-3"
           >
             <p className={`${todo.goal.id ? "text-black" : "text-slate-400"}`}>
-              {todo.goal.id ? goals.find((goal) => goal.id === todo.goal.id)?.title : "목표를 선택해주세요"}
+              {todo.goal.id ? todo.goal.title : "목표를 선택해주세요"}
             </p>
             <Image alt="arrowdown-icon" width={24} height={24} src="/modal-arrowdown.svg" />
           </div>
@@ -272,24 +289,14 @@ export default function CreateNewTodo({
             </div>
           )}
         </div>
-        {isEdit ? (
-          <button
-            onClick={() => handleConfirm("edit")}
-            className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
-            disabled={!todo.title.trim() || !todo.goal.id}
-          >
-            수정
-          </button>
-        ) : (
-          <button
-            onClick={() => handleConfirm("create")}
-            className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
-            disabled={!todo.title.trim() || !todo.goal.id}
-          >
-            확인
-          </button>
-        )}
-      </div>
+        <button
+          type="submit"
+          className="mb-6 mt-4 flex h-[50px] w-full items-center justify-center rounded-xl border bg-blue-400 py-3 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
+          disabled={!todo.title.trim() || !todo.goal.id}
+        >
+          {isEdit ? "수정" : "확인"}
+        </button>
+      </form>
       <Modal name="LINK_ATTACHMENT" title="링크 업로드">
         <LinkUpload closeSecond={closeModal} todo={todo} setTodo={setTodo} />
       </Modal>

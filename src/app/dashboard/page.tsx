@@ -1,12 +1,12 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 
 import { getInfinityScrollGoals } from "@/api/goalAPI";
-import { getAllData } from "@/api/todoAPI";
+import { getAllData, patchTodo } from "@/api/todoAPI";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 import TodoCard from "./components/TodoCard";
@@ -47,6 +47,49 @@ export default function Dashboard() {
   const [progressValue, setProgressValue] = useState(0);
   const [ratio, setRatio] = useState(0);
 
+  const fetchData = useCallback(async () => {
+    try {
+      const todosResponse = await getAllData();
+
+      const sortedTodos = todosResponse?.data.todos.sort((a: TodoType, b: TodoType) => {
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      });
+      setRecentTodos(sortedTodos.slice(0, 4));
+
+      const total = todosResponse?.data.totalCount;
+      const dones = todosResponse?.data.todos.filter((todo: TodoType) => todo.done === true);
+      setRatio(Math.round((dones.length / total) * 100));
+    } catch (error) {
+      console.error("데이터를 가져오는 중 오류가 발생했습니다:", error);
+    }
+  }, []);
+
+  const handleTodoUpdate = useCallback(async (updatedTodo: TodoType) => {
+    try {
+      const response = await patchTodo(
+        updatedTodo.title,
+        updatedTodo.goal.id,
+        updatedTodo.done,
+        updatedTodo.id,
+        updatedTodo.fileUrl || "",
+        updatedTodo.linkUrl || "",
+      );
+      if (response) {
+        setRecentTodos((prevTodos) =>
+          prevTodos.map((todo) => (todo.id === updatedTodo.id ? { ...todo, ...updatedTodo } : todo)),
+        );
+        // 전체 todos 업데이트를 위해 데이터를 다시 불러옵니다.
+        fetchData();
+      }
+    } catch (error) {
+      console.error("할 일 업데이트 중 오류 발생:", error);
+    }
+  }, []);
+
+  // const handleTodoUpdate = (updatedTodo: TodoType) => {
+  //   setRecentTodos((prevTodos) => prevTodos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)));
+  // };
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["goals"],
     queryFn: async ({ pageParam }) => {
@@ -63,7 +106,7 @@ export default function Dashboard() {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView]);
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -86,18 +129,22 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const content = data?.pages.map((page) => {
     return page.goals.map((goal: GoalType, i: number) => {
       if (page.goals.length === i + 1) {
         return (
           <div key={goal.id} className="col-span-2">
-            <TodoCard id={goal.id} />
+            <TodoCard id={goal.id} onTodoUpdate={handleTodoUpdate} />
           </div>
         );
       }
       return (
         <div key={goal.id} className="col-span-2">
-          <TodoCard id={goal.id} />
+          <TodoCard id={goal.id} onTodoUpdate={handleTodoUpdate} />
         </div>
       );
     });
@@ -119,10 +166,14 @@ export default function Dashboard() {
                   <p className="min-w-[74px] cursor-pointer text-sm text-slate-600">{"모두 보기 >"}</p>
                 </Link>
               </div>
-              {Array.isArray(recentTodos) &&
+              {recentTodos.length === 0 ? (
+                <p className="flex items-center justify-center">최근에 등록한 할 일이 없어요</p>
+              ) : (
+                Array.isArray(recentTodos) &&
                 recentTodos.map((todo: TodoType) => (
-                  <Todos key={todo.id} todo={todo} setTodos={setRecentTodos} isGoal={true} />
-                ))}
+                  <Todos key={todo.id} todo={todo} onTodoUpdate={handleTodoUpdate} isGoal={true} />
+                ))
+              )}
             </div>
             <ProgressTracker ratio={ratio} progressValue={progressValue} setProgressValue={setProgressValue} />
           </div>
