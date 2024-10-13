@@ -1,6 +1,17 @@
 import { AxiosError } from "axios";
+import { toast } from "react-toastify";
 
 import api from "@/lib/api";
+
+export interface ErrorType {
+  message?: string;
+  response: {
+    status: number;
+    data: {
+      message: string;
+    };
+  };
+}
 
 // 목표 목록 가져오기 (GET)
 export const getGoals = async () => {
@@ -8,8 +19,8 @@ export const getGoals = async () => {
     const response = await api.get(`/goals`);
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("목표 목록 가져오기 실패:", axiosError.response ? axiosError.response.data : axiosError.message);
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -19,8 +30,8 @@ export const PostGoal = async (title: string) => {
       title,
     });
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("목표 추가 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -29,8 +40,8 @@ export const getGoal = async (id: number) => {
     const response = await api.get(`/goals/${id}`);
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("목표 추가 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -38,8 +49,8 @@ export const deleteGoal = async (id: number) => {
   try {
     return await api.delete(`/goals/${id}`);
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("목표 삭제 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -48,8 +59,8 @@ export const PatchGoal = async (id: number, title: string) => {
     const response = await api.patch(`/goals/${id}`, { title });
     return response;
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("목표 제목 수정 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -73,7 +84,7 @@ export const getInfinityScrollGoals = async ({
     });
     return response.data;
   } catch (error) {
-    console.error("목표 리스트를 가져오는 중 오류가 발생했습니다:", error);
-    throw error;
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };

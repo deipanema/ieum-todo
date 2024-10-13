@@ -1,7 +1,10 @@
+import { ReactNode } from "react";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ReactNode } from "react";
+import "react-toastify/dist/ReactToastify.css";
+
+import ToastProvider from "@/components/ToastProvider";
 
 import Provider from "./Provider";
 
@@ -25,7 +28,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${pretendard.variable} font-pretendard`}>
-        <Provider>{children}</Provider>
+        <Provider>
+          <ToastProvider />
+          {children}
+        </Provider>
       </body>
     </html>
   );

@@ -1,11 +1,12 @@
 "use client";
-
+import { toast } from "react-toastify";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
 
 import { useGoalStore } from "@/store/goalStore";
-import { deleteGoal } from "@/api/goalAPI";
+import { deleteGoal, ErrorType } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
@@ -85,10 +86,12 @@ export default function GoalPage({ params }: GoalPageProps) {
       try {
         const response = await deleteGoal(goal.id);
         if (response) {
+          toast.success("삭제완료");
           router.push("/");
         }
       } catch (error) {
-        console.error("목표 삭제 중 오류 발생:", error);
+        const axiosError = error as AxiosError<ErrorType>;
+        toast.error(axiosError.message);
       }
     }
   };

@@ -1,4 +1,6 @@
 "use client";
+
+import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -22,7 +24,6 @@ export interface GoalType {
 
 export default function SideBar() {
   const { goals, addGoal, refreshGoals } = useGoalStore();
-  //const [goal, setGoal] = useState<GoalType[]>([]);
   const { Modal, openModal, closeModal } = useModal();
   const [inputVisible, setInputVisible] = useState(false);
   const [goalInput, setGoalInput] = useState("");
@@ -35,30 +36,25 @@ export default function SideBar() {
     refreshGoals();
   }, [refreshGoals]);
 
-  const toggleSidebar = () => {
-    setIsOpen((prev) => !prev);
-  };
-
   const handleLogout = async () => {
     const success = await logout();
 
     if (success) {
       router.push("/");
     } else {
-      console.error("로그아웃에 실패했습니다.");
+      toast.error("로그아웃에 실패했습니다.");
     }
   };
 
-  // const fetchAndSetGoals = async () => {
-  //   const goalList = await getGoals();
-  //   setGoals(goalList?.goals);
-  // };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && goalInput.trim()) {
+    if (goalInput.trim()) {
       await addGoal(goalInput);
-      //await fetchAndSetGoals();
       setGoalInput("");
+      setInputVisible(false);
+    } else {
+      toast.warn("목표를 입력해 주세요.");
       setInputVisible(false);
     }
   };
@@ -68,22 +64,6 @@ export default function SideBar() {
       inputRef.current.focus();
     }
   }, [inputVisible]);
-
-  // useEffect(() => {
-  //   fetchAndSetGoals();
-
-  //   // 커스텀 이벤트 리스너 추가
-  //   const handleGoalUpdate = () => {
-  //     fetchAndSetGoals();
-  //   };
-
-  //   window.addEventListener("goalUpdated", handleGoalUpdate);
-
-  //   // 컴포넌트 언마운트 시 이벤트 리스너 제거
-  //   return () => {
-  //     window.removeEventListener("goalUpdated", handleGoalUpdate);
-  //   };
-  // }, []);
 
   return (
     <>
@@ -106,7 +86,7 @@ export default function SideBar() {
             <Link href="/">
               <Image src="/brand.webp" width={106} height={0} className="h-auto w-auto" alt="brand" priority />
             </Link>
-            <button className="rounded-lg border-2 p-2" onClick={toggleSidebar}>
+            <button className="rounded-lg border-2 p-2" onClick={() => setIsOpen((prev) => !prev)}>
               <Image src="/sidebar-hide.svg" width={0} height={0} className="h-auto w-2" alt="sidebar-button" />
             </button>
           </div>
@@ -146,16 +126,17 @@ export default function SideBar() {
                 ))}
               </ul>
               {inputVisible && (
-                <input
-                  type="text"
-                  ref={inputRef}
-                  value={goalInput}
-                  onChange={(e) => {
-                    setGoalInput(e.target.value);
-                  }}
-                  onKeyDown={handleKeyDown}
-                  className="block w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none"
-                />
+                <form onSubmit={handleSubmit}>
+                  <input
+                    type="text"
+                    ref={inputRef}
+                    value={goalInput}
+                    onChange={(e) => {
+                      setGoalInput(e.target.value);
+                    }}
+                    className="block w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none"
+                  />
+                </form>
               )}
             </div>
             <div>
@@ -176,7 +157,7 @@ export default function SideBar() {
           <Link href="/">
             <Image src="/sidebar-logo.png" width={21} height={20} alt="sidebar-brand-hide" />
           </Link>
-          <button className="rounded-lg border-2 p-2" onClick={toggleSidebar}>
+          <button className="rounded-lg border-2 p-2" onClick={() => setIsOpen((prev) => !prev)}>
             <Image src="/sidebar-hide-R.svg" width={8} height={8} alt="sidebar-button" />
           </button>
         </div>

@@ -1,6 +1,9 @@
 import { AxiosError } from "axios";
+import { toast } from "react-toastify";
 
 import api from "@/lib/api";
+
+import { ErrorType } from "./goalAPI";
 
 export type TodoType = {
   title: string;
@@ -14,8 +17,8 @@ export const getAllData = async () => {
     const response = await api.get(`/todos`);
     return response;
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -30,8 +33,8 @@ export const postFile = async (file: File) => {
 
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("파일 업로드 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -63,9 +66,8 @@ export const PostTodos = async (
     const response = await api.post<TodoType>(`/todos`, payload);
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
-    return undefined; // 오류 발생 시 undefined 반환
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -74,8 +76,8 @@ export const getTodos = async (id: number) => {
     const response = await api.get(`/todos?goalId=${id}`);
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -107,8 +109,8 @@ export const patchTodo = async (
     const response = await api.patch(`todos/${todoId}`, payload);
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("할 일 수정 중 에러 발생11:", axiosError.response ? axiosError.response.data : axiosError.message);
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -139,9 +141,8 @@ export const editTodo = async (
     const response = await api.patch(`todos/${todoId}`, payload);
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("할 일 수정 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
-    throw axiosError;
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
 
@@ -150,7 +151,7 @@ export const deleteTodos = async (id: number) => {
     const response = await api.delete(`/todos/${id}`);
     return response;
   } catch (error) {
-    const axiosError = error as AxiosError;
-    console.error("목표 삭제 중 에러 발생:", axiosError.response ? axiosError.response.data : axiosError.message);
+    const axiosError = error as AxiosError<ErrorType>;
+    toast.error(axiosError.message);
   }
 };
