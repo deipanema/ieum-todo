@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { useAuthStore } from "@/store/AuthStore";
 import { checkAuth } from "@/utils/authUtils";
+import { useAuthStore } from "@/store/authStore";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();

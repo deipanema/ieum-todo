@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { useAuthStore } from "@/store/AuthStore";
+import { useAuthStore } from "@/store/authStore";
 
 export const login = async (email: string, password: string) => {
   try {

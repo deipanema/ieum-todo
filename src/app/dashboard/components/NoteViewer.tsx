@@ -30,7 +30,6 @@ type NoteViewerProps = {
 };
 
 export default function NoteViewer({ isNoteOpen, setIsNoteOpen, noteContent }: NoteViewerProps) {
-  console.log(noteContent);
   const handleLinkClick = (linkUrl: string) => {
     const url = linkUrl.includes("https://") ? linkUrl : `https://${linkUrl}`;
     const screen = window.screen.width;
