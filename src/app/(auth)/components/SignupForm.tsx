@@ -3,10 +3,14 @@
 import { toast } from "react-toastify";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+
+import { postUser } from "@/api/authAPI";
+import { ErrorResponse } from "@/app/Types/AuthType";
 
 import SubmitButton from "./SubmitButton";
 import InputField from "./InputField";
@@ -23,14 +27,38 @@ export default function SignupForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     trigger,
-    setError,
     clearErrors,
     reset,
     watch,
   } = useForm<FormData>({
     resolver: zodResolver(signupSchema),
-    mode: "onChange", // 실시간 유효성 검사를 위해 추가
+    mode: "onChange",
   });
+
+  const signupMutation = useMutation({
+    mutationFn: postUser,
+    onSuccess: () => {
+      clearErrors();
+      reset();
+      toast.success("회원가입이 완료되었습니다.");
+      router.push("/login");
+    },
+    onError: (error: AxiosError<ErrorResponse>) => {
+      console.log(error);
+
+      if (error.response) {
+        const statusCode = error.response.status;
+        const errorInfo = errorMessage[statusCode];
+        if (errorInfo) {
+          toast.error(errorInfo.message);
+        }
+      }
+    },
+  });
+
+  const onSubmit = (data: FormData) => {
+    signupMutation.mutate(data);
+  };
 
   useEffect(() => {
     const firstInput = document.getElementById("nickname") as HTMLInputElement;
@@ -38,37 +66,6 @@ export default function SignupForm() {
       firstInput.focus();
     }
   }, []);
-
-  const onSubmit = async (data: FormData) => {
-    try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
-        email: data.email,
-        name: data.nickname,
-        password: data.password,
-      });
-
-      if (response.data) {
-        clearErrors();
-        reset();
-        toast.success("회원가입이 완료되었습니다.");
-        router.push("/login");
-      }
-    } catch (error) {
-      console.error("회원가입 서버 오류🚨", error);
-
-      if (axios.isAxiosError(error) && error.response) {
-        const errorCode = error.response.status;
-        const errorInfo = errorMessage[errorCode];
-
-        if (errorCode) {
-          setError(errorInfo.field, {
-            type: "manual",
-            message: errorInfo.message,
-          });
-        }
-      }
-    }
-  };
 
   return (
     <form className="flex flex-col justify-center" aria-label="회원가입 양식" onSubmit={handleSubmit(onSubmit)}>
@@ -133,5 +130,9 @@ const errorMessage: Record<number, { field: FormFields; message: string }> = {
   409: {
     field: "email",
     message: "이미 사용 중인 이메일입니다.",
+  },
+  400: {
+    field: "email",
+    message: "유효하지 않은 요청입니다.",
   },
 };
