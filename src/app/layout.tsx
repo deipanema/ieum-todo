@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ReactNode } from "react";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
@@ -29,6 +30,7 @@ export default function RootLayout({
     <html lang="ko">
       <body className={`${pretendard.variable} font-pretendard`}>
         <Provider>
+          <SpeedInsights />
           <ToastProvider />
           {children}
         </Provider>
