@@ -6,7 +6,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { getGoal } from "@/api/goalAPI";
-import { editTodo, postFile, PostTodos } from "@/api/todoAPI";
+import { editTodo, postFile, postTodos } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 
 import LinkUpload from "./LinkUpload";
@@ -144,7 +144,7 @@ export default function CreateNewTodo({
         console.error("수정 실패:", response);
       }
     } else {
-      const response = await PostTodos(todo.title, todo.fileUrl, todo.linkUrl, todo.goal.id);
+      const response = await postTodos(todo.title, todo.fileUrl, todo.linkUrl, todo.goal.id);
 
       if (response) {
         toast.success("할 일이 성공적으로 생성되었습니다");
@@ -198,7 +198,12 @@ export default function CreateNewTodo({
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div>
           <h2 className="mb-3 font-semibold">제목</h2>
+          <label htmlFor="title" className="sr-only">
+            할 일의 제목
+          </label>
           <input
+            id="title"
+            name="title"
             className="w-full rounded-xl bg-slate-50 px-6 py-3 focus:outline-none"
             placeholder="할 일의 제목을 적어주세요"
             maxLength={30}
@@ -254,12 +259,23 @@ export default function CreateNewTodo({
                   <p>파일을 업로드해주세요</p>
                 </div>
               )}
-              <input type="file" ref={fileInputRef} onChange={handleFileChange} className="absolute opacity-0" />
+              <label className="sr-only" htmlFor="file-upload">
+                파일을 업로드해주세요
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="absolute opacity-0"
+              />
             </div>
           </div>
         </div>
         <div className="relative">
-          <h2 className="mb-3 font-semibold">목표</h2>
+          <h2 data-testid="modal-heading" className="mb-3 font-semibold">
+            목표
+          </h2>
           <div
             onClick={() => setIsOpenGoals((prev) => !prev)}
             className="flex w-full cursor-pointer justify-between rounded-xl bg-slate-50 px-[20px] py-3"

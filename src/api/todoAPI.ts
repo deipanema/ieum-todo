@@ -38,7 +38,7 @@ export const postFile = async (file: File) => {
   }
 };
 
-export const PostTodos = async (
+export const postTodos = async (
   title: string,
   fileUrl: string | null,
   linkUrl: string | null,

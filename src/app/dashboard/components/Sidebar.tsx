@@ -75,7 +75,7 @@ export default function SideBar() {
           >
             <Image src="/hamburger.svg" width={0} height={0} alt="hamburger-button" className="h-auto w-auto" />
           </div>
-          <h2 className="cursor-pointer text-[18px] font-semibold">대시보드</h2>
+          {/* <h2 className="cursor-pointer text-[18px] font-semibold">대시보드</h2> */}
         </div>
         <div
           className={`sticky top-0 float-left hidden h-screen w-[280px] transform border-r bg-white py-3 transition-transform duration-500 ease-in-out ${
@@ -86,8 +86,12 @@ export default function SideBar() {
             <Link href="/">
               <Image src="/brand.webp" width={106} height={0} className="h-auto w-auto" alt="brand" priority />
             </Link>
-            <button className="rounded-lg border-2 p-2" onClick={() => setIsOpen((prev) => !prev)}>
-              <Image src="/sidebar-hide.svg" width={0} height={0} className="h-auto w-2" alt="sidebar-button" />
+            <button
+              className="rounded-lg border-2 p-2"
+              data-testid="main-sidebar-button"
+              onClick={() => setIsOpen((prev) => !prev)}
+            >
+              <Image src="/sidebar-hide.svg" width={0} height={0} className="h-auto w-2" alt="main-sidebar-button" />
             </button>
           </div>
           <div className="mb-6 flex gap-3 px-6">
@@ -98,24 +102,24 @@ export default function SideBar() {
               <AnimatedText text="로그아웃" onClick={handleLogout} />
             </div>
           </div>
-          <div className="border-b border-b-slate-200 px-6 pb-6">
+          <h2 className="border-b border-b-slate-200 px-6 pb-6">
             <button
               onClick={() => openModal("CREATE_NEW_TODO")}
               className="w-full rounded-lg bg-blue-500 py-3 text-white outline-none"
             >
               + 새 할 일
             </button>
-          </div>
+          </h2>
           <div className="flex gap-2 border-b border-b-slate-200 px-6 py-4">
             <Image src="/sidebar-home.svg" width={0} height={0} className="ml-1.5 h-auto w-[13px]" alt="sidebar-home" />
             <Link href="/">
-              <span>대시보드</span>
+              <h2>대시보드</h2>
             </Link>
           </div>
           <div className="px-6 py-4">
             <div className="flex gap-2">
               <Image src="/sidebar-flag.svg" width={24} height={24} alt="sidebar-flag" />
-              <span>목표</span>
+              <h2 data-testid="sidebar-goal-heading">목표</h2>
             </div>
             <div className="mb-6 max-h-[350px] overflow-y-auto pt-4">
               <ul className="flex flex-col gap-4">
@@ -127,19 +131,22 @@ export default function SideBar() {
               </ul>
               {inputVisible && (
                 <form onSubmit={handleSubmit}>
-                  <input
-                    type="text"
-                    ref={inputRef}
-                    value={goalInput}
-                    onChange={(e) => {
-                      setGoalInput(e.target.value);
-                    }}
-                    className="block w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none"
-                  />
+                  <label className="sr-only">
+                    새목표
+                    <input
+                      type="text"
+                      ref={inputRef}
+                      value={goalInput}
+                      onChange={(e) => {
+                        setGoalInput(e.target.value);
+                      }}
+                      className="block w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none"
+                    />
+                  </label>
                 </form>
               )}
             </div>
-            <div>
+            <h2>
               <button
                 onClick={() => {
                   setInputVisible((prev) => !prev);
@@ -148,7 +155,7 @@ export default function SideBar() {
               >
                 + 새 목표
               </button>
-            </div>
+            </h2>
           </div>
         </div>
       </aside>
@@ -157,8 +164,12 @@ export default function SideBar() {
           <Link href="/">
             <Image src="/sidebar-logo.png" width={21} height={20} alt="sidebar-brand-hide" />
           </Link>
-          <button className="rounded-lg border-2 p-2" onClick={() => setIsOpen((prev) => !prev)}>
-            <Image src="/sidebar-hide-R.svg" width={8} height={8} alt="sidebar-button" />
+          <button
+            className="rounded-lg border-2 p-2"
+            data-testid="slim-sidebar-button"
+            onClick={() => setIsOpen((prev) => !prev)}
+          >
+            <Image src="/sidebar-hide-R.svg" width={8} height={8} alt="slim-sidebar-button" />
           </button>
         </div>
       )}
