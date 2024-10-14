@@ -1,8 +1,6 @@
 import "@testing-library/jest-dom";
 
-/* msw */
-
-beforeAll(() => {});
+beforeEach(() => {});
 
 afterEach(() => {
   /**
