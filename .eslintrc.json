@@ -10,6 +10,7 @@
     //"plugin:import/recommended",
     "prettier"
   ],
+  "ignorePatterns": ["vite.config.ts"],
   "plugins": ["import"],
   "rules": {
     "semi": ["error", "always"],
