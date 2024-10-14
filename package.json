@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest --coverage",
+    "test": "vitest",
     "cy:open": "wait-on http://localhost:3000/ && cypress open",
     "cy:run": "npm-run-all --parallel dev cy:open"
   },
@@ -15,6 +15,7 @@
     "@hookform/resolvers": "^3.9.0",
     "@sentry/nextjs": "^8.34.0",
     "@tanstack/react-query": "^5.59.9",
+    "@testing-library/react": "^16.0.1",
     "@vercel/speed-insights": "^1.0.12",
     "@vitejs/plugin-react": "^4.3.2",
     "@vitest/eslint-plugin": "^1.1.7",
@@ -43,6 +44,8 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/testing-library__react": "^10.0.1",
+    "@vitest/browser": "^2.1.2",
     "@vitest/coverage-v8": "^2.1.2",
     "cypress": "^13.15.0",
     "eslint": "^8.57.1",
@@ -54,7 +57,9 @@
     "prettier-plugin-tailwindcss": "^0.6.8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5",
+    "vite": "^5.4.8",
     "vite-plugin-eslint": "^1.8.1",
+    "vite-tsconfig-paths": "^5.0.1",
     "vitest": "^2.1.2",
     "wait-on": "^8.0.1"
   }
