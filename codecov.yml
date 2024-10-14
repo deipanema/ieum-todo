@@ -1,0 +1,19 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto # 기본 설정, 자동으로 목표를 설정
+        threshold: 0% # 허용 오차
+        base: auto # 기본 브랜치와 비교
+    patch:
+      default:
+        target: auto
+        threshold: 0%
+
+comment:
+  layout: "diff, flags, files"
+  behavior: default
+  require_changes: false # 커버리지 변화가 있을 때만 코멘트를 달 것인지 여부
+  require_base: false # 기본 보고서가 있어야만 코멘트를 달 것인지 여부
+  require_head: true # 헤드 보고서가 있어야만 코멘트를 달 것인지 여부
+  hide_project_coverage: false # 프로젝트 전체 커버리지 표시 여부
