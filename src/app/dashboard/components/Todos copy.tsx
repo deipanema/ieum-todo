@@ -8,7 +8,7 @@ import { deleteTodos, patchTodo } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import { getNotes } from "@/api/noteAPI";
-import useTodoStore, { TodoType } from "@/store/todoStore";
+import useTodoStore from "@/store/todoStore";
 
 import NoteViewer from "./NoteViewer";
 
@@ -19,6 +19,20 @@ export type GoalType = {
   id: number;
   userId: number;
   teamId: string;
+};
+
+export type TodoType = {
+  noteId: number | null;
+  done: boolean;
+  linkUrl: string | null;
+  fileUrl: string | null;
+  title: string;
+  id: number;
+  goal: GoalType;
+  userId: number;
+  teamId: string;
+  updatedAt: string;
+  createdAt: string;
 };
 
 type TodoProps = {
@@ -65,21 +79,16 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
   const { Modal, openModal, closeModal } = useModal();
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [noteContent, setNoteContent] = useState<NoteType>();
-  const { updateTodo, deleteTodo } = useTodoStore();
+  const { updateTodo } = useTodoStore();
 
-  const toggleTodoStatus = async (updatedTodo: TodoType) => {
+  const toggleTodoStatus = async ({ title, goalId, fileUrl, linkUrl, done, todoId }: toggleTodoStatusType) => {
+    const updatedTodo = { ...todo, done: !done };
+    onTodoUpdate(updatedTodo);
     try {
-      await patchTodo(
-        updatedTodo.title,
-        updatedTodo.goal.id,
-        !updatedTodo.done,
-        updatedTodo.id,
-        updatedTodo.fileUrl,
-        updatedTodo.linkUrl,
-      );
-      updateTodo(updatedTodo);
+      await patchTodo(title, goalId, !done, todoId, fileUrl, linkUrl);
     } catch (error) {
       console.error("할 일 상태 변경 중 오류 발생:", error);
+      onTodoUpdate({ ...updatedTodo, done: done });
     }
   };
 
@@ -99,7 +108,12 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
   // };
 
   const handleDelete = async () => {
-    await deleteTodo(todo.id); // Use deleteTodo from store
+    try {
+      const response = await deleteTodos(todo.id as number);
+      return response;
+    } catch (error) {
+      console.error("목표 삭제 중 오류 발생:", error);
+    }
   };
 
   useEffect(() => {
@@ -131,7 +145,16 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
             width={todo.done === true ? 18 : 24}
             height={todo.done === true ? 18 : 24}
             alt="checkbox-icon"
-            onClick={() => toggleTodoStatus({ ...todo, done: !todo.done })}
+            onClick={() =>
+              toggleTodoStatus({
+                title: todo.title,
+                goalId: todo.goal.id,
+                fileUrl: todo.fileUrl as string,
+                linkUrl: todo.linkUrl as string,
+                done: todo.done,
+                todoId: todo.id,
+              })
+            }
           />
 
           <span className={`text-sm ${todo.done ? "line-through" : ""}`}>{todo.title}</span>
@@ -228,6 +251,7 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
       <Modal name="EDIT_TODO" title="할 일 수정">
         <CreateNewTodo
           closeCreateNewTodo={closeModal}
+          todoId={todo.id}
           goal={todo.goal}
           title={todo.title}
           fileUrl={todo.fileUrl || undefined}

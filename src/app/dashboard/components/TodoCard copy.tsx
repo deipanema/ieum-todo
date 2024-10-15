@@ -8,6 +8,7 @@ import { getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
+import useTodoStore from "@/store/todoStore";
 
 import Todos from "./Todos";
 import ProgressBar from "./ProgressBar";

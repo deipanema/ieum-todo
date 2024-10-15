@@ -11,7 +11,7 @@ export type GoalType = {
   updatedAt: string;
 };
 
-type GoalState = {
+export type GoalState = {
   goals: GoalType[];
   addGoal: (little: string) => Promise<void>;
   updateGoal: (id: number, title: string) => Promise<void>;

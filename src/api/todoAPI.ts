@@ -5,11 +5,34 @@ import api from "@/lib/api";
 
 import { ErrorType } from "./goalAPI";
 
-export type TodoType = {
+export type Todo = {
   title: string;
   linkUrl: string | null;
   fileUrl: string | null;
   goalId: number;
+};
+
+export type TodoType = {
+  noteId?: number | null;
+  done: boolean;
+  linkUrl?: string | null;
+  fileUrl?: string | null;
+  title: string;
+  id: number;
+  goal: GoalType;
+  userId: number;
+  teamId: string;
+  updatedAt: string;
+  createdAt: string;
+};
+
+export type GoalType = {
+  id: number;
+  teamId: string;
+  title: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export const getAllData = async () => {
@@ -120,7 +143,7 @@ export const editTodo = async (
   fileUrl?: string | null,
   linkUrl?: string | null,
   todoId?: number,
-) => {
+): Promise<TodoType | undefined> => {
   try {
     const payload: {
       title: string;
