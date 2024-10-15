@@ -1,20 +1,24 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AxiosError } from "axios";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 import { login } from "@/utils/authUtils";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { ErrorResponse } from "@/app/Types/AuthType";
+
+type FormFields = "email" | "password";
 
 type FormData = z.infer<typeof schema>;
 
 export default function LoginForm() {
   const router = useRouter();
-  const [loginError, setLoginError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -25,22 +29,30 @@ export default function LoginForm() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = async (data: FormData) => {
-    clearErrors();
-    setLoginError(null);
-
-    try {
-      const success = await login(data.email, data.password);
-      if (success) {
+  const loginMutation = useMutation({
+    mutationFn: (data: { email: string; password: string }) => login(data.email, data.password),
+    onSuccess: (data) => {
+      if (data) {
+        toast.success("로그인 되었습니다.");
         router.push("/dashboard");
       } else {
-        setLoginError("로그인에 실패했습니다. 다시 시도해 주세요.");
+        toast.error("로그인에 실패했습니다. 다시 시도해 주세요.");
       }
-    } catch (error) {
-      const axiosError = error as AxiosError; // Type assertion
-      console.error("로그인 중 오류 발생:", axiosError);
-      setLoginError("로그인 실패했습니다. 다시 시도해 주세요.");
-    }
+    },
+    onError: (error: AxiosError<ErrorResponse>) => {
+      if (error.response) {
+        const statusCode = error.response.status;
+        const errorInfo = errorMessage[statusCode];
+        if (errorInfo) {
+          toast.error(errorInfo.message);
+        }
+      }
+    },
+  });
+
+  const onSubmit = (data: FormData) => {
+    clearErrors();
+    loginMutation.mutate(data);
   };
 
   return (
@@ -76,9 +88,9 @@ export default function LoginForm() {
         onBlur={() => trigger("password")}
       />
       {errors.password && <small className="mb-5 text-sm text-red-50">{errors.password.message}</small>}
-      {loginError && <small className="mb-5 text-sm text-red-50">{loginError}</small>}
       <button
         type="submit"
+        data-testid="login-sumbmit"
         disabled={isSubmitting}
         className="mb-6 mt-4 flex h-[50px] items-center justify-center rounded-md border bg-blue-400 text-base text-white hover:bg-blue-500 disabled:bg-blue-200"
       >
@@ -87,7 +99,18 @@ export default function LoginForm() {
     </form>
   );
 }
+
 const schema = z.object({
-  email: z.string().email({ message: "유효한 이메일 주소를 입력해주세요." }),
+  email: z.string(),
   password: z.string().min(8, { message: "비밀번호는 최소 8자 이상이어야 합니다." }),
 });
+const errorMessage: Record<number, { field: FormFields; message: string }> = {
+  404: {
+    field: "email",
+    message: "가입되지 않은 이메일입니다.",
+  },
+  400: {
+    field: "email",
+    message: "이메일 형식으로 작성해 주세요.",
+  },
+};
