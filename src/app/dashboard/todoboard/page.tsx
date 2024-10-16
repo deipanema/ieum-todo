@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-import { getAllData, patchTodo } from "@/api/todoAPI";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
+import { getAllTodos } from "@/api/todoAPI";
 
 import Todos from "../components/Todos";
 
@@ -49,14 +49,10 @@ export default function TodoboardPage() {
   const { Modal, openModal, closeModal } = useModal();
 
   // useQuery를 사용하여 할 일 데이터를 가져옴
-  const {
-    data: todosData,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: todosData, error } = useQuery({
     queryKey: ["todos"],
     queryFn: async () => {
-      const response = await getAllData(); // API 호출
+      const response = await getAllTodos(); // API 호출
       if (response && response.data) {
         return response.data; // 데이터 구조가 TodosResponse와 일치해야 합니다.
       }

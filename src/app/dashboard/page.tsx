@@ -7,9 +7,9 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 
 import { getInfinityScrollGoals } from "@/api/goalAPI";
-import { getAllData, patchTodo } from "@/api/todoAPI";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import LoadingScreen from "@/components/LoadingScreen";
+import { getAllTodos } from "@/api/todoAPI";
 
 import TodoCard from "./components/TodoCard";
 import Todos from "./components/Todos";
@@ -48,11 +48,18 @@ export default function Dashboard() {
   const [recentTodos, setRecentTodos] = useState<TodoType[]>([]);
   const [progressValue, setProgressValue] = useState(0);
   const [ratio, setRatio] = useState(0);
+  const [todos, setTodos] = useState<TodoType[]>([]);
 
   // 데이터를 가져오는 함수
   const fetchTodos = useCallback(async () => {
-    const todosResponse = await getAllData();
-    return todosResponse?.data.todos || []; // todos가 없을 경우 빈 배열 반환
+    try {
+      const todosResponse = await getAllTodos();
+      console.log(todosResponse);
+      return todosResponse?.data.todos || []; // todos가 없을 경우 빈 배열 반환
+    } catch (error) {
+      console.error("Failed to fetch todos:", error);
+      return []; // 에러 발생 시 빈 배열 반환
+    }
   }, []);
 
   // React Query를 사용하여 할 일 데이터를 가져옴
@@ -73,30 +80,11 @@ export default function Dashboard() {
       const total = todosData.length;
       const dones = todosData.filter((todo: TodoType) => todo.done);
       setRatio(Math.round((dones.length / total) * 100));
+      console.log("💤", todosData);
     } else {
-      console.error("todosData는 배열이 아닙니다:", todosData); // 디버깅을 위한 콘솔 로그
+      console.error("todosData는 배열이 아닙니다:", todosData);
     }
   }, [todosData]);
-
-  // const handleTodoUpdate = useCallback(async (updatedTodo: TodoType) => {
-  //   try {
-  //     const response = await patchTodo(
-  //       updatedTodo.title,
-  //       updatedTodo.goal.id,
-  //       updatedTodo.done,
-  //       updatedTodo.id,
-  //       updatedTodo.fileUrl || "",
-  //       updatedTodo.linkUrl || "",
-  //     );
-  //     if (response) {
-  //       setRecentTodos((prevTodos) =>
-  //         prevTodos.map((todo) => (todo.id === updatedTodo.id ? { ...todo, ...updatedTodo } : todo)),
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("할 일 업데이트 중 오류 발생:", error);
-  //   }
-  // }, []);
 
   const {
     data,
@@ -132,13 +120,13 @@ export default function Dashboard() {
       if (page.goals.length === i + 1) {
         return (
           <div key={goal.id} className="col-span-2">
-            <TodoCard id={goal.id} />
+            <TodoCard todos={todos} setTodos={setTodos} id={goal.id} />
           </div>
         );
       }
       return (
         <div key={goal.id} className="col-span-2">
-          <TodoCard id={goal.id} />
+          <TodoCard todos={todos} setTodos={setTodos} id={goal.id} />
         </div>
       );
     });

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { getGoal } from "@/api/goalAPI";
@@ -14,6 +14,8 @@ import ProgressBar from "./ProgressBar";
 
 export type TodoCardProps = {
   id: number;
+  todos: TodoType[];
+  setTodos: Dispatch<SetStateAction<TodoType[]>>;
 };
 
 export type GoalType = {
@@ -39,12 +41,11 @@ export type TodoType = {
   createdAt: string;
 };
 
-export default function TodoCard({ id }: TodoCardProps) {
+export default function TodoCard({ id, todos, setTodos }: TodoCardProps) {
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
   const [progress, setProgress] = useState(0);
   const [goals, setGoals] = useState<GoalType | null>(null);
-  const [todos, setTodos] = useState<TodoType[]>([]);
 
   //const { todos, setTodos, updateTodo } = useTodoStore();
   const activeTodos = Array.isArray(todos) ? todos.filter((todo) => !todo.done) : [];

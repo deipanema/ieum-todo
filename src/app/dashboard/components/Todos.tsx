@@ -4,11 +4,11 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { deleteTodos, patchTodo } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import { getNotes } from "@/api/noteAPI";
 import useTodoStore, { TodoType } from "@/store/todoStore";
+import { deleteTodo } from "@/api/todoAPI";
 
 import NoteViewer from "./NoteViewer";
 
@@ -27,14 +27,14 @@ type TodoProps = {
   isInGoalSection?: boolean;
 };
 
-type toggleTodoStatusType = {
-  title: string;
-  goalId: number;
-  fileUrl: string;
-  linkUrl: string;
-  done: boolean;
-  todoId: number;
-};
+// type toggleTodoStatusType = {
+//   title: string;
+//   goalId: number;
+//   fileUrl: string;
+//   linkUrl: string;
+//   done: boolean;
+//   todoId: number;
+// };
 
 export interface NoteType {
   content: string;
@@ -65,19 +65,11 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
   const { Modal, openModal, closeModal } = useModal();
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [noteContent, setNoteContent] = useState<NoteType>();
-  const { updateTodo, deleteTodo } = useTodoStore();
+  const { updateTodo } = useTodoStore();
 
   const toggleTodoStatus = async (updatedTodo: TodoType) => {
     try {
-      await patchTodo(
-        updatedTodo.title,
-        updatedTodo.goal.id,
-        !updatedTodo.done,
-        updatedTodo.id,
-        updatedTodo.fileUrl,
-        updatedTodo.linkUrl,
-      );
-      updateTodo(updatedTodo);
+      updateTodo(todo.id, updatedTodo);
     } catch (error) {
       console.error("할 일 상태 변경 중 오류 발생:", error);
     }
@@ -232,6 +224,7 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
           title={todo.title}
           fileUrl={todo.fileUrl || undefined}
           linkUrl={todo.linkUrl || undefined}
+          todoId={todo.id}
           isEdit
         />
       </Modal>

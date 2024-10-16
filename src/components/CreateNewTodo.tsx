@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
-import { editTodo, postFile, postTodos } from "@/api/todoAPI";
+import { createTodo, postFile } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 import { useGoalStore } from "@/store/goalStore";
 import useTodoStore from "@/store/todoStore";
@@ -44,6 +44,7 @@ export type CreateNewTodoProps = {
   fileUrl?: string | undefined;
   linkUrl?: string | undefined;
   todoId?: number;
+  done?: boolean;
   isEdit?: boolean;
   goalId?: number | undefined; // 목표 ID를 받아옴
 };
@@ -64,7 +65,7 @@ export default function CreateNewTodo({
   const [fileTitle, setFileTitle] = useState("");
   const { Modal, openModal, closeModal } = useModal();
   const { goals } = useGoalStore();
-  const { createTodo, updateTodo } = useTodoStore();
+  const { updateTodo } = useTodoStore();
 
   const [todo, setTodo] = useState<TodoType>({
     title: "",
@@ -143,40 +144,21 @@ export default function CreateNewTodo({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!todo) return;
 
-    let response;
-    // 할 일 수정
     if (isEdit && todoId) {
-      response = await editTodo(todo.title, todo.goal.id, todo.fileUrl, todo.linkUrl, todoId);
-      if (response) {
-        toast.success("할 일이 성공적으로 수정되었습니다");
-        updateTodo(response); // 수정된 할 일 전달
-      } else {
-        toast.error("할 일 수정 실패");
-      }
+      await updateTodo(todoId, { title: todo.title, fileUrl: todo.fileUrl, linkUrl: todo.linkUrl, id: todo.id });
     } else {
-      // 할 일 추가
-      const newTodo: TodoType = {
-        title: todo.title,
-        fileUrl: todo.fileUrl,
-        linkUrl: todo.linkUrl,
-        goal: { id: todo.goal.id, title: todo.goal.title, teamId: "", userId: 0, createdAt: "", updatedAt: "" },
-        done: false,
-        noteId: 0 || null || undefined,
-        id: Date.now(),
-        userId: 0,
-        teamId: "FESI3-5",
-        updatedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-      };
-
-      await createTodo(newTodo);
-      toast.success("할 일이 성공적으로 생성되었습니다");
+      await createTodo(todo.title, todo.fileUrl || null, todo.linkUrl || null, todo.goal.id);
     }
+
+    toast.success(isEdit ? "할 일이 수정되었습니다" : "할 일이 생성되었습니다");
     closeCreateNewTodo();
   };
 
   useEffect(() => {
+    console.log(isEdit, goal);
+
     if (isEdit && goal) {
       setTodo((prevTodo) => ({
         ...prevTodo,
