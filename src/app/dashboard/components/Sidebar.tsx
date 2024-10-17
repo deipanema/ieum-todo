@@ -8,11 +8,11 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { logout } from "@/utils/authUtils";
-import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
 import AnimatedText from "@/utils/AnimatedText";
 import { useGoalStore } from "@/store/goalStore";
 import { useAuthStore } from "@/store/authStore";
+import CreateNewTodo from "@/components/CreateNewTodo";
 
 export interface GoalType {
   id: number;
@@ -218,7 +218,7 @@ export default function SideBar() {
       )}
 
       <Modal name="CREATE_NEW_TODO" title="할 일 생성">
-        <CreateNewTodo closeCreateNewTodo={closeModal} />
+        <CreateNewTodo closeCreateNewTodo={closeModal} goals={goals} />
       </Modal>
     </>
   );

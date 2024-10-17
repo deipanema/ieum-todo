@@ -24,6 +24,7 @@ export const useGoalStore = create<GoalState>((set) => ({
   addGoal: async (title: string): Promise<GoalType> => {
     const response = await PostGoal(title);
     const newGoal: GoalType = response?.data;
+    console.log(response?.data);
 
     set((state) => ({
       goals: [

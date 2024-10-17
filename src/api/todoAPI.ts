@@ -6,7 +6,7 @@ import api from "@/lib/api";
 import { ErrorType } from "./goalAPI";
 
 export type TodoType = {
-  noteId?: number | null;
+  noteId: number | null;
   done: boolean;
   linkUrl?: string | null;
   fileUrl?: string | null;
@@ -69,17 +69,20 @@ export const postFile = async (file: File) => {
 
 export const createTodo = async (
   title: string,
-  fileUrl: string | null,
-  linkUrl: string | null,
   goalId: number,
+  fileUrl?: string | null,
+  linkUrl?: string | null,
 ): Promise<TodoType> => {
   try {
     const payload = { title, goalId, fileUrl, linkUrl };
+    console.log("😲");
     const response = await api.post<TodoType>(`/todos`, payload);
+    console.log(response);
     return response.data;
   } catch (error) {
+    console.log(error);
     const axiosError = error as AxiosError<ErrorType>;
-    toast.error(axiosError.message);
+    toast.error(axiosError.response?.data.message);
     throw error;
   }
 };
@@ -87,6 +90,7 @@ export const createTodo = async (
 export const updateTodo = async (todoId: number, updates: Partial<TodoType>): Promise<TodoType> => {
   try {
     const response = await api.patch<TodoType>(`/todos/${todoId}`, updates);
+    console.log();
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ErrorType>;

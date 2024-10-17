@@ -7,18 +7,33 @@ import { useEffect, useRef, useState } from "react";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import { getNotes } from "@/api/noteAPI";
-import useTodoStore, { TodoType } from "@/store/todoStore";
+import useTodoStore from "@/store/todoStore";
 import { deleteTodo } from "@/api/todoAPI";
 
 import NoteViewer from "./NoteViewer";
+import { useGoalStore } from "@/store/goalStore";
 
-export type GoalType = {
-  updatedAt: string;
-  createdAt: string;
+export type TodoType = {
+  noteId?: number | null; // noteId를 선택적으로 정의
+  done: boolean;
+  linkUrl?: string | null;
+  fileUrl?: string | null;
   title: string;
   id: number;
+  goal: GoalType;
   userId: number;
   teamId: string;
+  updatedAt: string;
+  createdAt: string;
+};
+
+export type GoalType = {
+  id: number;
+  teamId: string;
+  title: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type TodoProps = {
@@ -36,7 +51,7 @@ type TodoProps = {
 //   todoId: number;
 // };
 
-export interface NoteType {
+export type NoteType = {
   content: string;
   createdAt: string;
   goal: {
@@ -56,7 +71,7 @@ export interface NoteType {
   };
   updatedAt: string;
   userId: number;
-}
+};
 
 export default function Todos({ todo, isGoal = false, isInGoalSection = false }: TodoProps) {
   const router = useRouter();
@@ -66,21 +81,12 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [noteContent, setNoteContent] = useState<NoteType>();
   const { updateTodo } = useTodoStore();
-
-  const toggleTodoStatus = async (updatedTodo: TodoType) => {
-    try {
-      updateTodo(todo.id, updatedTodo);
-    } catch (error) {
-      console.error("할 일 상태 변경 중 오류 발생:", error);
-    }
-  };
+  const { goals } = useGoalStore();
 
   const fetchNoteContent = async () => {
     if (todo.noteId) {
       const response = await getNotes(todo.noteId);
-      if (response) {
-        setNoteContent(response);
-      }
+      setNoteContent(response);
     }
   };
 
@@ -91,7 +97,7 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
   // };
 
   const handleDelete = async () => {
-    await deleteTodo(todo.id); // Use deleteTodo from store
+    await deleteTodo(todo.id);
   };
 
   useEffect(() => {
@@ -106,12 +112,12 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, todo.noteId]);
 
-  useEffect(() => {
-    fetchNoteContent();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   fetchNoteContent();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   return (
     <div>
@@ -123,7 +129,7 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
             width={todo.done === true ? 18 : 24}
             height={todo.done === true ? 18 : 24}
             alt="checkbox-icon"
-            onClick={() => toggleTodoStatus({ ...todo, done: !todo.done })}
+            onClick={() => updateTodo(todo.id, { ...todo, done: !todo.done })}
           />
 
           <span className={`text-sm ${todo.done ? "line-through" : ""}`}>{todo.title}</span>
@@ -218,15 +224,7 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
         </div>
       </ul>
       <Modal name="EDIT_TODO" title="할 일 수정">
-        <CreateNewTodo
-          closeCreateNewTodo={closeModal}
-          goal={todo.goal}
-          title={todo.title}
-          fileUrl={todo.fileUrl || undefined}
-          linkUrl={todo.linkUrl || undefined}
-          todoId={todo.id}
-          isEdit
-        />
+        <CreateNewTodo closeCreateNewTodo={closeModal} goals={goals} />
       </Modal>
       <NoteViewer isNoteOpen={isNoteOpen} setIsNoteOpen={setIsNoteOpen} noteContent={noteContent} />
     </div>
