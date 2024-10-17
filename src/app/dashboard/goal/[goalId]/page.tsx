@@ -35,11 +35,10 @@ export default function GoalPage({ params }: GoalPageProps) {
   const { goalId } = params;
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
-  const [progress, setProgress] = useState(0);
-  const { goals } = useGoalStore();
-  //const [todos, setTodos] = useState<TodoType[]>([]);
+  const { goals, refreshGoals } = useGoalStore();
   const { todos, setTodos } = useTodoStore();
   const [goal, setGoal] = useState<GoalType | null>(null);
+  const [progress, setProgress] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -67,7 +66,7 @@ export default function GoalPage({ params }: GoalPageProps) {
       setTodos(todosData);
       updateProgress(todosData);
     }
-  }, [todosData]);
+  }, [setTodos, todosData]);
 
   const updateProgress = (todosArray: TodoType[]) => {
     if (todosArray.length > 0) {
@@ -85,7 +84,8 @@ export default function GoalPage({ params }: GoalPageProps) {
       try {
         const response = await deleteGoal(goal.id);
         if (response) {
-          toast.success("삭제완료");
+          toast.success("목표가 삭제되었습니다.");
+          await refreshGoals(); // 사이드바의 목표 상태를 업데이트
           router.push("/");
         }
       } catch (error) {
@@ -95,13 +95,6 @@ export default function GoalPage({ params }: GoalPageProps) {
     }
   };
 
-  // 할 일 업데이트 처리
-  // const handleTodoUpdate = (updatedTodo: TodoType) => {
-  //   setTodos((prevTodos) =>
-  //     prevTodos.map((prevTodo) => (prevTodo.id === updatedTodo.id ? { ...prevTodo, ...updatedTodo } : prevTodo)),
-  //   );
-  // };
-
   // 목표 제목 수정 모달 열기
   const handleEditGoal = () => {
     if (goal) {
@@ -110,9 +103,10 @@ export default function GoalPage({ params }: GoalPageProps) {
     setIsOpen(false);
   };
 
-  useEffect(() => {
-    updateProgress(todos);
-  }, [todos]);
+  // 이거 있어야 될 것 같은데?
+  // useEffect(() => {
+  //   updateProgress(todos);
+  // }, [todos]);
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
