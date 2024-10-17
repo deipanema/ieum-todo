@@ -1,6 +1,7 @@
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
+// 로그인 할 때, 바디에 받아서
 export const login = async (email: string, password: string) => {
   try {
     const { data } = await api.post("/auth/login", { email, password });

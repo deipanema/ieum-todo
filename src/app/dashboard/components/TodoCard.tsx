@@ -11,10 +11,6 @@ import useModal from "@/hook/useModal";
 import Todos from "./Todos";
 import ProgressBar from "./ProgressBar";
 
-type TodoCardProps = {
-  goal: GoalType;
-};
-
 export type TodoType = {
   noteId?: number | null; // noteId를 선택적으로 정의
   done: boolean;
@@ -38,7 +34,12 @@ export type GoalType = {
   updatedAt: string;
 };
 
-export default function TodoCard({ goal }: TodoCardProps) {
+type TodoCardProps = {
+  goal: GoalType;
+  onTodoCreated: (newTodo: TodoType) => void; // 여기 추가
+};
+
+export default function TodoCard({ goal, onTodoCreated }: TodoCardProps) {
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
   const [todos, setTodos] = useState<TodoType[]>([]);
@@ -47,6 +48,10 @@ export default function TodoCard({ goal }: TodoCardProps) {
   const activeTodos = todos.filter((todo) => !todo.done); // 완료되지 않은 할 일들
   const completedTodos = todos.filter((todo) => todo.done); // 완료된 할 일들
   const showMore = activeTodos.length > 5 || completedTodos.length > 5;
+
+  // const handleNewTodoCreated = (newTodo: TodoType) => {
+  //   setTodos((prevTodos) => [...prevTodos, newTodo]); // 새로운 할 일을 기존 목록에 추가
+  // };
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -105,7 +110,7 @@ export default function TodoCard({ goal }: TodoCardProps) {
           <ul>
             {/* 완료된 할 일 목록 나열 */}
             {completedTodos.slice(0, 5).map((todo) => (
-              <Todos key={todo.id} todo={todo} isGoal={false} />
+              <Todos key={todo.id} todo={todo} isGoal={false} onTodoCreated={onTodoCreated} />
             ))}
           </ul>
           {completedTodos.length === 0 && (
@@ -128,7 +133,8 @@ export default function TodoCard({ goal }: TodoCardProps) {
       )}
 
       <Modal name="CREATE_NEW_TODO" title="할 일 생성">
-        <CreateNewTodo closeCreateNewTodo={closeModal} goal={goal} /> {/* 할 일 추가 모달 */}
+        <CreateNewTodo closeCreateNewTodo={closeModal} goal={goal} onTodoCreated={onTodoCreated} />{" "}
+        {/* 할 일 추가 모달 */}
       </Modal>
     </div>
   );

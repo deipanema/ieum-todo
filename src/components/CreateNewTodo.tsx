@@ -32,13 +32,21 @@ export type GoalType = {
   updatedAt: string;
 };
 
+export type NewTodoType = {
+  title: string;
+  fileUrl?: string;
+  linkUrl?: string;
+  goalId: number;
+};
+
 type CreateNewTodoProps = {
   closeCreateNewTodo: () => void;
   goal?: GoalType;
   goals?: GoalType[]; // 사이드바에서 받아온 목표 리스트
+  onTodoCreated?: (newTodo: TodoType) => void; // 추가
 };
-
-export default function CreateNewTodo({ closeCreateNewTodo, goal, goals = [] }: CreateNewTodoProps) {
+export default function CreateNewTodo({ closeCreateNewTodo, goal, goals = [], onTodoCreated }: CreateNewTodoProps) {
+  const [file, setFile] = useState("");
   const [todo, setTodo] = useState<TodoType>({
     noteId: null,
     done: false,
@@ -98,7 +106,7 @@ export default function CreateNewTodo({ closeCreateNewTodo, goal, goals = [] }: 
       return;
     }
 
-    console.log(todo);
+    console.log("할 일 데이터:", todo); // 추가된 로그
     try {
       await createTodo(
         todo.title,
@@ -106,10 +114,15 @@ export default function CreateNewTodo({ closeCreateNewTodo, goal, goals = [] }: 
         todo.fileUrl ? todo.fileUrl : undefined,
         todo.linkUrl ? todo.linkUrl : undefined,
       );
+
+      // 안전하게 호출
+      if (onTodoCreated) {
+        onTodoCreated(todo); // 생성된 할 일을 부모에 알림
+      }
       closeCreateNewTodo();
       toast.success("할 일이 생성되었습니다.");
     } catch (error) {
-      console.log(error);
+      console.log("에러 발생:", error); // 에러 로그 추가
       toast.error("할 일 생성에 실패했습니다.");
     }
   };

@@ -36,10 +36,11 @@ export type GoalType = {
   updatedAt: string;
 };
 
-type TodoProps = {
+type TodosProps = {
   todo: TodoType;
   isGoal?: boolean;
   isInGoalSection?: boolean;
+  onTodoCreated?: (newTodo: TodoType) => void; // 추가
 };
 
 // type toggleTodoStatusType = {
@@ -73,7 +74,7 @@ export type NoteType = {
   userId: number;
 };
 
-export default function Todos({ todo, isGoal = false, isInGoalSection = false }: TodoProps) {
+export default function Todos({ todo, isGoal = false, isInGoalSection = false, onTodoCreated }: TodosProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -224,7 +225,7 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
         </div>
       </ul>
       <Modal name="EDIT_TODO" title="할 일 수정">
-        <CreateNewTodo closeCreateNewTodo={closeModal} goals={goals} />
+        <CreateNewTodo closeCreateNewTodo={closeModal} goals={goals} onTodoCreated={onTodoCreated} />
       </Modal>
       <NoteViewer isNoteOpen={isNoteOpen} setIsNoteOpen={setIsNoteOpen} noteContent={noteContent} />
     </div>

@@ -45,32 +45,29 @@ export type GoalType = {
 };
 
 export default function Dashboard() {
-  const { goals, refreshGoals } = useGoalStore();
-  const { ref, inView } = useInView();
   const [recentTodos, setRecentTodos] = useState<TodoType[]>([]);
   const [isTodosLoading, setIsTodosLoading] = useState(true);
   const [ratio, setRatio] = useState(0);
   const [progressValue, setProgressValue] = useState(0);
+  const { goals } = useGoalStore();
 
-  /** 있어야되나....? 흠 */
-  // 페이지 로드 시 목표 목록을 새로고침
-  useEffect(() => {
-    refreshGoals(); 
-  }, [refreshGoals]);
+  const handleNewTodoCreated = (newTodo: TodoType) => {
+    setRecentTodos((prevTodos) => [newTodo, ...prevTodos]); // 새 할 일을 최근 할 일 목록의 맨 앞에 추가
+  };
 
   const fetchRecentTodos = async () => {
     try {
       const todos = await getAllTodos();
-
-      const total = todos.totalCount;
-      const dones = todos.todos.filter((todo: TodoType) => todo.done === true);
-      setRatio(Math.round((dones.length / total) * 100));
-
       // 생성일 기준 내림차순으로 정렬 후 최근 4개의 할 일만 가져오기
+      console.log(todos);
       const sortedTodos = todos.todos.sort(
         (a: TodoType, b: TodoType) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
       setRecentTodos(sortedTodos.slice(0, 4));
+      const total = todos.totalCount;
+      const dones = todos.todos.filter((todo: TodoType) => todo.done === true);
+
+      setRatio(Math.round((dones.length / total) * 100));
     } catch (error) {
       console.error("Failed to fetch todos", error);
     } finally {
@@ -98,12 +95,18 @@ export default function Dashboard() {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
+  const { ref, inView } = useInView();
+
+  console.log("inView", inView);
+  console.log("hasNextPage", hasNextPage);
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
+      console.log("****************");
       fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // Loading state
   if (isGoalsLoading || isTodosLoading) {
     return <LoadingScreen />;
   }
@@ -127,36 +130,30 @@ export default function Dashboard() {
               {recentTodos.length === 0 ? (
                 <p className="flex items-center justify-center">최근에 등록한 할 일이 없어요</p>
               ) : (
-                recentTodos.map((todo) => <Todos key={todo.id} todo={todo} isGoal={!!todo.goal.id} />)
+                recentTodos.map((todo) => <Todos key={todo.id} todo={todo} />)
               )}
             </div>
             <ProgressTracker ratio={ratio} progressValue={progressValue} setProgressValue={setProgressValue} />
           </div>
-
           <div className="rounded-3 mt-6 flex h-auto w-[306px] flex-col gap-4 bg-white px-6 py-4 sm:w-auto">
-            {data?.pages.flatMap((page) => page.goals).length === 0 ? (
-              <p className="text-center">등록한 할 일이 없습니다.</p>
-            ) : (
-              <>
-                <div className="flex items-center gap-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[15px] bg-[#F97316]">
-                    <Image src="/dashboard-flag.svg" width={24} height={24} alt="goal-task-icon" />
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[15px] bg-[#F97316]">
+                <Image src="/dashboard-flag.svg" width={24} height={24} alt="recent-task-icon" />
+              </div>
+              <h2 className="text-lg font-semibold">목표 별 할 일</h2>
+            </div>
+            <div className="flex h-[465px] grid-cols-2 flex-col gap-4 overflow-y-auto p-2 sm:grid">
+              {data?.pages.map((page) =>
+                page.goals.map((goal: GoalType) => (
+                  <div key={goal.id} className="col-span-2">
+                    <TodoCard goal={goal} onTodoCreated={handleNewTodoCreated} />
                   </div>
-                  <h2 className="text-lg font-semibold">목표 별 할 일</h2>
-                </div>
-                <div className="flex max-h-[465px] grid-cols-2 flex-col gap-4 overflow-y-auto p-2 sm:grid">
-                    {goals.map((goal) => (
-                      <div key={goal.id} className="col-span-2">
-                        {/* 각 목표의 할 일들을 나열하기 위해 TodoCard 컴포넌트 사용 */}
-                        <TodoCard goal={goal} />
-                      </div>
-                    ))}
-                    <div ref={ref}>
-                      {goals.length > 0 ? <LoadingSpinner /> : null}
-                    </div>
-                  </div>
-                </>
-            )}
+                )),
+              )}
+              <div ref={ref}>
+                <LoadingSpinner />
+              </div>
+            </div>
           </div>
         </div>
       </div>
