@@ -6,4 +6,6 @@ workflows:
   build:
     jobs:
       - "cypress/run":
-          start-command: "npm run start"
+          start-command: "npm run dev"
+          wait-on: "http://localhost:3000/"
+          command: "npm run cy:run"
