@@ -4,27 +4,20 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { deleteTodos, patchTodo } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import { getNotes } from "@/api/noteAPI";
+import useTodoStore from "@/store/todoStore";
+import { deleteTodo } from "@/api/todoAPI";
 
 import NoteViewer from "./NoteViewer";
-
-export type GoalType = {
-  updatedAt: string;
-  createdAt: string;
-  title: string;
-  id: number;
-  userId: number;
-  teamId: string;
-};
+import { useGoalStore } from "@/store/goalStore";
 
 export type TodoType = {
-  noteId: number | null;
+  noteId?: number | null; // noteId를 선택적으로 정의
   done: boolean;
-  linkUrl: string | null;
-  fileUrl: string | null;
+  linkUrl?: string | null;
+  fileUrl?: string | null;
   title: string;
   id: number;
   goal: GoalType;
@@ -34,23 +27,32 @@ export type TodoType = {
   createdAt: string;
 };
 
-type TodoProps = {
+export type GoalType = {
+  id: number;
+  teamId: string;
+  title: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type TodosProps = {
   todo: TodoType;
-  onTodoUpdate: (updatedTodo: TodoType) => void;
   isGoal?: boolean;
   isInGoalSection?: boolean;
+  onTodoCreated?: (newTodo: TodoType) => void; // 추가
 };
 
-type toggleTodoStatusType = {
-  title: string;
-  goalId: number;
-  fileUrl: string;
-  linkUrl: string;
-  done: boolean;
-  todoId: number;
-};
+// type toggleTodoStatusType = {
+//   title: string;
+//   goalId: number;
+//   fileUrl: string;
+//   linkUrl: string;
+//   done: boolean;
+//   todoId: number;
+// };
 
-export interface NoteType {
+export type NoteType = {
   content: string;
   createdAt: string;
   goal: {
@@ -70,33 +72,22 @@ export interface NoteType {
   };
   updatedAt: string;
   userId: number;
-}
+};
 
-export default function Todos({ todo, onTodoUpdate, isGoal = false, isInGoalSection = false }: TodoProps) {
+export default function Todos({ todo, isGoal = false, isInGoalSection = false, onTodoCreated }: TodosProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const { Modal, openModal, closeModal } = useModal();
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [noteContent, setNoteContent] = useState<NoteType>();
-
-  const toggleTodoStatus = async ({ title, goalId, fileUrl, linkUrl, done, todoId }: toggleTodoStatusType) => {
-    const updatedTodo = { ...todo, done: !done };
-    onTodoUpdate(updatedTodo);
-    try {
-      await patchTodo(title, goalId, !done, todoId, fileUrl, linkUrl);
-    } catch (error) {
-      console.error("할 일 상태 변경 중 오류 발생:", error);
-      onTodoUpdate({ ...updatedTodo, done: done });
-    }
-  };
+  const { updateTodo } = useTodoStore();
+  const { goals } = useGoalStore();
 
   const fetchNoteContent = async () => {
     if (todo.noteId) {
       const response = await getNotes(todo.noteId);
-      if (response) {
-        setNoteContent(response);
-      }
+      setNoteContent(response);
     }
   };
 
@@ -107,12 +98,7 @@ export default function Todos({ todo, onTodoUpdate, isGoal = false, isInGoalSect
   // };
 
   const handleDelete = async () => {
-    try {
-      const response = await deleteTodos(todo.id as number);
-      return response;
-    } catch (error) {
-      console.error("목표 삭제 중 오류 발생:", error);
-    }
+    await deleteTodo(todo.id);
   };
 
   useEffect(() => {
@@ -127,12 +113,12 @@ export default function Todos({ todo, onTodoUpdate, isGoal = false, isInGoalSect
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, todo.noteId]);
 
-  useEffect(() => {
-    fetchNoteContent();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   fetchNoteContent();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   return (
     <div>
@@ -144,16 +130,7 @@ export default function Todos({ todo, onTodoUpdate, isGoal = false, isInGoalSect
             width={todo.done === true ? 18 : 24}
             height={todo.done === true ? 18 : 24}
             alt="checkbox-icon"
-            onClick={() =>
-              toggleTodoStatus({
-                title: todo.title,
-                goalId: todo.goal.id,
-                fileUrl: todo.fileUrl as string,
-                linkUrl: todo.linkUrl as string,
-                done: todo.done,
-                todoId: todo.id,
-              })
-            }
+            onClick={() => updateTodo(todo.id, { ...todo, done: !todo.done })}
           />
 
           <span className={`text-sm ${todo.done ? "line-through" : ""}`}>{todo.title}</span>
@@ -248,16 +225,7 @@ export default function Todos({ todo, onTodoUpdate, isGoal = false, isInGoalSect
         </div>
       </ul>
       <Modal name="EDIT_TODO" title="할 일 수정">
-        <CreateNewTodo
-          closeCreateNewTodo={closeModal}
-          todoId={todo.id}
-          goal={todo.goal}
-          title={todo.title}
-          fileUrl={todo.fileUrl || undefined}
-          linkUrl={todo.linkUrl || undefined}
-          isEdit
-          onUpdate={onTodoUpdate}
-        />
+        <CreateNewTodo closeCreateNewTodo={closeModal} goals={goals} onTodoCreated={onTodoCreated} />
       </Modal>
       <NoteViewer isNoteOpen={isNoteOpen} setIsNoteOpen={setIsNoteOpen} noteContent={noteContent} />
     </div>

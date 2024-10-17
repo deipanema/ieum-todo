@@ -14,13 +14,17 @@ export interface ErrorType {
 }
 
 // 목표 목록 가져오기 (GET)
+// 모든 목표를 가져오는 함수
 export const getGoals = async () => {
   try {
     const response = await api.get(`/goals`);
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<ErrorType>;
-    toast.error(axiosError.message);
+    console.error("Goals fetch error:", error);
+    // const axiosError = error as AxiosError<ErrorType>;
+    // toast.error(
+    //   axiosError.response?.data?.message || axiosError.message || "목표 목록을 가져오는 중 오류가 발생했습니다.",
+    // );
   }
 };
 
@@ -35,13 +39,15 @@ export const PostGoal = async (title: string) => {
   }
 };
 
+// 특정 ID로 목표를 가져오는 함수
 export const getGoal = async (id: number) => {
   try {
     const response = await api.get(`/goals/${id}`);
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<ErrorType>;
-    toast.error(axiosError.message);
+    console.error("Goal fetch error:", error);
+    //  const axiosError = error as AxiosError<ErrorType>;
+    // toast.error(axiosError.response?.data?.message || axiosError.message || "목표를 가져오는 중 오류가 발생했습니다.");
   }
 };
 

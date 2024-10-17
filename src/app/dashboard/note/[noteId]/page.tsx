@@ -3,11 +3,13 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 
 import useModal from "@/hook/useModal";
 import { getNotes, patchNotes, postNotes } from "@/api/noteAPI";
 import { getTodos } from "@/api/todoAPI";
 import UploadLinkModal from "@/components/UploadLinkModal";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export type GoalType = {
   id: number;
@@ -67,35 +69,52 @@ export default function NotePage() {
   const todoId = Number(pathName.split("/").at(-1));
   const goalId = Number(searchParams.get("goalId"));
 
-  const getNote = async () => {
+  // 노트와 할 일 가져오는 함수
+  const fetchNote = async () => {
     const todoResponse = await getTodos(goalId);
     const findTodo = todoResponse.todos.find((todo: TodoType) => todo.id === todoId);
     setTodo(findTodo);
 
-    if (note?.id) {
-      const noteResponse = await getNotes(note.id);
-      setNote(noteResponse);
-      setTitle(noteResponse.title);
-      setContent(noteResponse.content);
-      setLink(noteResponse.linkUrl);
+    if (findTodo?.noteId) {
+      const noteResponse = await getNotes(findTodo.noteId);
+      return noteResponse; // 노트 데이터 반환
     }
+
+    return null; // 노트가 없을 경우 null 반환
   };
 
-  const handleSubmit = async (type: string) => {
-    if (type === "write") {
-      const response = await postNotes(todoId, title, content, link ? link : null);
-      if (response) {
-        setNote(response);
-        toast.success("작성완료");
-        router.back();
-      }
-    } else if (type === "edit") {
-      const response = await patchNotes(Number(note?.id), title, content, link ? link : null);
-      if (response) {
-        setNote(response);
-        toast.success("수정완료");
-        router.back();
-      }
+  // React Query를 사용하여 노트 데이터를 가져옴
+  const {
+    data: fetchedNote,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["note", todoId], // 고유 쿼리 키 설정
+    queryFn: fetchNote,
+    enabled: !!todoId, // todoId가 존재할 때만 쿼리 실행
+  });
+
+  // fetchedNote가 변경되면 상태 업데이트
+  useEffect(() => {
+    if (fetchedNote) {
+      setNote(fetchedNote);
+      setTitle(fetchedNote.title);
+      setContent(fetchedNote.content);
+      setLink(fetchedNote.linkUrl);
+    }
+  }, [fetchedNote]);
+
+  // 제출 처리
+  const handleSubmit = async (type: "write" | "edit") => {
+    const response =
+      type === "write"
+        ? await postNotes(todoId, title, content, link || null)
+        : await patchNotes(Number(note?.id), title, content, link || null);
+
+    if (response) {
+      setNote(response);
+      toast.success(type === "write" ? "작성이 완료되었습니다." : "수정이 완료되었습니다.");
+      router.back();
     }
   };
 
@@ -138,36 +157,20 @@ export default function NotePage() {
   };
 
   useEffect(() => {
-    getNote();
     autoSaveDraft();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  if (isError) {
+    return <p>노트를 불러오는 데 오류가 발생했습니다.</p>;
+  }
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="flex">
-      {/* <div className="relative flex w-1/2 flex-col items-center justify-center gap-3 sm:flex-row">
-        <div className="left-0 right-0 top-0 flex h-10 justify-end bg-white p-2 sm:absolute">
-          <Image
-            className="cursor-pointer"
-            src="/modal-close.svg"
-            width={13}
-            height={13}
-            alt="close-icon"
-            onClick={() => {}}
-          />
-        </div>
-
-         <iframe
-            src={link ? (link.startsWith("http://") || link.startsWith("https://") ? link : `https://${link}`) : ""}
-            className="h-1/2 w-full"
-            title="Embedded Link"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms" // 보안 관련 옵션 추가 가능
-          /> 
-        <Link className="hover:underline" href={link.includes("https://") ? link : `https://${link}`} target="_blank">
-          <p>새창에서 열기</p>
-        </Link>
-      </div> */}
-
       <form className="mt-[51px] h-[calc(100vh-51px)] w-full bg-white lg:mt-0 lg:h-screen">
         <div className="h-[calc(100vh-40px)] w-full p-6 2xl:w-[1200px]">
           <div className="mb-6 flex items-center justify-between">

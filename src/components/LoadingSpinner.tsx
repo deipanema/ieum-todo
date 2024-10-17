@@ -7,7 +7,7 @@ export default function LoadingSpinner() {
       data-testid="spinner"
       animate={{ rotate: 360 }}
       transition={{
-        repeat: Infinity,
+        // repeat: Infinity,
         duration: 1,
         ease: "linear",
       }}

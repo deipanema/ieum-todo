@@ -1,17 +1,19 @@
 "use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 
 import { getInfinityScrollGoals } from "@/api/goalAPI";
-import { getAllData, patchTodo } from "@/api/todoAPI";
 import LoadingSpinner from "@/components/LoadingSpinner";
-
+import LoadingScreen from "@/components/LoadingScreen";
+import { getAllTodos } from "@/api/todoAPI";
 import TodoCard from "./components/TodoCard";
 import Todos from "./components/Todos";
 import ProgressTracker from "./components/ProgressTracker";
+import { useGoalStore } from "@/store/goalStore";
 
 export type TodosResponse = {
   totalCount: number;
@@ -19,20 +21,11 @@ export type TodosResponse = {
   todos: TodoType[];
 };
 
-export type GoalType = {
-  updatedAt: string;
-  createdAt: string;
-  title: string;
-  id: number;
-  userId: number;
-  teamId: string;
-};
-
 export type TodoType = {
-  noteId: number | null;
+  noteId?: number | null; // noteId를 선택적으로 정의
   done: boolean;
-  linkUrl: string | null;
-  fileUrl: string | null;
+  linkUrl?: string | null;
+  fileUrl?: string | null;
   title: string;
   id: number;
   goal: GoalType;
@@ -42,55 +35,57 @@ export type TodoType = {
   createdAt: string;
 };
 
+export type GoalType = {
+  id: number;
+  teamId: string;
+  title: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export default function Dashboard() {
   const [recentTodos, setRecentTodos] = useState<TodoType[]>([]);
-  const [progressValue, setProgressValue] = useState(0);
+  const [isTodosLoading, setIsTodosLoading] = useState(true);
   const [ratio, setRatio] = useState(0);
+  const [progressValue, setProgressValue] = useState(0);
+  const { goals } = useGoalStore();
 
-  const fetchData = useCallback(async () => {
+  const handleNewTodoCreated = (newTodo: TodoType) => {
+    setRecentTodos((prevTodos) => [newTodo, ...prevTodos]); // 새 할 일을 최근 할 일 목록의 맨 앞에 추가
+  };
+
+  const fetchRecentTodos = async () => {
     try {
-      const todosResponse = await getAllData();
-
-      const sortedTodos = todosResponse?.data.todos.sort((a: TodoType, b: TodoType) => {
-        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-      });
+      const todos = await getAllTodos();
+      // 생성일 기준 내림차순으로 정렬 후 최근 4개의 할 일만 가져오기
+      console.log(todos);
+      const sortedTodos = todos.todos.sort(
+        (a: TodoType, b: TodoType) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
       setRecentTodos(sortedTodos.slice(0, 4));
+      const total = todos.totalCount;
+      const dones = todos.todos.filter((todo: TodoType) => todo.done === true);
 
-      const total = todosResponse?.data.totalCount;
-      const dones = todosResponse?.data.todos.filter((todo: TodoType) => todo.done === true);
       setRatio(Math.round((dones.length / total) * 100));
     } catch (error) {
-      console.error("데이터를 가져오는 중 오류가 발생했습니다:", error);
+      console.error("Failed to fetch todos", error);
+    } finally {
+      setIsTodosLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchRecentTodos();
   }, []);
 
-  const handleTodoUpdate = useCallback(async (updatedTodo: TodoType) => {
-    try {
-      const response = await patchTodo(
-        updatedTodo.title,
-        updatedTodo.goal.id,
-        updatedTodo.done,
-        updatedTodo.id,
-        updatedTodo.fileUrl || "",
-        updatedTodo.linkUrl || "",
-      );
-      if (response) {
-        setRecentTodos((prevTodos) =>
-          prevTodos.map((todo) => (todo.id === updatedTodo.id ? { ...todo, ...updatedTodo } : todo)),
-        );
-        // 전체 todos 업데이트를 위해 데이터를 다시 불러옵니다.
-        fetchData();
-      }
-    } catch (error) {
-      console.error("할 일 업데이트 중 오류 발생:", error);
-    }
-  }, []);
-
-  // const handleTodoUpdate = (updatedTodo: TodoType) => {
-  //   setRecentTodos((prevTodos) => prevTodos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)));
-  // };
-
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isGoalsLoading,
+  } = useInfiniteQuery({
     queryKey: ["goals"],
     queryFn: async ({ pageParam }) => {
       const response = await getInfinityScrollGoals({ cursor: pageParam, size: 3, sortOrder: "oldest" });
@@ -102,53 +97,19 @@ export default function Dashboard() {
 
   const { ref, inView } = useInView();
 
+  console.log("inView", inView);
+  console.log("hasNextPage", hasNextPage);
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
+      console.log("****************");
       fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const todosResponse = await getAllData();
-
-        const sortedTodos = todosResponse?.data.todos.sort((a: TodoType, b: TodoType) => {
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        });
-        setRecentTodos(sortedTodos.slice(0, 4));
-
-        const total = todosResponse?.data.totalCount;
-        const dones = todosResponse?.data.todos.filter((todo: TodoType) => todo.done === true);
-        setRatio(Math.round((dones.length / total) * 100));
-      } catch (error) {
-        console.error("데이터를 가져오는 중 오류가 발생했습니다:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const content = data?.pages.map((page) => {
-    return page.goals.map((goal: GoalType, i: number) => {
-      if (page.goals.length === i + 1) {
-        return (
-          <div key={goal.id} className="col-span-2">
-            <TodoCard id={goal.id} onTodoUpdate={handleTodoUpdate} />
-          </div>
-        );
-      }
-      return (
-        <div key={goal.id} className="col-span-2">
-          <TodoCard id={goal.id} onTodoUpdate={handleTodoUpdate} />
-        </div>
-      );
-    });
-  });
+  // Loading state
+  if (isGoalsLoading || isTodosLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="relative">
@@ -169,10 +130,7 @@ export default function Dashboard() {
               {recentTodos.length === 0 ? (
                 <p className="flex items-center justify-center">최근에 등록한 할 일이 없어요</p>
               ) : (
-                Array.isArray(recentTodos) &&
-                recentTodos.map((todo: TodoType) => (
-                  <Todos key={todo.id} todo={todo} onTodoUpdate={handleTodoUpdate} isGoal={true} />
-                ))
+                recentTodos.map((todo) => <Todos key={todo.id} todo={todo} />)
               )}
             </div>
             <ProgressTracker ratio={ratio} progressValue={progressValue} setProgressValue={setProgressValue} />
@@ -184,8 +142,14 @@ export default function Dashboard() {
               </div>
               <h2 className="text-lg font-semibold">목표 별 할 일</h2>
             </div>
-            <div className="flex max-h-[465px] grid-cols-2 flex-col gap-4 overflow-y-auto p-2 sm:grid">
-              {content}
+            <div className="flex h-[465px] grid-cols-2 flex-col gap-4 overflow-y-auto p-2 sm:grid">
+              {data?.pages.map((page) =>
+                page.goals.map((goal: GoalType) => (
+                  <div key={goal.id} className="col-span-2">
+                    <TodoCard goal={goal} onTodoCreated={handleNewTodoCreated} />
+                  </div>
+                )),
+              )}
               <div ref={ref}>
                 <LoadingSpinner />
               </div>

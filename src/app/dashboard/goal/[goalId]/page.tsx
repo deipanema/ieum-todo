@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 import { useGoalStore } from "@/store/goalStore";
 import { deleteGoal, ErrorType } from "@/api/goalAPI";
@@ -11,26 +12,14 @@ import { getTodos } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import EditGoalTitleModal from "@/components/EditGoalTitleModal";
+import LoadingScreen from "@/components/LoadingScreen";
+import useTodoStore, { TodoType } from "@/store/todoStore";
 
 import Todos from "../../components/Todos";
 import ProgressBar from "../../components/ProgressBar";
 
 type GoalPageProps = {
   params: { goalId: string };
-};
-
-export type TodoType = {
-  noteId: number | null;
-  done: boolean;
-  linkUrl: string | null;
-  fileUrl: string | null;
-  title: string;
-  id: number;
-  goal: GoalType;
-  userId: number;
-  teamId: string;
-  updatedAt: string;
-  createdAt: string;
 };
 
 export type GoalType = {
@@ -46,30 +35,38 @@ export default function GoalPage({ params }: GoalPageProps) {
   const { goalId } = params;
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
-  const [progress, setProgress] = useState(0);
-  const { goals } = useGoalStore();
-  const [todos, setTodos] = useState<TodoType[]>([]);
+  const { goals, refreshGoals } = useGoalStore();
+  const { todos, setTodos } = useTodoStore();
   const [goal, setGoal] = useState<GoalType | null>(null);
+  const [progress, setProgress] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
+  // 목표 찾기
   useEffect(() => {
     setGoal(goals.find((goal) => goal.id === Number(goalId)) || null);
   }, [goals, goalId]);
 
   // 할 일 데이터 가져오기
-  const fetchTodos = async () => {
-    if (goal) {
-      const todoResponse = await getTodos(goal.id);
-      const todosArray = Array.isArray(todoResponse?.todos) ? todoResponse.todos : [];
-      setTodos(todosArray);
-      updateProgress(todosArray);
-    }
+  const fetchTodos = async (goalId: number) => {
+    const todoResponse = await getTodos(goalId);
+    return Array.isArray(todoResponse?.todos) ? todoResponse.todos : [];
   };
 
+  // React Query를 사용하여 할 일 데이터를 가져옴
+  const { data: todosData, isLoading: isTodosLoading } = useQuery({
+    queryKey: ["todos", goalId],
+    queryFn: () => fetchTodos(goal ? goal.id : 0), // goal이 있을 때만 호출
+    enabled: !!goal, // goal이 있을 때만 쿼리 실행
+  });
+
+  // 할 일 업데이트 및 진행률 계산
   useEffect(() => {
-    fetchTodos();
-  }, []);
+    if (todosData) {
+      setTodos(todosData);
+      updateProgress(todosData);
+    }
+  }, [setTodos, todosData]);
 
   const updateProgress = (todosArray: TodoType[]) => {
     if (todosArray.length > 0) {
@@ -81,12 +78,14 @@ export default function GoalPage({ params }: GoalPageProps) {
     }
   };
 
+  // 목표 삭제 처리
   const handleDelete = async () => {
     if (goal) {
       try {
         const response = await deleteGoal(goal.id);
         if (response) {
-          toast.success("삭제완료");
+          toast.success("목표가 삭제되었습니다.");
+          await refreshGoals(); // 사이드바의 목표 상태를 업데이트
           router.push("/");
         }
       } catch (error) {
@@ -96,12 +95,7 @@ export default function GoalPage({ params }: GoalPageProps) {
     }
   };
 
-  const handleTodoUpdate = (updatedTodo: TodoType) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((prevTodo) => (prevTodo.id === updatedTodo.id ? { ...prevTodo, ...updatedTodo } : prevTodo)),
-    );
-  };
-
+  // 목표 제목 수정 모달 열기
   const handleEditGoal = () => {
     if (goal) {
       openModal("EDIT_GOAL_TITLE");
@@ -109,10 +103,12 @@ export default function GoalPage({ params }: GoalPageProps) {
     setIsOpen(false);
   };
 
-  useEffect(() => {
-    updateProgress(todos);
-  }, [todos]);
+  // 이거 있어야 될 것 같은데?
+  // useEffect(() => {
+  //   updateProgress(todos);
+  // }, [todos]);
 
+  // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -126,6 +122,10 @@ export default function GoalPage({ params }: GoalPageProps) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  if (isTodosLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="mt-[51px] h-auto min-h-[calc(100vh)] w-full select-none bg-slate-100 lg:mt-0 lg:h-screen">
@@ -184,9 +184,7 @@ export default function GoalPage({ params }: GoalPageProps) {
             </div>
             <ul>
               {Array.isArray(todos) &&
-                todos
-                  .filter((todo) => !todo.done)
-                  .map((todo) => <Todos key={todo.id} todo={todo} onTodoUpdate={handleTodoUpdate} isGoal={false} />)}
+                todos.filter((todo) => !todo.done).map((todo) => <Todos key={todo.id} todo={todo} isGoal={false} />)}
             </ul>
             {Array.isArray(todos) && todos.filter((todo) => !todo.done).length === 0 && (
               <div className="mx-auto my-auto text-sm text-slate-500">해야할 일이 아직 없어요.</div>
@@ -199,9 +197,7 @@ export default function GoalPage({ params }: GoalPageProps) {
             </div>
             <ul>
               {Array.isArray(todos) &&
-                todos
-                  .filter((todo) => todo.done)
-                  .map((todo) => <Todos key={todo.id} todo={todo} onTodoUpdate={handleTodoUpdate} isGoal={false} />)}
+                todos.filter((todo) => todo.done).map((todo) => <Todos key={todo.id} todo={todo} isGoal={false} />)}
             </ul>
             {Array.isArray(todos) && todos.filter((todo) => todo.done).length === 0 && (
               <div className="mx-auto my-auto text-sm text-slate-500">다 한 일이 아직 없어요.</div>
@@ -210,7 +206,7 @@ export default function GoalPage({ params }: GoalPageProps) {
         </div>
       </div>
       <Modal name="CREATE_NEW_TODO" title="할 일 생성">
-        <CreateNewTodo closeCreateNewTodo={closeModal} />
+        <CreateNewTodo closeCreateNewTodo={closeModal} goalId={goal?.id} />
       </Modal>
       <Modal name="EDIT_GOAL_TITLE" title="목표 수정">
         <EditGoalTitleModal closeEditTitle={closeModal} goals={goal as GoalType} />
