@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 
 import { getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
@@ -14,8 +15,6 @@ import ProgressBar from "./ProgressBar";
 
 export type TodoCardProps = {
   id: number;
-  todos: TodoType[];
-  setTodos: Dispatch<SetStateAction<TodoType[]>>;
 };
 
 export type GoalType = {
@@ -41,15 +40,37 @@ export type TodoType = {
   createdAt: string;
 };
 
-export default function TodoCard({ id, todos, setTodos }: TodoCardProps) {
+export default function TodoCard({ id }: TodoCardProps) {
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
   const [progress, setProgress] = useState(0);
-  const [goals, setGoals] = useState<GoalType | null>(null);
+  const [goal, setGoal] = useState<GoalType | null>(null);
 
-  //const { todos, setTodos, updateTodo } = useTodoStore();
-  const activeTodos = Array.isArray(todos) ? todos.filter((todo) => !todo.done) : [];
-  const completedTodos = Array.isArray(todos) ? todos.filter((todo) => todo.done) : [];
+  // 목표 데이터 가져오기
+  const { data: goalData, error: goalError } = useQuery({
+    queryKey: ["goal", id], // 쿼리 키
+    queryFn: () => getGoal(id), // 쿼리 함수
+  });
+
+  // 할 일 목록 가져오기
+  const { data: todosData, error: todosError } = useQuery({
+    queryKey: ["todos", goalData?.id], // 쿼리 키
+    queryFn: () => getTodos(goalData.id), // 쿼리 함수
+    enabled: !!goalData?.id, // 목표가 존재할 때만 쿼리 실행
+  });
+
+  // 목표 데이터가 변경될 때마다 setGoal 호출
+  useEffect(() => {
+    if (goalData) {
+      setGoal(goalData);
+    }
+  }, [goalData]);
+
+  console.log(todosData); // todosData 로그 출력
+
+  // todosData에서 todos 배열 가져오기
+  const activeTodos = Array.isArray(todosData?.todos) ? todosData.todos.filter((todo: TodoType) => !todo.done) : [];
+  const completedTodos = Array.isArray(todosData?.todos) ? todosData.todos.filter((todo: TodoType) => todo.done) : [];
   const showMore = activeTodos.length > 5 || completedTodos.length > 5;
 
   // const handleTodoUpdate = async (updatedTodo: TodoType) => {
@@ -58,36 +79,23 @@ export default function TodoCard({ id, todos, setTodos }: TodoCardProps) {
   // };
 
   useEffect(() => {
-    setProgress(Math.round((completedTodos.length / todos.length) * 100));
-  }, [completedTodos.length, todos.length]);
+    // completedTodos.length가 0일 경우를 고려하여 0으로 나누는 것을 방지
+    const totalTodos = todosData?.todos.length || 1; // todosData가 없거나 todos 배열이 없을 때 1로 설정
+    setProgress(Math.round((completedTodos.length / totalTodos) * 100));
+  }, [completedTodos.length, todosData?.todos.length]); // todosData의 todos 길이로 의존성 추가
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const goalResponse = await getGoal(id);
-        setGoals(goalResponse);
-
-        if (goalResponse?.id) {
-          const todoResponse = await getTodos(goalResponse.id);
-          const fetchedTodos = Array.isArray(todoResponse?.todos) ? todoResponse.todos : [];
-          setTodos(fetchedTodos);
-        }
-      } catch (error) {
-        console.error("데이터를 가져오는 중 오류 발생:", error);
-      }
-    }
-
-    fetchData();
-  }, [id]);
+  if (goalError || todosError) {
+    return <div>데이터를 가져오는 중 오류가 발생했습니다.</div>;
+  }
 
   return (
     <div className="h-auto min-h-[231px] w-full select-none rounded-2xl bg-blue-50 p-6">
       <div className="flex justify-between">
         <h2
           className="mb-2 cursor-pointer text-2xl font-bold hover:underline"
-          onClick={() => router.push(`/dashboard/goal/${goals?.id}`)}
+          onClick={() => router.push(`/dashboard/goal/${goal?.id}`)}
         >
-          {goals?.title}
+          {goal?.title}
         </h2>
         <button className="cursor-pointer text-blue-500" onClick={() => openModal("CREATE_NEW_TODO")}>
           <span className="text-sm">+ 할일 추가</span>
@@ -102,7 +110,7 @@ export default function TodoCard({ id, todos, setTodos }: TodoCardProps) {
         <div className="w-full">
           <h3 className="mb-3 text-lg font-semibold">To do</h3>
           <ul>
-            {activeTodos.slice(0, 5).map((todo) => (
+            {activeTodos.slice(0, 5).map((todo: TodoType) => (
               <Todos key={todo.id} todo={todo} isGoal={false} />
             ))}
           </ul>
@@ -115,7 +123,7 @@ export default function TodoCard({ id, todos, setTodos }: TodoCardProps) {
         <div className="w-full">
           <h3 className="mb-3 text-lg font-semibold">Done</h3>
           <ul>
-            {completedTodos.slice(0, 5).map((todo) => (
+            {completedTodos.slice(0, 5).map((todo: TodoType) => (
               <Todos key={todo.id} todo={todo} isGoal={false} />
             ))}
           </ul>
@@ -131,7 +139,7 @@ export default function TodoCard({ id, todos, setTodos }: TodoCardProps) {
         <div className="mt-4 flex justify-center">
           <button
             className="flex w-[120px] cursor-pointer items-center justify-center rounded-2xl bg-white py-[6px]"
-            onClick={() => router.push(`/dashboard/goal/${goals?.id}`)}
+            onClick={() => router.push(`/dashboard/goal/${goal?.id}`)}
           >
             <span>더보기</span>
             <Image src="/modal-arrowdown.svg" width={24} height={24} alt="button-arrow-icon" />

@@ -74,7 +74,7 @@ export const PatchGoal = async (id: number, title: string) => {
 export const getInfinityScrollGoals = async ({
   cursor,
   size = 3,
-  sortOrder = "oldest",
+  sortOrder = "newest",
 }: {
   cursor: number | undefined;
   size: number;
