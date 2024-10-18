@@ -13,7 +13,7 @@ export type GoalType = {
 
 export type GoalState = {
   goals: GoalType[];
-  addGoal: (little: string) => Promise<GoalType>;
+  addGoal: (tittle: string) => Promise<GoalType>;
   updateGoal: (id: number, title: string) => Promise<GoalType>;
   refreshGoals: () => Promise<void>;
 };

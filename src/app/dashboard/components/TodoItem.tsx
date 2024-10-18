@@ -3,119 +3,59 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query"; // useQueryClient 추가
 
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
+import { NoteType, TodoType } from "@/app/Types/TodoGoalType";
+import { deleteTodo, toggleTodo } from "@/api/todoAPI";
 import { getNotes } from "@/api/noteAPI";
-import { TodoType } from "@/store/todoStore";
-import { deleteTodo, updateTodo } from "@/api/todoAPI";
 
 import NoteViewer from "./NoteViewer";
 
-export type GoalType = {
-  updatedAt: string;
-  createdAt: string;
-  title: string;
-  id: number;
-  userId: number;
-  teamId: string;
-};
-
 type TodoProps = {
   todo: TodoType;
-  isGoal?: boolean;
-  isInGoalSection?: boolean;
+  isTodoCardRelated?: boolean;
+  inTodoCard?: boolean;
 };
 
-// type toggleTodoStatusType = {
-//   title: string;
-//   goalId: number;
-//   fileUrl: string;
-//   linkUrl: string;
-//   done: boolean;
-//   todoId: number;
-// };
-
-export interface NoteType {
-  content: string;
-  createdAt: string;
-  goal: {
-    id: number;
-    title: string;
-  };
-  id: number;
-  linkUrl: string;
-  teamId: string;
-  title: string;
-  todo: {
-    done: boolean;
-    fileUrl: string | null;
-    id: number;
-    linkUrl: string | null;
-    title: string;
-  };
-  updatedAt: string;
-  userId: number;
-}
-
-export default function Todos({ todo, isGoal = false, isInGoalSection = false }: TodoProps) {
+export default function TodoItem({ todo, isTodoCardRelated = true, inTodoCard }: TodoProps) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const { Modal, openModal, closeModal } = useModal();
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [noteContent, setNoteContent] = useState<NoteType>();
 
-  const queryClient = useQueryClient();
-
-  const updateTodoMutation = useMutation({
-    mutationFn: (updatedTodo: TodoType) => updateTodo(todo.id, updatedTodo),
-    onSuccess: () => {
-      // 할 일 목록 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ["todos", todo.goal.id] });
-    },
-  });
-
-  const toggleTodoStatus = async () => {
-    try {
-      await updateTodoMutation.mutateAsync({ ...todo, done: !todo.done });
-    } catch (error) {
-      console.error("할 일 상태 변경 중 오류 발생:", error);
-    }
-  };
-
-  // const toggleTodoStatus = async (updatedTodo: TodoType) => {
-  //   try {
-  //     updateTodo(todo.id, updatedTodo);
-  //   } catch (error) {
-  //     console.error("할 일 상태 변경 중 오류 발생:", error);
-  //   }
-  // };
-
-  const fetchNoteContent = async () => {
+  const loadNoteContent = async () => {
     if (todo.noteId) {
       const response = await getNotes(todo.noteId);
       if (response) {
+        console.log("🖐️🖐️🖐️🖐️🖐️🖐️🖐️🖐️");
+        console.log(response);
         setNoteContent(response);
       }
     }
   };
 
-  // const handleTodoUpdate = (updatedTodo: TodoType) => {
-  //   setTodos((prevTodos) =>
-  //     prevTodos.map((prevTodo) => (prevTodo.id === updatedTodo.id ? { ...prevTodo, ...updatedTodo } : prevTodo)),
-  //   );
-  // };
-
   const handleDelete = async () => {
-    await deleteTodo(todo.id); // Use deleteTodo from store
+    await deleteTodo(todo.id);
+    // TODO: 삭제 후 새로고침하도록 구현
+  };
+
+  const toggleTodoStatus = async (todo: TodoType) => {
+    try {
+      const updatedTodo = { done: !todo.done };
+      await toggleTodo(todo.id, updatedTodo);
+      // TODO: 토글됐다면 할 일 목록 업데이트
+    } catch (error) {
+      console.error("할 일 상태 변경에 실패했습니다.", error);
+    }
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+      if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
       }
     };
 
@@ -124,16 +64,18 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isDropdownOpen]);
 
   useEffect(() => {
-    fetchNoteContent();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadNoteContent();
   }, []);
 
   return (
     <div>
-      <ul key={todo.id} className={`group relative rounded-2xl ${isGoal ? "hover:font-semibold" : "hover:underline"} `}>
+      <ul
+        key={todo.id}
+        className={`group relative rounded-2xl ${isTodoCardRelated ? "hover:font-semibold" : "hover:underline"} `}
+      >
         <li className="flex items-center gap-2">
           <Image
             className={`cursor-pointer ${todo.done ? "ml-1 mr-[2px]" : ""}`}
@@ -141,12 +83,14 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
             width={todo.done === true ? 18 : 24}
             height={todo.done === true ? 18 : 24}
             alt="checkbox-icon"
-            onClick={() => toggleTodoStatus}
+            onClick={() => {
+              toggleTodoStatus(todo);
+            }}
           />
 
           <span className={`text-sm ${todo.done ? "line-through" : ""}`}>{todo.title}</span>
         </li>
-        {isGoal && (
+        {isTodoCardRelated && (
           <div className="flex items-center gap-2">
             <Image className="ml-[35px]" src="/goal-summit.webp" width={24} height={24} alt="goal-summit-icon" />
             <p className="text-sm">{todo.goal?.title}</p>
@@ -154,8 +98,8 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
         )}
 
         <div
-          className={`absolute ${isInGoalSection && "rounded-3xl bg-blue-50"} ${
-            isGoal ? "top-[25%]" : "top-0"
+          className={`absolute ${inTodoCard && "rounded-3xl bg-blue-50"} ${
+            isTodoCardRelated ? "top-[25%]" : "top-0"
           } right-1 flex gap-1`}
         >
           {todo.fileUrl && (
@@ -210,11 +154,11 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
             alt="수정/삭제"
             title="수정 / 삭제"
             onClick={() => {
-              setIsOpen((prev) => !prev);
+              setDropdownOpen((prev) => !prev);
             }}
           />
 
-          {isOpen && (
+          {isDropdownOpen && (
             <div
               ref={dropdownRef}
               className="absolute right-3 top-7 z-10 w-24 cursor-pointer rounded-lg border bg-white text-center shadow-xl"
@@ -223,12 +167,12 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
                 className="cursor-pointer p-3 hover:bg-slate-200"
                 onClick={() => {
                   openModal("EDIT_TODO");
-                  if (isOpen) setIsOpen(false);
+                  if (isDropdownOpen) setDropdownOpen(false);
                 }}
               >
                 수정하기
               </p>
-              <p onClick={handleDelete} className="cursor-pointer p-3 hover:bg-slate-200">
+              <p className="cursor-pointer p-3 hover:bg-slate-200" onClick={handleDelete}>
                 삭제하기
               </p>
             </div>
@@ -236,15 +180,7 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
         </div>
       </ul>
       <Modal name="EDIT_TODO" title="할 일 수정">
-        <CreateNewTodo
-          closeCreateNewTodo={closeModal}
-          goal={todo.goal}
-          title={todo.title}
-          fileUrl={todo.fileUrl || undefined}
-          linkUrl={todo.linkUrl || undefined}
-          todoId={todo.id}
-          isEdit
-        />
+        <CreateNewTodo closeCreateNewTodo={closeModal} todo={todo} selectedGoalId={todo.goal.id} isEditing={true} />
       </Modal>
       <NoteViewer isNoteOpen={isNoteOpen} setIsNoteOpen={setIsNoteOpen} noteContent={noteContent} />
     </div>

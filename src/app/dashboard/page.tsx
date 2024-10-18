@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -11,63 +11,21 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { getInfinityScrollGoals } from "@/api/goalAPI";
 import { getAllTodos } from "@/api/todoAPI";
 
+import { GoalType, TodoType } from "../Types/TodoGoalType";
+
 import TodoCard from "./components/TodoCard";
-import Todos from "./components/Todos";
 import ProgressTracker from "./components/ProgressTracker";
+import TodoItem from "./components/TodoItem";
 
-export type TodoType = {
-  noteId?: number | null;
-  done: boolean;
-  linkUrl?: string | null;
-  fileUrl?: string | null;
-  title: string;
-  id: number;
-  goal: GoalType;
-  userId: number;
-  teamId: string;
-  updatedAt: string;
-  createdAt: string;
-};
-
-export type GoalType = {
-  id: number;
-  teamId: string;
-  title: string;
-  userId: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export default function Dashboard() {
+export default function DashboardPage() {
   const [recentTodos, setRecentTodos] = useState<TodoType[]>([]);
-  const [progressValue, setProgressValue] = useState(0);
-  const [ratio, setRatio] = useState(0);
+  const [progressPercentage, setProgressPercentage] = useState(0);
+  const [completionRatio, setCompletionRatio] = useState(0);
   const { ref, inView } = useInView();
-
-  // 최근 할 일 데이터 가져오기
-  const { data: todosData, isLoading: isTodosLoading } = useQuery({
-    queryKey: ["todos"],
-    queryFn: getAllTodos,
-    //staleTime: 60000,
-  });
-
-  // 정렬 및 최근 할 일 설정
-  useEffect(() => {
-    if (todosData && Array.isArray(todosData.todos)) {
-      const sortedTodos = [...todosData.todos].sort(
-        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-      );
-      setRecentTodos(sortedTodos.slice(0, 4));
-
-      const total = todosData.totalCount; // 총 개수는 totalCount에서 가져옴
-      const dones = todosData.todos.filter((todo: TodoType) => todo.done);
-      setRatio(Math.round((dones.length / total) * 100));
-    }
-  }, [todosData]);
 
   // 목표 데이터 무한 스크롤
   const {
-    data,
+    data: infiniteGoalPages,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -75,21 +33,18 @@ export default function Dashboard() {
   } = useInfiniteQuery({
     queryKey: ["goals"],
     queryFn: async ({ pageParam }) => {
-      const response = await getInfinityScrollGoals({ cursor: pageParam, size: 3, sortOrder: "newest" });
+      const response = await getInfinityScrollGoals({ cursor: pageParam, size: 3, sortOrder: "oldest" });
       return response;
     },
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
-  const getAllGoals = () => {
-    if (!data) return [];
-    return data.pages.reduce((acc, page) => {
-      return [...acc, ...page.goals];
-    }, []);
-  };
-
-  const allGoals = getAllGoals();
+  const allGoals = infiniteGoalPages
+    ? infiniteGoalPages.pages.reduce((acc, page) => {
+        return acc.concat(page.goals);
+      }, [])
+    : [];
 
   // 목표 데이터가 화면에 보일 때 다음 페이지 로드
   useEffect(() => {
@@ -98,12 +53,30 @@ export default function Dashboard() {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // 정렬 및 최근 할 일 설정
+  const loadDashboardData = async () => {
+    const todosResponse = await getAllTodos();
+    if (todosResponse) {
+      const todoTotalCount = todosResponse.totalCount;
+      const doneTodos = todosResponse.todos.filter((todo: TodoType) => todo.done === true);
+      setCompletionRatio(Math.round((doneTodos.length / todoTotalCount) * 100));
+      const sortedTodos = [...todosResponse.todos].sort(
+        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      );
+      setRecentTodos(sortedTodos.slice(0, 4));
+    }
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // 로딩 상태 처리
-  if (isGoalsLoading || isTodosLoading) {
+  if (isGoalsLoading) {
+    console.log("여기 들리니?");
     return <LoadingScreen />;
   }
-
-  //const allGoals = data?.pages.flatMap((page) => page.goals) || [];
 
   return (
     <div className="relative">
@@ -127,12 +100,16 @@ export default function Dashboard() {
               {recentTodos.length === 0 ? (
                 <p className="flex items-center justify-center">최근에 등록한 할 일이 없어요</p>
               ) : (
-                recentTodos.map((todo) => <Todos key={todo.id} todo={todo} isGoal={true} />)
+                recentTodos.map((todo) => <TodoItem key={todo.id} todo={todo} />)
               )}
             </div>
 
             {/* 진행 상황 트래커 */}
-            <ProgressTracker ratio={ratio} progressValue={progressValue} setProgressValue={setProgressValue} />
+            <ProgressTracker
+              completionRatio={completionRatio}
+              progressPercentage={progressPercentage}
+              setProgressPercentage={setProgressPercentage}
+            />
           </div>
 
           {/* 목표 별 할 일 */}

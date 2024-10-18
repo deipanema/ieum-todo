@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 
-import { TodoType } from "./CreateNewTodo";
+import { InitialTodoType } from "@/app/Types/TodoGoalType";
 
 type LinkUploadProps = {
   closeSecond: () => void;
-  todo?: TodoType;
-  setTodo: React.Dispatch<React.SetStateAction<TodoType>>;
+  todo?: InitialTodoType;
+  setTodo: React.Dispatch<React.SetStateAction<InitialTodoType>>;
 };
 
 export default function LinkUpload({ closeSecond, todo, setTodo }: LinkUploadProps) {

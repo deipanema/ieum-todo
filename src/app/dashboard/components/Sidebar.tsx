@@ -8,20 +8,12 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { logout } from "@/utils/authUtils";
-import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
 import AnimatedText from "@/utils/AnimatedText";
 import { useGoalStore } from "@/store/goalStore";
 import { useAuthStore } from "@/store/authStore";
-
-export interface GoalType {
-  id: number;
-  teamId: string;
-  userId: number;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import CreateNewTodo from "@/components/CreateNewTodo";
+import { GoalType } from "@/app/Types/TodoGoalType";
 
 interface GoalsPage {
   goals: GoalType[];
@@ -65,17 +57,25 @@ export default function SideBar() {
 
       // 무한 스크롤 데이터를 업데이트
       queryClient.setQueryData<GoalsData>(["goals"], (oldData) => {
-        if (oldData) {
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) => ({
+        if (!oldData) return { pages: [{ goals: [newGoal], nextCursor: null }], pageParams: [undefined] };
+
+        const newPages = oldData.pages.map((page, index) => {
+          if (index === 0) {
+            return {
               ...page,
-              goals: [newGoal, ...page.goals] as GoalType[], // 명시적으로 GoalType 배열로 캐스팅
-            })),
-          };
-        }
-        return { pages: [{ goals: [newGoal] }] }; // 초기 데이터 설정
+              goals: [newGoal, ...page.goals],
+            };
+          }
+          return page;
+        });
+
+        return {
+          ...oldData,
+          pages: newPages,
+        };
       });
+
+      queryClient.invalidateQueries({ queryKey: ["goals"] });
     } else {
       toast.warn("목표를 입력해 주세요.");
       setInputVisible(false);

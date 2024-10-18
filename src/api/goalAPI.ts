@@ -18,6 +18,7 @@ export interface ErrorType {
 export const getGoals = async () => {
   try {
     const response = await api.get(`/goals`);
+    //  console.log(response);
     return response.data;
   } catch (error) {
     console.error("Goals fetch error:", error);
@@ -43,6 +44,7 @@ export const PostGoal = async (title: string) => {
 export const getGoal = async (id: number) => {
   try {
     const response = await api.get(`/goals/${id}`);
+    //console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Goal fetch error:", error);
