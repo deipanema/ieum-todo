@@ -3,13 +3,11 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 
 import useModal from "@/hook/useModal";
-import { getNote, getNotes, patchNotes, postNotes } from "@/api/noteAPI";
+import { getNote, patchNotes, postNotes } from "@/api/noteAPI";
 import { getTodos } from "@/api/todoAPI";
 import UploadLinkModal from "@/components/UploadLinkModal";
-import LoadingScreen from "@/components/LoadingScreen";
 import { NoteType, TodoType } from "@/app/Types/TodoGoalType";
 
 export default function NotePage() {

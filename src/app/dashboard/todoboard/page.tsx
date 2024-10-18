@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "react-toastify";
 
 import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
 import { getAllTodos } from "@/api/todoAPI";
+import { TodoType } from "@/app/Types/TodoGoalType";
 
 import TodoItem from "../components/TodoItem";
-import { TodoType } from "@/app/Types/TodoGoalType";
 
 type StatusType = "All" | "Todo" | "Done";
 
