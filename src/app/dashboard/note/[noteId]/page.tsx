@@ -5,54 +5,10 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import useModal from "@/hook/useModal";
-import { getNotes, patchNotes, postNotes } from "@/api/noteAPI";
+import { getNote, patchNotes, postNotes } from "@/api/noteAPI";
 import { getTodos } from "@/api/todoAPI";
 import UploadLinkModal from "@/components/UploadLinkModal";
-
-export type GoalType = {
-  id: number;
-  teamId: string;
-  title: string;
-  userId: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type TodoType = {
-  noteId: number | null;
-  done: boolean;
-  linkUrl: string | null;
-  fileUrl: string | null;
-  title: string;
-  id: number;
-  goal: GoalType;
-  userId: number;
-  teamId: string;
-  updatedAt: string;
-  createdAt: string;
-};
-
-export interface NoteType {
-  content: string;
-  createdAt: string;
-  goal: {
-    id: number;
-    title: string;
-  };
-  id: number;
-  linkUrl: string;
-  teamId: string;
-  title: string;
-  todo: {
-    done: boolean;
-    fileUrl: string | null;
-    id: number;
-    linkUrl: string | null;
-    title: string;
-  };
-  updatedAt: string;
-  userId: number;
-}
+import { NoteType, TodoType } from "@/app/Types/TodoGoalType";
 
 export default function NotePage() {
   const router = useRouter();
@@ -67,37 +23,92 @@ export default function NotePage() {
   const todoId = Number(pathName.split("/").at(-1));
   const goalId = Number(searchParams.get("goalId"));
 
-  const getNote = async () => {
+  const loadNoteData = async () => {
     const todoResponse = await getTodos(goalId);
-    const findTodo = todoResponse.todos.find((todo: TodoType) => todo.id === todoId);
-    setTodo(findTodo);
+    const selectedTodo = todoResponse.todos.find((todo: TodoType) => todo.id === todoId);
+    console.log(selectedTodo);
+    setTodo(selectedTodo);
 
-    if (note?.id) {
-      const noteResponse = await getNotes(note.id);
+    const noteResponse = await getNote(selectedTodo.noteId);
+
+    if (noteResponse) {
       setNote(noteResponse);
-      setTitle(noteResponse.title);
       setContent(noteResponse.content);
+      setTitle(noteResponse.title);
       setLink(noteResponse.linkUrl);
     }
   };
 
-  const handleSubmit = async (type: string) => {
-    if (type === "write") {
-      const response = await postNotes(todoId, title, content, link ? link : null);
-      if (response) {
-        setNote(response);
-        toast.success("작성완료");
-        router.back();
-      }
-    } else if (type === "edit") {
-      const response = await patchNotes(Number(note?.id), title, content, link ? link : null);
-      if (response) {
-        setNote(response);
-        toast.success("수정완료");
-        router.back();
-      }
+  const handleSubmit = async (type: "write" | "edit") => {
+    const response =
+      type === "write"
+        ? await postNotes(todoId, title, content, link || null)
+        : await patchNotes(Number(note?.id), title, content, link || null);
+
+    if (response) {
+      setNote(response);
+      toast.success(type === "write" ? "작성이 완료되었습니다." : "수정이 완료되었습니다.");
+      router.back();
     }
   };
+
+  useEffect(() => {
+    loadNoteData();
+  }, []);
+
+  // 노트와 할 일 가져오는 함수
+  // const fetchNote = async () => {
+  //   const todoResponse = await getTodos(goalId);
+  //   const findTodo = todoResponse.todos.find((todo: TodoType) => todo.id === todoId);
+  //   setTodo(findTodo);
+
+  //   if (findTodo?.noteId) {
+  //     const noteResponse = await getNotes(findTodo.noteId);
+  //     return noteResponse; // 노트 데이터 반환
+  //   }
+
+  //   return null; // 노트가 없을 경우 null 반환
+  // };
+
+  // // React Query를 사용하여 노트 데이터를 가져옴
+  // const {
+  //   data: noteData,
+  //   isLoading,
+  //   isError,
+  // } = useQuery({
+  //   queryKey: ["note", todoId], // 고유 쿼리 키 설정
+  //   queryFn: fetchNote,
+  //   enabled: !!todoId, // todoId가 존재할 때만 쿼리 실행
+  // });
+
+  // noteData가 변경되면 상태 업데이트
+  // useEffect(() => {
+  //   if (noteData) {
+  //     setNote(noteData);
+  //     setTitle(noteData.title);
+  //     setContent(noteData.content);
+  //     setLink(noteData.linkUrl);
+  //   }
+  // }, [noteData]);
+
+  // 제출 처리
+  // const handleSubmit = async (type: string) => {
+  //   if (type === "create") {
+  //     const response = await postNotes(todoId, title, content, link ? link : null);
+  //     if (response) {
+  //       setNote(response);
+  //       router.push(`/dashboard/goal/${goalId}`);
+  //       toast.success("작성완료");
+  //     }
+  //   } else {
+  //     const response = await patchNotes(Number(note?.id), title, content, link ? link : null);
+  //     if (response) {
+  //       setNote(response.data);
+  //       router.push(`/dashboard/goal/${goalId}`);
+  //       toast.success("수정완료");
+  //     }
+  //   }
+  // };
 
   const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -112,16 +123,16 @@ export default function NotePage() {
     toast.success("임시 저장이 완료되었습니다.");
   };
 
-  const autoSaveDraft = () => {
-    const intervalId = setInterval(
-      () => {
-        saveDraft();
-      },
-      5 * 60 * 1000,
-    ); // 5분마다 저장
+  // const autoSaveDraft = () => {
+  //   const intervalId = setInterval(
+  //     () => {
+  //       saveDraft();
+  //     },
+  //     5 * 60 * 1000,
+  //   ); // 5분마다 저장
 
-    return () => clearInterval(intervalId);
-  };
+  //   return () => clearInterval(intervalId);
+  // };
 
   const loadSavedDraft = () => {
     const savedNote = localStorage.getItem(`note${todoId}`);
@@ -137,37 +148,20 @@ export default function NotePage() {
     }
   };
 
-  useEffect(() => {
-    getNote();
-    autoSaveDraft();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   autoSaveDraft();
+  // }, []);
+
+  // if (isError) {
+  //   return <p>노트를 불러오는 데 오류가 발생했습니다.</p>;
+  // }
+
+  // if (isLoading) {
+  //   return <LoadingScreen />;
+  // }
 
   return (
     <div className="flex">
-      {/* <div className="relative flex w-1/2 flex-col items-center justify-center gap-3 sm:flex-row">
-        <div className="left-0 right-0 top-0 flex h-10 justify-end bg-white p-2 sm:absolute">
-          <Image
-            className="cursor-pointer"
-            src="/modal-close.svg"
-            width={13}
-            height={13}
-            alt="close-icon"
-            onClick={() => {}}
-          />
-        </div>
-
-         <iframe
-            src={link ? (link.startsWith("http://") || link.startsWith("https://") ? link : `https://${link}`) : ""}
-            className="h-1/2 w-full"
-            title="Embedded Link"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms" // 보안 관련 옵션 추가 가능
-          /> 
-        <Link className="hover:underline" href={link.includes("https://") ? link : `https://${link}`} target="_blank">
-          <p>새창에서 열기</p>
-        </Link>
-      </div> */}
-
       <form className="mt-[51px] h-[calc(100vh-51px)] w-full bg-white lg:mt-0 lg:h-screen">
         <div className="h-[calc(100vh-40px)] w-full p-6 2xl:w-[1200px]">
           <div className="mb-6 flex items-center justify-between">
