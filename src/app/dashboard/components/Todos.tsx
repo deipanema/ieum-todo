@@ -3,12 +3,13 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query"; // useQueryClient 추가
 
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import { getNotes } from "@/api/noteAPI";
-import useTodoStore, { TodoType } from "@/store/todoStore";
-import { deleteTodo } from "@/api/todoAPI";
+import { TodoType } from "@/store/todoStore";
+import { deleteTodo, updateTodo } from "@/api/todoAPI";
 
 import NoteViewer from "./NoteViewer";
 
@@ -65,15 +66,32 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
   const { Modal, openModal, closeModal } = useModal();
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [noteContent, setNoteContent] = useState<NoteType>();
-  const { updateTodo } = useTodoStore();
 
-  const toggleTodoStatus = async (updatedTodo: TodoType) => {
+  const queryClient = useQueryClient();
+
+  const updateTodoMutation = useMutation({
+    mutationFn: (updatedTodo: TodoType) => updateTodo(todo.id, updatedTodo),
+    onSuccess: () => {
+      // 할 일 목록 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ["todos", todo.goal.id] });
+    },
+  });
+
+  const toggleTodoStatus = async () => {
     try {
-      updateTodo(todo.id, updatedTodo);
+      await updateTodoMutation.mutateAsync({ ...todo, done: !todo.done });
     } catch (error) {
       console.error("할 일 상태 변경 중 오류 발생:", error);
     }
   };
+
+  // const toggleTodoStatus = async (updatedTodo: TodoType) => {
+  //   try {
+  //     updateTodo(todo.id, updatedTodo);
+  //   } catch (error) {
+  //     console.error("할 일 상태 변경 중 오류 발생:", error);
+  //   }
+  // };
 
   const fetchNoteContent = async () => {
     if (todo.noteId) {
@@ -123,7 +141,7 @@ export default function Todos({ todo, isGoal = false, isInGoalSection = false }:
             width={todo.done === true ? 18 : 24}
             height={todo.done === true ? 18 : 24}
             alt="checkbox-icon"
-            onClick={() => toggleTodoStatus({ ...todo, done: !todo.done })}
+            onClick={() => toggleTodoStatus}
           />
 
           <span className={`text-sm ${todo.done ? "line-through" : ""}`}>{todo.title}</span>
