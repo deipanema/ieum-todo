@@ -11,10 +11,11 @@ jobs:
     executor:
       name: cypress/default
       node-version: "20.6.0"
+    parallelism: 2
     steps:
       - cypress/install
       - cypress/run-tests:
-          cypress-command: "npx wait-on@latest http://localhost:3000 && npx cypress run --record"
+          cypress-command: "npx wait-on@latest http://localhost:3000 && npx cypress run --record --parallel"
           start-command: "npm run build && npm run start"
 
 workflows:
