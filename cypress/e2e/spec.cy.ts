@@ -8,7 +8,7 @@ describe("로그인 페이지 테스트", () => {
     cy.get('input[placeholder="비밀번호"]').type("012345678");
     cy.contains("로그인").click();
 
-    cy.wait("@dashboard").then((_) => {
+    cy.wait("@dashboard").then(() => {
       cy.contains("대시보드");
     });
   });
