@@ -29,8 +29,12 @@ export default function TodoCard({ id }: TodoCardProps) {
 
   const loadTodoCardData = async () => {
     const goalResponse = await getGoal(id);
-    const activeResponse = await getTodos(id, false, 5);
-    const completedResponse = await getTodos(id, true, 5);
+    const todoResponse = await getTodos(id);
+    //const completedResponse = await getTodos(id, true, 5);
+
+    const activeResponse = Array.isArray(todoResponse) ? todoResponse.filter((todo) => !todo.done) : [];
+    const completedResponse = Array.isArray(todoResponse) ? todoResponse.filter((todo) => todo.done) : [];
+    console.log(activeResponse);
 
     setGoal(goalResponse);
     setSelectedGoal(goalResponse);
