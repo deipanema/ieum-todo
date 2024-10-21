@@ -1,27 +1,7 @@
 import Image from "next/image";
 import { Dispatch, SetStateAction } from "react";
 
-export interface NoteType {
-  content: string;
-  createdAt: string;
-  goal: {
-    id: number;
-    title: string;
-  };
-  id: number;
-  linkUrl: string;
-  teamId: string;
-  title: string;
-  todo: {
-    done: boolean;
-    fileUrl: string | null;
-    id: number;
-    linkUrl: string | null;
-    title: string;
-  };
-  updatedAt: string;
-  userId: number;
-}
+import { NoteType } from "@/app/Types/TodoGoalType";
 
 type NoteViewerProps = {
   isNoteOpen: boolean;
@@ -40,6 +20,8 @@ export default function NoteViewer({ isNoteOpen, setIsNoteOpen, noteContent }: N
 
     window.open(url, "_blank", `width=${windowWidth},height=${windowHeight},left=${windowLeft},top=${windowTop}`);
   };
+
+  //console.log(noteContent);
 
   return (
     <div className="relative">
