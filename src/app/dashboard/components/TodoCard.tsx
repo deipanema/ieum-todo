@@ -8,7 +8,7 @@ import { getGoal } from "@/api/goalAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import { GoalType, TodoType } from "@/app/Types/TodoGoalType";
-import { getTodos } from "@/api/todoAPI";
+import { deleteTodo, getTodos, toggleTodo } from "@/api/todoAPI";
 
 import ProgressBar from "./ProgressBar";
 import TodoItem from "./TodoItem";
@@ -30,20 +30,54 @@ export default function TodoCard({ id }: TodoCardProps) {
   const loadTodoCardData = async () => {
     const goalResponse = await getGoal(id);
     const todoResponse = await getTodos(id);
-    //const completedResponse = await getTodos(id, true, 5);
 
-    const activeResponse = Array.isArray(todoResponse) ? todoResponse.filter((todo) => !todo.done) : [];
-    const completedResponse = Array.isArray(todoResponse) ? todoResponse.filter((todo) => todo.done) : [];
-    console.log(activeResponse);
+    const activeResponse = Array.isArray(todoResponse.todos)
+      ? todoResponse.todos.filter((todo: TodoType) => !todo.done)
+      : [];
+    const completedResponse = Array.isArray(todoResponse.todos)
+      ? todoResponse.todos.filter((todo: TodoType) => todo.done)
+      : [];
 
     setGoal(goalResponse);
     setSelectedGoal(goalResponse);
-    setAcitveTodos(activeResponse.todos);
-    setCompletedTodos(completedResponse.todos);
+    setAcitveTodos(activeResponse);
+    setCompletedTodos(completedResponse);
 
-    const totalTaskCount = activeResponse.totalCount + completedResponse.totalCount;
-    setProgressPercentage(Math.round((completedResponse.totalCount / totalTaskCount) * 100));
-    setHasMoreThanFiveTodos(5 < activeResponse.totalCount || 5 < completedResponse.totalCount);
+    const totalTaskCount = activeResponse.length + completedResponse.length;
+    setProgressPercentage(Math.round((completedResponse.length / totalTaskCount) * 100));
+    setHasMoreThanFiveTodos(5 < activeResponse.length || 5 < completedResponse.length);
+  };
+
+  // 할 일 삭제 함수 정의
+  const handleDeleteTodo = async (todoId: number) => {
+    try {
+      await deleteTodo(todoId);
+      loadTodoCardData(); // 삭제 후 할 일 목록 다시 불러오기
+    } catch (error) {
+      console.error("할 일 삭제에 실패했습니다.", error);
+    }
+  };
+
+  // 할 일 상태 토글
+  const toggleTodoStatus = async (todo: TodoType) => {
+    try {
+      const updatedTodo = { ...todo, done: !todo.done };
+      await toggleTodo(todo.id, updatedTodo);
+
+      if (updatedTodo.done) {
+        setCompletedTodos((prev) => [...prev, updatedTodo]);
+        setAcitveTodos((prev) => prev.filter((t) => t.id !== todo.id));
+      } else {
+        setAcitveTodos((prev) => [...prev, updatedTodo]);
+        setCompletedTodos((prev) => prev.filter((t) => t.id !== todo.id));
+      }
+
+      // Progress bar update
+      const totalTaskCount = activeTodos.length + completedTodos.length;
+      setProgressPercentage(Math.round((completedTodos.length / totalTaskCount) * 100));
+    } catch (error) {
+      console.error("할 일 상태 변경에 실패했습니다.", error);
+    }
   };
 
   useEffect(() => {
@@ -74,7 +108,16 @@ export default function TodoCard({ id }: TodoCardProps) {
           <h3 className="mb-3 text-lg font-semibold">To do</h3>
           <ul>
             {activeTodos.length > 0 ? (
-              activeTodos.map((todo) => <TodoItem key={todo.id} todo={todo} isTodoCardRelated={false} inTodoCard />)
+              activeTodos.map((todo) => (
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  isTodoCardRelated={false}
+                  inTodoCard
+                  toggleTodoStatus={toggleTodoStatus}
+                  deleteTodo={handleDeleteTodo}
+                />
+              ))
             ) : (
               <li className="text-center text-sm text-slate-500">아직 해야할 일이 없어요</li>
             )}
@@ -84,7 +127,16 @@ export default function TodoCard({ id }: TodoCardProps) {
           <h3 className="mb-3 text-lg font-semibold">Done</h3>
           <ul>
             {completedTodos.length > 0 ? (
-              completedTodos.map((todo) => <TodoItem key={todo.id} todo={todo} isTodoCardRelated={false} inTodoCard />)
+              completedTodos.map((todo) => (
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  isTodoCardRelated={false}
+                  inTodoCard
+                  toggleTodoStatus={toggleTodoStatus}
+                  deleteTodo={handleDeleteTodo}
+                />
+              ))
             ) : (
               <li className="text-center text-sm text-slate-500">아직 다 한 일이 없어요</li>
             )}

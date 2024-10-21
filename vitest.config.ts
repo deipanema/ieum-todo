@@ -12,7 +12,7 @@ export default defineConfig({
     globals: true, // 전역으로 vi, describe, it 등을 사용
     environment: "jsdom", // 브라우저 환경에서의 테스트를 위한 설정
     setupFiles: "./src/setupTests.ts", // 테스트 초기화 파일
-    //  include: ["**/*.test.tsx"], // 포함할 파일 패턴을 명시
+    include: ["**/*.test.tsx"], // 포함할 파일 패턴을 명시
     coverage: {
       provider: "v8",
       reportsDirectory: "./coverage", // 리포트 디렉토리

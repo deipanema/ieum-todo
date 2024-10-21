@@ -21,7 +21,7 @@ export default function NoteViewer({ isNoteOpen, setIsNoteOpen, noteContent }: N
     window.open(url, "_blank", `width=${windowWidth},height=${windowHeight},left=${windowLeft},top=${windowTop}`);
   };
 
-  console.log(noteContent);
+  //console.log(noteContent);
 
   return (
     <div className="relative">

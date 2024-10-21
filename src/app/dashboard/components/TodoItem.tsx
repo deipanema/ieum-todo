@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from "react";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import { NoteType, TodoType } from "@/app/Types/TodoGoalType";
-import { deleteTodo, toggleTodo } from "@/api/todoAPI";
 import { getNotes } from "@/api/noteAPI";
 
 import NoteViewer from "./NoteViewer";
@@ -16,9 +15,17 @@ type TodoProps = {
   todo: TodoType;
   isTodoCardRelated?: boolean;
   inTodoCard?: boolean;
+  toggleTodoStatus?: (todo: TodoType) => Promise<void>;
+  deleteTodo?: (todoId: number) => Promise<void>;
 };
 
-export default function TodoItem({ todo, isTodoCardRelated = true, inTodoCard }: TodoProps) {
+export default function TodoItem({
+  todo,
+  isTodoCardRelated = true,
+  inTodoCard,
+  toggleTodoStatus,
+  deleteTodo,
+}: TodoProps) {
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -38,17 +45,8 @@ export default function TodoItem({ todo, isTodoCardRelated = true, inTodoCard }:
   };
 
   const handleDelete = async () => {
-    await deleteTodo(todo.id);
-    // TODO: 삭제 후 새로고침하도록 구현
-  };
-
-  const toggleTodoStatus = async (todo: TodoType) => {
-    try {
-      const updatedTodo = { done: !todo.done };
-      await toggleTodo(todo.id, updatedTodo);
-      // TODO: 토글됐다면 할 일 목록 업데이트
-    } catch (error) {
-      console.error("할 일 상태 변경에 실패했습니다.", error);
+    if (deleteTodo) {
+      await deleteTodo(todo.id);
     }
   };
 
@@ -84,7 +82,9 @@ export default function TodoItem({ todo, isTodoCardRelated = true, inTodoCard }:
             height={todo.done === true ? 18 : 24}
             alt="checkbox-icon"
             onClick={() => {
-              toggleTodoStatus(todo);
+              if (toggleTodoStatus) {
+                toggleTodoStatus(todo);
+              }
             }}
           />
 

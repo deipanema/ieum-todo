@@ -72,7 +72,7 @@ export default function CreateNewTodo({ closeCreateNewTodo, todo, isEditing, sel
       title: initialTodo.title,
       goalId: selectedGoalId || initialTodo.goalId,
       fileUrl: fileUrl || null,
-      linkUrl: initialTodo.linkUrl || null, 
+      linkUrl: initialTodo.linkUrl || null,
     };
 
     try {
@@ -88,7 +88,6 @@ export default function CreateNewTodo({ closeCreateNewTodo, todo, isEditing, sel
         ); // 새로 생성할 경우
         toast.success("할 일이 생성되었습니다.");
       }
-      //updateTodos();  // 상태 업데이트
       closeCreateNewTodo(); // 모달 닫기
     } catch (error) {
       console.error(error);

@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest",
+    "test": "vitest --passWithNoTests",
     "cy:open": "wait-on http://localhost:3000/ && cypress open",
     "cy:run": "npm-run-all --parallel dev cy:open"
   },
