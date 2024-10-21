@@ -16,11 +16,12 @@ import ProgressBar from "../../components/ProgressBar";
 import TodoItem from "../../components/TodoItem";
 
 type GoalPageProps = {
-  params: { goalId: string };
+  params: { goalId: string; title: string };
 };
 
 export default function GoalPage({ params }: GoalPageProps) {
-  const { goalId } = params;
+  const { goalId, title } = params;
+  console.log(title);
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
 

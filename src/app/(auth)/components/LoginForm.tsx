@@ -38,7 +38,7 @@ export default function LoginForm() {
         setLoginError("로그인에 실패했습니다. 다시 시도해 주세요.");
       }
     } catch (error) {
-      const axiosError = error as AxiosError; // Type assertion
+      const axiosError = error as AxiosError; 
       console.error("로그인 중 오류 발생:", axiosError);
       setLoginError("로그인 실패했습니다. 다시 시도해 주세요.");
     }

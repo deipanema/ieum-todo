@@ -61,12 +61,18 @@ export default function CreateNewTodo({ closeCreateNewTodo, todo, isEditing, sel
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // 모달이 확인으로 닫히는 이벤트를 받아서
+    // 할 일 목록이 변경됐으니
+    // 1. 서버에서 새로받기
+    // 2. 할일목록 수정 또는 추가를 클라이언트 쪽에서 콜백 데이터를 넘겨받아 새로업데이트
     const todoPayload = {
       title: initialTodo.title,
       goalId: selectedGoalId || initialTodo.goalId,
-      fileUrl: fileUrl || null, // file이 존재하지 않으면 null로 처리
-      linkUrl: initialTodo.linkUrl || null, // linkUrl이 없으면 null로 처리
+      fileUrl: fileUrl || null,
+      linkUrl: initialTodo.linkUrl || null, 
     };
 
     try {
