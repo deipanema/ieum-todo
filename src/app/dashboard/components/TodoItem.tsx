@@ -9,9 +9,9 @@ import CreateNewTodo from "@/components/CreateNewTodo";
 import { getNotes } from "@/api/noteAPI";
 import { NoteType, TodoType } from "@/app/types/todoGoalType";
 import { deleteTodo, toggleTodo } from "@/api/todoAPI";
+import { useTodoStore } from "@/store/todoStore";
 
 import NoteViewer from "./NoteViewer";
-import { useTodoStore } from "@/store/todoStore";
 
 type TodoProps = {
   todo: TodoType;
@@ -66,6 +66,8 @@ export default function TodoItem({ todo, isTodoCardRelated = true, inTodoCard }:
 
   useEffect(() => {
     loadNoteContent();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

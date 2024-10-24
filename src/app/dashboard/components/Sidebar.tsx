@@ -74,6 +74,7 @@ export default function SideBar() {
 
       queryClient.invalidateQueries({ queryKey: ["goals"] });
     } catch (error) {
+      console.error(error);
       toast.error("새로운 목표가 추가되지 않았습니다.");
     }
   };

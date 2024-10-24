@@ -6,17 +6,17 @@ import { useEffect, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 
-import LoadingSpinner from "@/components/LoadingSpinner";
-import LoadingScreen from "@/components/LoadingScreen";
 import { getInfinityScrollGoals } from "@/api/goalAPI";
 import { getAllTodos } from "@/api/todoAPI";
+import { useTodoStore } from "@/store/todoStore";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingScreen from "@/components/LoadingScreen";
 
 import { GoalType, TodoType } from "../types/todoGoalType";
 
 import TodoCard from "./components/TodoCard";
 import ProgressTracker from "./components/ProgressTracker";
 import TodoItem from "./components/TodoItem";
-import { useTodoStore } from "@/store/todoStore";
 
 export default function DashboardPage() {
   const { isUpdated } = useTodoStore();

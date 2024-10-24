@@ -1,5 +1,6 @@
-import AnimatedText from "@/utils/AnimatedText";
 import Link from "next/link";
+
+import AnimatedText from "@/utils/AnimatedText";
 
 export default function LoginPrompt() {
   return (

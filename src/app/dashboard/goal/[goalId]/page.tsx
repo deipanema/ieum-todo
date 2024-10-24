@@ -8,6 +8,7 @@ import { AxiosError } from "axios";
 import { deleteGoal, ErrorType, getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
+import { useTodoStore } from "@/store/todoStore";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import EditGoalTitleModal from "@/components/EditGoalTitleModal";
 import { GoalType, TodoType } from "@/app/types/todoGoalType";
@@ -15,7 +16,6 @@ import { useGoalStore } from "@/store/goalStore";
 
 import ProgressBar from "../../components/ProgressBar";
 import TodoItem from "../../components/TodoItem";
-import { useTodoStore } from "@/store/todoStore";
 
 type GoalPageProps = {
   params: { goalId: string; title: string };

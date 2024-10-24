@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 
+import { useTodoStore } from "@/store/todoStore";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
 import { getAllTodos } from "@/api/todoAPI";
 import { TodoType } from "@/app/types/todoGoalType";
 
 import TodoItem from "../components/TodoItem";
-import { useTodoStore } from "@/store/todoStore";
 
 type StatusType = "All" | "Todo" | "Done";
 
