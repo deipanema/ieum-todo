@@ -3,8 +3,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-import { NoteType } from "@/app/Types/TodoGoalType";
 import deleteNote, { getNote } from "@/api/noteAPI";
+import { NoteType } from "@/app/types/todoGoalType";
 
 import NoteViewer from "./NoteViewer";
 
@@ -17,8 +17,6 @@ export default function NoteItem({ note }: { note: NoteType }) {
   const loadNoteItemData = async () => {
     const response = await getNote(note.id);
     if (response) {
-      console.log(isNoteOpen);
-      console.log(noteContent);
       setNoteContent(response.data);
     }
   };

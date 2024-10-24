@@ -1,11 +1,10 @@
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
-// 로그인 할 때, 바디에 받아서
 export const login = async (email: string, password: string) => {
   try {
     const { data } = await api.post("/auth/login", { email, password });
-    document.cookie = `accessToken=${data.accessToken}; path=/; max-age=3600`;
+    document.cookie = `accessToken=${data.accessToken}; path=/; max-age=86400; secure; SameSite=Strict`;
     localStorage.setItem("refreshToken", data.refreshToken);
     useAuthStore.getState().setUser(data.user);
     useAuthStore.getState().setIsAuthenticated(true);

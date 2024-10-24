@@ -7,11 +7,12 @@ import { useRouter } from "next/navigation";
 import { getGoal } from "@/api/goalAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
-import { GoalType, TodoType } from "@/app/Types/TodoGoalType";
-import { deleteTodo, getTodos, toggleTodo } from "@/api/todoAPI";
+import { getTodos } from "@/api/todoAPI";
+import { GoalType, TodoType } from "@/app/types/todoGoalType";
 
 import ProgressBar from "./ProgressBar";
 import TodoItem from "./TodoItem";
+import { useTodoStore } from "@/store/todoStore";
 
 export type TodoCardProps = {
   id: number;
@@ -19,71 +20,38 @@ export type TodoCardProps = {
 
 export default function TodoCard({ id }: TodoCardProps) {
   const router = useRouter();
+  const { isUpdated } = useTodoStore();
   const [goal, setGoal] = useState<GoalType | null>(null);
   const [selectedGoal, setSelectedGoal] = useState<GoalType>();
   const [progressPercentage, setProgressPercentage] = useState(0);
-  const [hasMoreThanFiveTodos, setHasMoreThanFiveTodos] = useState(true);
+  const [hasMoreThanFiveTodos, setHasMoreThanFiveTodos] = useState(false);
   const [completedTodos, setCompletedTodos] = useState<TodoType[]>([]);
   const [activeTodos, setAcitveTodos] = useState<TodoType[]>([]);
   const { Modal, openModal, closeModal } = useModal();
 
   const loadTodoCardData = async () => {
     const goalResponse = await getGoal(id);
-    const todoResponse = await getTodos(id);
+    const activeResponse = await getTodos(id, false, 5);
+    const completedResponse = await getTodos(id, true, 5);
 
-    const activeResponse = Array.isArray(todoResponse.todos)
-      ? todoResponse.todos.filter((todo: TodoType) => !todo.done)
-      : [];
-    const completedResponse = Array.isArray(todoResponse.todos)
-      ? todoResponse.todos.filter((todo: TodoType) => todo.done)
-      : [];
+    if (goalResponse && activeResponse && completedResponse) {
+      setGoal(goalResponse);
+      setSelectedGoal(goalResponse);
+      setAcitveTodos(activeResponse.todos);
+      setCompletedTodos(completedResponse.todos);
 
-    setGoal(goalResponse);
-    setSelectedGoal(goalResponse);
-    setAcitveTodos(activeResponse);
-    setCompletedTodos(completedResponse);
+      const totalTodoCount = activeResponse.totalCount + completedResponse.totalCount;
+      setProgressPercentage(Math.round((completedResponse.totalCount / totalTodoCount) * 100));
 
-    const totalTaskCount = activeResponse.length + completedResponse.length;
-    setProgressPercentage(Math.round((completedResponse.length / totalTaskCount) * 100));
-    setHasMoreThanFiveTodos(5 < activeResponse.length || 5 < completedResponse.length);
-  };
-
-  // 할 일 삭제 함수 정의
-  const handleDeleteTodo = async (todoId: number) => {
-    try {
-      await deleteTodo(todoId);
-      loadTodoCardData(); // 삭제 후 할 일 목록 다시 불러오기
-    } catch (error) {
-      console.error("할 일 삭제에 실패했습니다.", error);
-    }
-  };
-
-  // 할 일 상태 토글
-  const toggleTodoStatus = async (todo: TodoType) => {
-    try {
-      const updatedTodo = { ...todo, done: !todo.done };
-      await toggleTodo(todo.id, updatedTodo);
-
-      if (updatedTodo.done) {
-        setCompletedTodos((prev) => [...prev, updatedTodo]);
-        setAcitveTodos((prev) => prev.filter((t) => t.id !== todo.id));
-      } else {
-        setAcitveTodos((prev) => [...prev, updatedTodo]);
-        setCompletedTodos((prev) => prev.filter((t) => t.id !== todo.id));
-      }
-
-      // Progress bar update
-      const totalTaskCount = activeTodos.length + completedTodos.length;
-      setProgressPercentage(Math.round((completedTodos.length / totalTaskCount) * 100));
-    } catch (error) {
-      console.error("할 일 상태 변경에 실패했습니다.", error);
+      if (activeResponse.totalCount >= 5 || completedResponse.totalCount >= 5) setHasMoreThanFiveTodos(true);
+      else setHasMoreThanFiveTodos(false);
     }
   };
 
   useEffect(() => {
     loadTodoCardData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isUpdated]);
 
   return (
     <div className="h-auto min-h-[231px] w-full select-none rounded-2xl bg-blue-50 p-6">
@@ -114,8 +82,8 @@ export default function TodoCard({ id }: TodoCardProps) {
                   todo={todo}
                   isTodoCardRelated={false}
                   inTodoCard
-                  toggleTodoStatus={toggleTodoStatus}
-                  deleteTodo={handleDeleteTodo}
+                  // toggleTodoStatus={toggleTodoStatus}
+                  //deleteTodo={handleDeleteTodo}
                 />
               ))
             ) : (
@@ -133,8 +101,8 @@ export default function TodoCard({ id }: TodoCardProps) {
                   todo={todo}
                   isTodoCardRelated={false}
                   inTodoCard
-                  toggleTodoStatus={toggleTodoStatus}
-                  deleteTodo={handleDeleteTodo}
+                  //  toggleTodoStatus={toggleTodoStatus}
+                  //deleteTodo={handleDeleteTodo}
                 />
               ))
             ) : (
@@ -143,7 +111,6 @@ export default function TodoCard({ id }: TodoCardProps) {
           </ul>
         </div>
       </div>
-
       {hasMoreThanFiveTodos && (
         <div className="mt-4 flex justify-center">
           <button

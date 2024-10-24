@@ -6,6 +6,7 @@ import { AxiosError } from "axios";
 
 import { useGoalStore, GoalType } from "@/store/goalStore";
 import { ErrorType } from "@/api/goalAPI";
+import { useTodoStore } from "@/store/todoStore";
 
 export type EditGoalTitleModalProps = {
   closeEditTitle: () => void;
@@ -13,6 +14,7 @@ export type EditGoalTitleModalProps = {
 };
 
 export default function EditGoalTitleModal({ closeEditTitle, goals }: EditGoalTitleModalProps) {
+  const { updateTodos } = useTodoStore();
   const [title, setTitle] = useState("");
   const { updateGoal } = useGoalStore();
 
@@ -21,7 +23,9 @@ export default function EditGoalTitleModal({ closeEditTitle, goals }: EditGoalTi
 
     try {
       await updateGoal(goals.id, title);
+      updateTodos();
       closeEditTitle();
+      toast.success("목표 제목이 수정되었습니다");
     } catch (error) {
       const axiosError = error as AxiosError<ErrorType>;
       toast.error(axiosError.message);

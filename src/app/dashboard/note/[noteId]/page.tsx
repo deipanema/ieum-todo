@@ -8,7 +8,7 @@ import useModal from "@/hook/useModal";
 import { getNote, patchNotes, postNotes } from "@/api/noteAPI";
 import { getTodos } from "@/api/todoAPI";
 import UploadLinkModal from "@/components/UploadLinkModal";
-import { NoteType, TodoType } from "@/app/Types/TodoGoalType";
+import { NoteType, TodoType } from "@/app/types/todoGoalType";
 
 export default function NotePage() {
   const router = useRouter();
@@ -26,7 +26,6 @@ export default function NotePage() {
   const loadNoteData = async () => {
     const todoResponse = await getTodos(goalId);
     const selectedTodo = todoResponse.todos.find((todo: TodoType) => todo.id === todoId);
-    console.log(selectedTodo);
     setTodo(selectedTodo);
 
     const noteResponse = await getNote(selectedTodo.noteId);
@@ -56,83 +55,17 @@ export default function NotePage() {
     loadNoteData();
   }, []);
 
-  // 노트와 할 일 가져오는 함수
-  // const fetchNote = async () => {
-  //   const todoResponse = await getTodos(goalId);
-  //   const findTodo = todoResponse.todos.find((todo: TodoType) => todo.id === todoId);
-  //   setTodo(findTodo);
-
-  //   if (findTodo?.noteId) {
-  //     const noteResponse = await getNotes(findTodo.noteId);
-  //     return noteResponse; // 노트 데이터 반환
-  //   }
-
-  //   return null; // 노트가 없을 경우 null 반환
-  // };
-
-  // // React Query를 사용하여 노트 데이터를 가져옴
-  // const {
-  //   data: noteData,
-  //   isLoading,
-  //   isError,
-  // } = useQuery({
-  //   queryKey: ["note", todoId], // 고유 쿼리 키 설정
-  //   queryFn: fetchNote,
-  //   enabled: !!todoId, // todoId가 존재할 때만 쿼리 실행
-  // });
-
-  // noteData가 변경되면 상태 업데이트
-  // useEffect(() => {
-  //   if (noteData) {
-  //     setNote(noteData);
-  //     setTitle(noteData.title);
-  //     setContent(noteData.content);
-  //     setLink(noteData.linkUrl);
-  //   }
-  // }, [noteData]);
-
-  // 제출 처리
-  // const handleSubmit = async (type: string) => {
-  //   if (type === "create") {
-  //     const response = await postNotes(todoId, title, content, link ? link : null);
-  //     if (response) {
-  //       setNote(response);
-  //       router.push(`/dashboard/goal/${goalId}`);
-  //       toast.success("작성완료");
-  //     }
-  //   } else {
-  //     const response = await patchNotes(Number(note?.id), title, content, link ? link : null);
-  //     if (response) {
-  //       setNote(response.data);
-  //       router.push(`/dashboard/goal/${goalId}`);
-  //       toast.success("수정완료");
-  //     }
-  //   }
-  // };
-
   const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
     if (value.length <= 30) setTitle(value);
   };
 
-  // 임시저장
   const saveDraft = () => {
     const tempData = { title, content, link };
     localStorage.setItem(`note${todoId}`, JSON.stringify(tempData));
     toast.success("임시 저장이 완료되었습니다.");
   };
-
-  // const autoSaveDraft = () => {
-  //   const intervalId = setInterval(
-  //     () => {
-  //       saveDraft();
-  //     },
-  //     5 * 60 * 1000,
-  //   ); // 5분마다 저장
-
-  //   return () => clearInterval(intervalId);
-  // };
 
   const loadSavedDraft = () => {
     const savedNote = localStorage.getItem(`note${todoId}`);
@@ -142,23 +75,11 @@ export default function NotePage() {
       setContent(content || "");
       setLink(link || "");
       localStorage.removeItem(`note${todoId}`);
-      toast.success("임시 저장된 노트를 불러왔습니다.");
+      toast.success("임시 저장된 내용을 불러왔습니다.");
     } else {
-      toast.info("임시 저장된 노트가 없습니다.");
+      toast.info("임시 저장된 내용이 없습니다.");
     }
   };
-
-  // useEffect(() => {
-  //   autoSaveDraft();
-  // }, []);
-
-  // if (isError) {
-  //   return <p>노트를 불러오는 데 오류가 발생했습니다.</p>;
-  // }
-
-  // if (isLoading) {
-  //   return <LoadingScreen />;
-  // }
 
   return (
     <div className="flex">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { InitialTodoType } from "@/app/Types/TodoGoalType";
+import { InitialTodoType } from "@/app/types/todoGoalType";
 
 type LinkUploadProps = {
   closeSecond: () => void;

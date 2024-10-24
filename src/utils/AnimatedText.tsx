@@ -37,7 +37,7 @@ const AnimatedText = ({ text, onClick }: AnimatedTextProps) => {
 
   return (
     <button
-      className="text-3 text-slate-400 hover:underline"
+      className="text-3 font-semibold text-slate-400 hover:underline"
       ref={textRef}
       onClick={onClick}
       onMouseEnter={handleMouseEnter}

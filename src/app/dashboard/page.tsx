@@ -11,13 +11,15 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { getInfinityScrollGoals } from "@/api/goalAPI";
 import { getAllTodos } from "@/api/todoAPI";
 
-import { GoalType, TodoType } from "../Types/TodoGoalType";
+import { GoalType, TodoType } from "../types/todoGoalType";
 
 import TodoCard from "./components/TodoCard";
 import ProgressTracker from "./components/ProgressTracker";
 import TodoItem from "./components/TodoItem";
+import { useTodoStore } from "@/store/todoStore";
 
 export default function DashboardPage() {
+  const { isUpdated } = useTodoStore();
   const [recentTodos, setRecentTodos] = useState<TodoType[]>([]);
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [completionRatio, setCompletionRatio] = useState(0);
@@ -31,7 +33,7 @@ export default function DashboardPage() {
     isFetchingNextPage,
     isLoading: isGoalsLoading,
   } = useInfiniteQuery({
-    queryKey: ["goals"],
+    queryKey: ["infiniteGoals"],
     queryFn: async ({ pageParam }) => {
       const response = await getInfinityScrollGoals({ cursor: pageParam, size: 3, sortOrder: "oldest" });
       return response;
@@ -56,6 +58,7 @@ export default function DashboardPage() {
   // 정렬 및 최근 할 일 설정
   const loadDashboardData = async () => {
     const todosResponse = await getAllTodos();
+
     if (todosResponse) {
       const todoTotalCount = todosResponse.totalCount;
       const doneTodos = todosResponse.todos.filter((todo: TodoType) => todo.done === true);
@@ -70,11 +73,10 @@ export default function DashboardPage() {
   useEffect(() => {
     loadDashboardData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isUpdated]);
 
   // 로딩 상태 처리
   if (isGoalsLoading) {
-    console.log("여기 들리니?");
     return <LoadingScreen />;
   }
 

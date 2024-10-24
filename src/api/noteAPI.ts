@@ -81,11 +81,8 @@ export async function patchNotes(noteId: number, title: string, content: string,
 export default async function deleteNote(noteId: number) {
   try {
     const response = await api.delete(`notes/${noteId}`);
-    console.log(response);
-    console.log(response.data);
     return response.data;
   } catch (e) {
     const error = e as ErrorType;
-    console.log(error);
   }
 }

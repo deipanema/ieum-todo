@@ -44,7 +44,6 @@ export const getTodos = async (id: number, done?: boolean, size?: number) => {
     const response = await api.get(
       `/todos?goalId=${id}&${done ? `done=${done}&` : done === false ? "done=false&" : ""}${size ? `size=${size}` : "size=27"}`,
     );
-    //console.log(response.data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ErrorType>;
@@ -60,7 +59,6 @@ export const postFile = async (file: File) => {
     const response = await api.post(`/files`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    console.log(response.data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ErrorType>;
@@ -76,10 +74,7 @@ export const createTodo = async (
 ): Promise<TodoType> => {
   try {
     const payload = { title, goalId, fileUrl, linkUrl };
-    console.log(title, goalId);
-    console.log("😲");
     const response = await api.post<TodoType>(`/todos`, payload);
-    console.log(response);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -92,7 +87,6 @@ export const createTodo = async (
 export const updateTodo = async (todoId: number, updates: Partial<TodoType>): Promise<TodoType> => {
   try {
     const response = await api.patch<TodoType>(`/todos/${todoId}`, updates);
-    console.log();
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ErrorType>;

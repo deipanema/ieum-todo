@@ -10,27 +10,30 @@ import { getTodos } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import EditGoalTitleModal from "@/components/EditGoalTitleModal";
-import { GoalType, TodoType } from "@/app/Types/TodoGoalType";
+import { GoalType, TodoType } from "@/app/types/todoGoalType";
+import { useGoalStore } from "@/store/goalStore";
 
 import ProgressBar from "../../components/ProgressBar";
 import TodoItem from "../../components/TodoItem";
+import { useTodoStore } from "@/store/todoStore";
 
 type GoalPageProps = {
   params: { goalId: string; title: string };
 };
 
 export default function GoalPage({ params }: GoalPageProps) {
-  const { goalId, title } = params;
-  console.log(title);
+  const { goalId } = params;
+
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
-
+  const { isUpdated } = useTodoStore();
   const [goal, setGoal] = useState<GoalType | null>(null);
   const [todos, setTodos] = useState<TodoType[]>([]);
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState<TodoType | undefined>(undefined);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const { refreshGoals } = useGoalStore();
 
   // 할 일 데이터 가져오기
   const loadGoalData = async () => {
@@ -52,7 +55,7 @@ export default function GoalPage({ params }: GoalPageProps) {
       const response = await deleteGoal(goal?.id as number);
       if (response) {
         toast.success("목표가 삭제되었습니다.");
-        // await refreshGoals(); // 사이드바의 목표 상태를 업데이트
+        await refreshGoals(); // 사이드바의 목표 상태를 업데이트
         router.push("/");
       }
     } catch (error) {
@@ -80,7 +83,8 @@ export default function GoalPage({ params }: GoalPageProps) {
 
   useEffect(() => {
     loadGoalData();
-  }, [progressPercentage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progressPercentage, isUpdated]);
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -96,10 +100,6 @@ export default function GoalPage({ params }: GoalPageProps) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
-
-  // if (isTodosLoading) {
-  //   return <LoadingScreen />;
-  // }
 
   return (
     <div className="mt-[51px] h-auto min-h-[calc(100vh)] w-full select-none bg-slate-100 lg:mt-0 lg:h-screen">

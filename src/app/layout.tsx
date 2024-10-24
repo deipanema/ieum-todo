@@ -1,11 +1,8 @@
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ReactNode } from "react";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
-
-import ToastProvider from "@/components/ToastProvider";
 
 import Provider from "./Provider";
 
@@ -29,11 +26,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${pretendard.variable} font-pretendard`}>
-        <Provider>
-          <SpeedInsights />
-          <ToastProvider />
-          {children}
-        </Provider>
+        <Provider>{children}</Provider>
       </body>
     </html>
   );

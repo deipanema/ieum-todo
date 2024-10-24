@@ -6,48 +6,48 @@ import { useEffect, useRef, useState } from "react";
 
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
-import { NoteType, TodoType } from "@/app/Types/TodoGoalType";
 import { getNotes } from "@/api/noteAPI";
+import { NoteType, TodoType } from "@/app/types/todoGoalType";
+import { deleteTodo, toggleTodo } from "@/api/todoAPI";
 
 import NoteViewer from "./NoteViewer";
+import { useTodoStore } from "@/store/todoStore";
 
 type TodoProps = {
   todo: TodoType;
   isTodoCardRelated?: boolean;
   inTodoCard?: boolean;
-  toggleTodoStatus?: (todo: TodoType) => Promise<void>;
-  deleteTodo?: (todoId: number) => Promise<void>;
 };
 
-export default function TodoItem({
-  todo,
-  isTodoCardRelated = true,
-  inTodoCard,
-  toggleTodoStatus,
-  deleteTodo,
-}: TodoProps) {
+export default function TodoItem({ todo, isTodoCardRelated = true, inTodoCard }: TodoProps) {
   const router = useRouter();
   const { Modal, openModal, closeModal } = useModal();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [noteContent, setNoteContent] = useState<NoteType>();
+  const { updateTodos } = useTodoStore();
 
   const loadNoteContent = async () => {
     if (todo.noteId) {
       const response = await getNotes(todo.noteId);
       if (response) {
-        console.log("🖐️🖐️🖐️🖐️🖐️🖐️🖐️🖐️");
-        console.log(response);
         setNoteContent(response);
       }
     }
   };
 
-  const handleDelete = async () => {
-    if (deleteTodo) {
-      await deleteTodo(todo.id);
-    }
+  // 할 일 상태 토글
+  const toggleTodoStatus = async (todo: TodoType) => {
+    const updatedTodo = { ...todo, done: !todo.done };
+    const response = await toggleTodo(todo.id, updatedTodo);
+
+    if (response) updateTodos();
+  };
+
+  const handleDeleteTodo = async () => {
+    await deleteTodo(todo.id);
+    updateTodos();
   };
 
   useEffect(() => {
@@ -82,13 +82,10 @@ export default function TodoItem({
             height={todo.done === true ? 18 : 24}
             alt="checkbox-icon"
             onClick={() => {
-              if (toggleTodoStatus) {
-                toggleTodoStatus(todo);
-              }
+              toggleTodoStatus(todo);
             }}
           />
-
-          <span className={`text-sm ${todo.done ? "line-through" : ""}`}>{todo.title}</span>
+          <span className={`text-sm ${todo.done ? "line-through" : ""}truncate`}>{todo.title}</span>
         </li>
         {isTodoCardRelated && (
           <div className="flex items-center gap-2">
@@ -172,7 +169,7 @@ export default function TodoItem({
               >
                 수정하기
               </p>
-              <p className="cursor-pointer p-3 hover:bg-slate-200" onClick={handleDelete}>
+              <p className="cursor-pointer p-3 hover:bg-slate-200" onClick={handleDeleteTodo}>
                 삭제하기
               </p>
             </div>
@@ -180,7 +177,7 @@ export default function TodoItem({
         </div>
       </ul>
       <Modal name="EDIT_TODO" title="할 일 수정">
-        <CreateNewTodo closeCreateNewTodo={closeModal} todo={todo} selectedGoalId={todo.goal.id} isEditing={true} />
+        <CreateNewTodo closeCreateNewTodo={closeModal} todo={todo} selectedGoalId={todo.goal?.id} isEditing={true} />
       </Modal>
       <NoteViewer isNoteOpen={isNoteOpen} setIsNoteOpen={setIsNoteOpen} noteContent={noteContent} />
     </div>
