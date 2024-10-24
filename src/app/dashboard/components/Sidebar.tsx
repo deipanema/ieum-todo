@@ -13,7 +13,7 @@ import AnimatedText from "@/utils/AnimatedText";
 import { useGoalStore } from "@/store/goalStore";
 import { useAuthStore } from "@/store/authStore";
 import CreateNewTodo from "@/components/CreateNewTodo";
-import { GoalType } from "@/app/Types/TodoGoalType";
+import { GoalType } from "@/app/types/todoGoalType";
 
 interface GoalsPage {
   goals: GoalType[];
@@ -32,53 +32,49 @@ export default function SideBar() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  const { user } = useAuthStore(); // 쿼리 클라이언트 인스턴스 생성
+  const { user } = useAuthStore();
 
   const queryClient = useQueryClient();
 
   const handleLogout = async () => {
     const success = await logout();
-
-    if (success) {
-      router.push("/");
-    } else {
-      toast.error("로그아웃에 실패했습니다.");
-    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    success ? router.push("/") : toast.error("로그아웃에 실패했습니다.");
   };
 
-  // Sidebar에서 새 목표를 추가하는 부분
+  // 새 목표 추가
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (goalInput.trim()) {
-      const newGoal: GoalType = await addGoal(goalInput); // 새 목표 추가
+    if (!goalInput.trim()) {
+      toast.warn("목표를 입력해 주세요.");
+      return setInputVisible(false);
+    }
+
+    if (goalInput.length > 20) {
+      toast.warn("목표는 20자 이내로 입력해 주세요.");
+      return;
+    }
+
+    try {
+      const newGoal: GoalType = await addGoal(goalInput);
       setGoalInput("");
       setInputVisible(false);
 
-      // 무한 스크롤 데이터를 업데이트
+      // 새로운 목표 추가 후 쿼리 데이터 업데이트
       queryClient.setQueryData<GoalsData>(["goals"], (oldData) => {
         if (!oldData) return { pages: [{ goals: [newGoal], nextCursor: null }], pageParams: [undefined] };
 
-        const newPages = oldData.pages.map((page, index) => {
-          if (index === 0) {
-            return {
-              ...page,
-              goals: [newGoal, ...page.goals],
-            };
-          }
-          return page;
-        });
+        const newPages = oldData.pages.map((page, index) =>
+          index === 0 ? { ...page, goals: [newGoal, ...page.goals] } : page,
+        );
 
-        return {
-          ...oldData,
-          pages: newPages,
-        };
+        return { ...oldData, pages: newPages };
       });
 
       queryClient.invalidateQueries({ queryKey: ["goals"] });
-    } else {
-      toast.warn("목표를 입력해 주세요.");
-      setInputVisible(false);
+    } catch (error) {
+      toast.error("새로운 목표가 추가되지 않았습니다.");
     }
   };
 
@@ -88,9 +84,7 @@ export default function SideBar() {
   }, [refreshGoals]);
 
   useEffect(() => {
-    if (inputVisible && inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (inputVisible && inputRef.current) inputRef.current.focus();
   }, [inputVisible]);
 
   // 스켈레톤 UI 컴포넌트
@@ -99,7 +93,7 @@ export default function SideBar() {
       {Array(5)
         .fill("")
         .map((_, index) => (
-          <li key={index} className="h-6 w-[231px] animate-pulse rounded bg-gray-200"></li>
+          <li key={index} className="h-6 w-[231px] animate-pulse rounded bg-slate-200"></li>
         ))}
     </ul>
   );
@@ -171,7 +165,7 @@ export default function SideBar() {
               ) : (
                 <ul className="flex flex-col gap-4">
                   {goals.map((goal) => (
-                    <li key={goal.id} className="max-w-[231px] overflow-hidden text-ellipsis whitespace-nowrap">
+                    <li key={goal.id} className="max-w-[231px] truncate">
                       <Link href={`/dashboard/goal/${goal.id}`}>・{goal.title}</Link>
                     </li>
                   ))}

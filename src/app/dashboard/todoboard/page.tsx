@@ -5,15 +5,17 @@ import { useEffect, useState } from "react";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
 import { getAllTodos } from "@/api/todoAPI";
-import { TodoType } from "@/app/Types/TodoGoalType";
+import { TodoType } from "@/app/types/todoGoalType";
 
 import TodoItem from "../components/TodoItem";
+import { useTodoStore } from "@/store/todoStore";
 
 type StatusType = "All" | "Todo" | "Done";
 
 const statuses: StatusType[] = ["All", "Todo", "Done"];
 
 export default function TodoboardPage() {
+  const { isUpdated } = useTodoStore();
   const [todos, setTodos] = useState<TodoType[]>([]);
   const [status, setStatus] = useState<StatusType>("All");
   const { Modal, openModal, closeModal } = useModal();
@@ -25,7 +27,7 @@ export default function TodoboardPage() {
 
   useEffect(() => {
     loadTodoboardData();
-  }, []);
+  }, [isUpdated]);
 
   const renderTodos = () => {
     switch (status) {

@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { getNotes } from "@/api/noteAPI";
-import { NoteType } from "@/app/Types/TodoGoalType";
+import { NoteType } from "@/app/types/todoGoalType";
 
 import NoteItem from "../../components/NoteItem";
 
@@ -17,7 +17,6 @@ export default function NotesPage() {
 
   const loadNotesData = async () => {
     const response = await getNotes(goalId);
-    console.log(response);
 
     if (response) {
       setNotes(response.notes);
