@@ -11,8 +11,8 @@ import useModal from "@/hook/useModal";
 import { useTodoStore } from "@/store/todoStore";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import EditGoalTitleModal from "@/components/EditGoalTitleModal";
-import { GoalType, TodoType } from "@/app/types/todoGoalType";
 import { useGoalStore } from "@/store/goalStore";
+import { GoalType, TodoType } from "@/type";
 
 import ProgressBar from "../../components/ProgressBar";
 import TodoItem from "../../components/TodoItem";

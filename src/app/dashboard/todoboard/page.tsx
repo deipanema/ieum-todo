@@ -6,7 +6,7 @@ import { useTodoStore } from "@/store/todoStore";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import useModal from "@/hook/useModal";
 import { getAllTodos } from "@/api/todoAPI";
-import { TodoType } from "@/app/types/todoGoalType";
+import { TodoType } from "@/type";
 
 import TodoItem from "../components/TodoItem";
 

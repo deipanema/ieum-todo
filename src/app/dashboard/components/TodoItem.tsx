@@ -7,9 +7,9 @@ import { useEffect, useRef, useState } from "react";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import { getNotes } from "@/api/noteAPI";
-import { NoteType, TodoType } from "@/app/types/todoGoalType";
 import { deleteTodo, toggleTodo } from "@/api/todoAPI";
 import { useTodoStore } from "@/store/todoStore";
+import { NoteType, TodoType } from "@/type";
 
 import NoteViewer from "./NoteViewer";
 

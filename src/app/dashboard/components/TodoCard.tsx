@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation";
 import { getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
 import { useTodoStore } from "@/store/todoStore";
-import { GoalType, TodoType } from "@/app/types/todoGoalType";
 import useModal from "@/hook/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
+import { GoalType, TodoType } from "@/type";
 
 import TodoItem from "./TodoItem";
 import ProgressBar from "./ProgressBar";

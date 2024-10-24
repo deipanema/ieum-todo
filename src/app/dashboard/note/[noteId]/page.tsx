@@ -8,7 +8,7 @@ import useModal from "@/hook/useModal";
 import { getNote, patchNotes, postNotes } from "@/api/noteAPI";
 import { getTodos } from "@/api/todoAPI";
 import UploadLinkModal from "@/components/UploadLinkModal";
-import { NoteType, TodoType } from "@/app/types/todoGoalType";
+import { NoteType, TodoType } from "@/type";
 
 export default function NotePage() {
   const router = useRouter();

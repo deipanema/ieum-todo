@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import deleteNote, { getNote } from "@/api/noteAPI";
-import { NoteType } from "@/app/types/todoGoalType";
+import { NoteType } from "@/type";
 
 import NoteViewer from "./NoteViewer";
 

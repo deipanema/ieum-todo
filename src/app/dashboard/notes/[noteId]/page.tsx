@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { getNotes } from "@/api/noteAPI";
-import { NoteType } from "@/app/types/todoGoalType";
+import { NoteType } from "@/type";
 
 import NoteItem from "../../components/NoteItem";
 

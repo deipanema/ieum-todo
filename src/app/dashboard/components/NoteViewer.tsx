@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Dispatch, SetStateAction } from "react";
 
-import { NoteType } from "@/app/types/todoGoalType";
+import { NoteType } from "@/type";
 
 type NoteViewerProps = {
   isNoteOpen: boolean;

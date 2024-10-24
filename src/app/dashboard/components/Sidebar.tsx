@@ -13,7 +13,7 @@ import AnimatedText from "@/utils/AnimatedText";
 import { useGoalStore } from "@/store/goalStore";
 import { useAuthStore } from "@/store/authStore";
 import CreateNewTodo from "@/components/CreateNewTodo";
-import { GoalType } from "@/app/types/todoGoalType";
+import { GoalType } from "@/type";
 
 interface GoalsPage {
   goals: GoalType[];

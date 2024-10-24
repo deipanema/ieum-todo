@@ -11,8 +11,7 @@ import { getAllTodos } from "@/api/todoAPI";
 import { useTodoStore } from "@/store/todoStore";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import LoadingScreen from "@/components/LoadingScreen";
-
-import { GoalType, TodoType } from "../types/todoGoalType";
+import { GoalType, TodoType } from "@/type";
 
 import TodoCard from "./components/TodoCard";
 import ProgressTracker from "./components/ProgressTracker";

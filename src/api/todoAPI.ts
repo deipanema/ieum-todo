@@ -2,31 +2,9 @@ import { AxiosError } from "axios";
 import { toast } from "react-toastify";
 
 import api from "@/lib/api";
+import { TodoType } from "@/type";
 
 import { ErrorType } from "./goalAPI";
-
-export type TodoType = {
-  noteId: number | null;
-  done: boolean;
-  linkUrl?: string | null;
-  fileUrl?: string | null;
-  title: string;
-  id: number;
-  goal: GoalType;
-  userId: number;
-  teamId: string;
-  updatedAt: string;
-  createdAt: string;
-};
-
-export type GoalType = {
-  id: number;
-  teamId: string;
-  title: string;
-  userId: number;
-  createdAt: string;
-  updatedAt: string;
-};
 
 export const getAllTodos = async () => {
   try {

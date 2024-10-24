@@ -5,8 +5,8 @@ import Image from "next/image";
 import { useTodoStore } from "@/store/todoStore";
 import { createTodo, postFile, updateTodo } from "@/api/todoAPI";
 import useModal from "@/hook/useModal";
-import { GoalType, InitialTodoType, TodoType } from "@/app/types/todoGoalType";
 import { getGoals } from "@/api/goalAPI";
+import { GoalType, InitialTodoType, TodoType } from "@/type";
 
 import LinkUpload from "./LinkUpload";
 

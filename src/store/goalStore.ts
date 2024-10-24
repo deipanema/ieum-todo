@@ -1,15 +1,7 @@
 import { create } from "zustand";
 
 import { getGoals, PatchGoal, PostGoal } from "@/api/goalAPI";
-
-export type GoalType = {
-  id: number;
-  teamId: string;
-  userId: number;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-};
+import { GoalType } from "@/type";
 
 export type GoalState = {
   goals: GoalType[];

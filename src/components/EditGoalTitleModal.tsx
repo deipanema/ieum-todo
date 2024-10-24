@@ -4,9 +4,10 @@ import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
 
-import { useGoalStore, GoalType } from "@/store/goalStore";
+import { useGoalStore } from "@/store/goalStore";
 import { ErrorType } from "@/api/goalAPI";
 import { useTodoStore } from "@/store/todoStore";
+import { GoalType } from "@/type";
 
 export type EditGoalTitleModalProps = {
   closeEditTitle: () => void;
