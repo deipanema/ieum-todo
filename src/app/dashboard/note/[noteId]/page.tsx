@@ -53,6 +53,8 @@ export default function NotePage() {
 
   useEffect(() => {
     loadNoteData();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {

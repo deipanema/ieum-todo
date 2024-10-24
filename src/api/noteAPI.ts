@@ -82,7 +82,8 @@ export default async function deleteNote(noteId: number) {
   try {
     const response = await api.delete(`notes/${noteId}`);
     return response.data;
-  } catch (e) {
-    const error = e as ErrorType;
+  } catch (error) {
+    const axiosError = error as AxiosError<ErrorType>;
+    console.error(axiosError.message);
   }
 }
