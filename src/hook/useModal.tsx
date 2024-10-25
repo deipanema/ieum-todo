@@ -1,8 +1,8 @@
 "use client";
 
 import { IoCloseOutline } from "react-icons/io5";
-import React, { ReactNode, useState } from "react";
-import ReactDOM from "react-dom";
+import React, { ReactNode, useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 
 type ModalProps = {
   name: string;
@@ -13,36 +13,50 @@ type ModalProps = {
 export default function useModal() {
   const [custom, setCustom] = useState("");
 
-  // 모달 열기 함수
   const openModal = (name: string) => {
     setCustom(name);
   };
 
-  // 모달 닫기 함수
   const closeModal = () => {
     setCustom("");
   };
 
-  const Modal = ({ name, title, children }: ModalProps) =>
-    ReactDOM.createPortal(
-      custom === name ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black bg-opacity-5" onClick={closeModal}></div>
+  const Modal = ({ name, children, title }: ModalProps) => {
+    if (typeof document === "undefined") return null;
+
+    return createPortal(
+      name === custom ? (
+        <div
+          className="fixed left-0 top-0 z-20 flex h-screen w-screen items-center justify-center"
+          onClick={closeModal}
+        >
           <div
-            className="relative z-50 w-full max-w-lg rounded-xl bg-white p-6"
-            onClick={(e) => e.stopPropagation()} // 모달 내부 클릭 시 닫히지 않게
+            role="dialog"
+            aria-modal="true"
+            className="relative h-auto w-auto rounded-xl bg-white p-6"
+            onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="mb-6 text-[18px] font-semibold">{title}</h2>
-            <IoCloseOutline
-              className="absolute right-5 top-6 cursor-pointer text-2xl text-slate-500 hover:text-slate-800"
-              onClick={closeModal} // 모달 닫기 버튼
-            />
-            {children}
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+              <button
+                type="button"
+                onClick={closeModal}
+                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Close modal"
+              >
+                <IoCloseOutline className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="my-4 h-[1px] w-full bg-gray-200" />
+
+            <div className="mt-4">{children}</div>
           </div>
         </div>
       ) : null,
       document.body,
     );
+  };
 
   return { Modal, openModal, closeModal };
 }
