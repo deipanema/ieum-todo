@@ -74,7 +74,9 @@ export default function InputField<T extends FieldValues>({
         aria-required="true"
         onBlur={handleBlur} // 입력 필드에서 포커스가 벗어날 때 handleBlur를 호출합니다.
       />
-      <small className="mb-5 text-sm text-red-50">{errorText}</small>
+      <small role="alert" className="mb-5 text-sm text-red-50">
+        {errorText}
+      </small>
     </>
   );
 }
