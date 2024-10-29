@@ -7,7 +7,6 @@ import { ErrorType } from "@/api/goalAPI";
 
 export const useSignup = () => {
   const router = useRouter();
-  console.log("1");
 
   return useMutation({
     mutationFn: signup,
