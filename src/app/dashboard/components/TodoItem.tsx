@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import useModal from "@/hook/useModal";
+import useModal from "@/hooks/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import { getNotes } from "@/api/noteAPI";
 import { deleteTodo, toggleTodo } from "@/api/todoAPI";

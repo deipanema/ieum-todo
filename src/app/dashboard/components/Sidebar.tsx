@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { logout } from "@/utils/authUtils";
-import useModal from "@/hook/useModal";
+import useModal from "@/hooks/useModal";
 import AnimatedText from "@/utils/AnimatedText";
 import { useGoalStore } from "@/store/goalStore";
 import { useAuthStore } from "@/store/authStore";
