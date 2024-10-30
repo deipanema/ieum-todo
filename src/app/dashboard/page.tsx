@@ -11,6 +11,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { getInfinityScrollGoals } from "@/api/goalAPI";
 import { getAllTodos } from "@/api/todoAPI";
 import { GoalType, TodoType } from "@/type";
+import { useTodoStore } from "@/store/todoStore";
 
 import TodoCard from "./components/TodoCard";
 import ProgressTracker from "./components/ProgressTracker";
@@ -21,6 +22,7 @@ export default function DashboardPage() {
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [completionRatio, setCompletionRatio] = useState(0);
   const { ref, inView } = useInView();
+  const { isUpdated } = useTodoStore();
 
   // 목표 데이터 무한 스크롤
   const {
@@ -69,7 +71,7 @@ export default function DashboardPage() {
   useEffect(() => {
     loadDashboardData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isUpdated]);
 
   // 로딩 상태 처리
   if (isGoalsLoading) {
