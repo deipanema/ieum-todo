@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
 import { useTodoStore } from "@/store/todoStore";
-import useModal from "@/hook/useModal";
+import useModal from "@/hooks/useModal";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import { GoalType, TodoType } from "@/type";
 

@@ -6,7 +6,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useSignup } from "@/hook/useSignup";
+import { useAuth } from "@/hooks/useAuth";
 
 import SubmitButton from "./SubmitButton";
 import InputField from "./InputField";
@@ -28,7 +28,7 @@ export default function SignupForm() {
     mode: "onChange", // 실시간 유효성 검사를 위해 추가
   });
 
-  const signupMutation = useSignup();
+  const { signupMutation } = useAuth();
 
   const onSubmit = async (data: FormData) => {
     signupMutation.mutate(data, {

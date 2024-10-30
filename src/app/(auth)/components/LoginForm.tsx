@@ -1,20 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { AxiosError } from "axios";
 
-import { login } from "@/utils/authUtils";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { useAuth } from "@/hooks/useAuth";
 
 type FormData = z.infer<typeof schema>;
 
 export default function LoginForm() {
-  const router = useRouter();
-  const [loginError, setLoginError] = useState<string | null>(null);
+  const { loginMutation } = useAuth();
 
   const {
     register,
@@ -26,22 +22,9 @@ export default function LoginForm() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: { email: string; password: string }) => {
     clearErrors();
-    setLoginError(null);
-
-    try {
-      const success = await login(data.email, data.password);
-      if (success) {
-        router.push("/dashboard");
-      } else {
-        setLoginError("로그인에 실패했습니다. 다시 시도해 주세요.");
-      }
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      console.error("로그인 중 오류 발생:", axiosError);
-      setLoginError("로그인 실패했습니다. 다시 시도해 주세요.");
-    }
+    loginMutation.mutate(data);
   };
 
   return (
@@ -77,7 +60,6 @@ export default function LoginForm() {
       />
       {errors.email && <small className="text-sm text-red-50">{errors.email.message}</small>}
       {errors.password && <small className="mb-5 text-sm text-red-50">{errors.password.message}</small>}
-      {loginError && <small className="mb-5 text-sm text-red-50">{loginError}</small>}
       <button
         type="submit"
         disabled={isSubmitting}
