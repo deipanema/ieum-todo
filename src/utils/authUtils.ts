@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 export const login = async (email: string, password: string) => {
   try {
     const { data } = await api.post("/auth/login", { email, password });
-    document.cookie = `accessToken=${data.accessToken}; path=/; max-age=86400; secure; SameSite=Strict`;
+    document.cookie = `accessToken=${data.accessToken}; path=/; max-age=3600; secure; SameSite=Strict`;
     localStorage.setItem("refreshToken", data.refreshToken);
     useAuthStore.getState().setUser(data.user);
     useAuthStore.getState().setIsAuthenticated(true);

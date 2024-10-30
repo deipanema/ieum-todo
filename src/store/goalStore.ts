@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { getGoals, PatchGoal, PostGoal } from "@/api/goalAPI";
+import { getGoals, patchGoal, postGoal } from "@/api/goalAPI";
 import { GoalType } from "@/type";
 
 export type GoalState = {
@@ -14,7 +14,7 @@ export const useGoalStore = create<GoalState>((set) => ({
   goals: [],
 
   addGoal: async (title: string): Promise<GoalType> => {
-    const response = await PostGoal(title);
+    const response = await postGoal(title);
     const newGoal: GoalType = response?.data;
 
     set((state) => ({
@@ -27,7 +27,7 @@ export const useGoalStore = create<GoalState>((set) => ({
   },
 
   updateGoal: async (id: number, title: string): Promise<GoalType> => {
-    const response = await PatchGoal(id, title); // PatchGoal 호출
+    const response = await patchGoal(id, title); // PatchGoal 호출
     const updatedGoal: GoalType = response?.data; // 응답의 data에서 GoalType 추출
 
     set((state) => ({

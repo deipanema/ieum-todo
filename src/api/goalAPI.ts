@@ -23,7 +23,7 @@ export const getGoals = async () => {
   }
 };
 
-export const PostGoal = async (title: string) => {
+export const postGoal = async (title: string) => {
   try {
     return await api.post(`/goals`, {
       title,
@@ -53,7 +53,7 @@ export const deleteGoal = async (id: number) => {
   }
 };
 
-export const PatchGoal = async (id: number, title: string) => {
+export const patchGoal = async (id: number, title: string) => {
   try {
     const response = await api.patch(`/goals/${id}`, { title });
     return response;
