@@ -12,9 +12,6 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 
 type FormData = z.infer<typeof schema>;
 
-//TODO: 회원가입 시 로그인으로 바로 보내기
-//TODO: 회원가입 버튼 클릭 시 폭죽 날리기
-
 export default function LoginForm() {
   const router = useRouter();
   const [loginError, setLoginError] = useState<string | null>(null);
