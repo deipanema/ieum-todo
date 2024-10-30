@@ -7,7 +7,7 @@ import { AxiosError } from "axios";
 
 import { deleteGoal, ErrorType, getGoal } from "@/api/goalAPI";
 import { getTodos } from "@/api/todoAPI";
-import useModal from "@/hook/useModal";
+import useModal from "@/hooks/useModal";
 import { useTodoStore } from "@/store/todoStore";
 import CreateNewTodo from "@/components/CreateNewTodo";
 import EditGoalTitleModal from "@/components/EditGoalTitleModal";

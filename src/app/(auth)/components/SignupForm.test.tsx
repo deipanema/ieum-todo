@@ -2,11 +2,14 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { vi, Mock } from "vitest";
 import userEvent from "@testing-library/user-event";
 
-import { useSignup } from "@/hook/useSignup";
+import { useAuth } from "@/hooks/useAuth";
 
 import SignupForm from "./SignupForm";
 
 // Mock modules
+
+vi.mock("@/hooks/useAuth");
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
@@ -25,17 +28,17 @@ vi.mock("react-toastify", () => ({
 }));
 
 describe("SignupForm", () => {
-  const mockMutate = vi.fn();
+  const mockSignupMutation = { mutate: vi.fn() };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useSignup as Mock).mockReturnValue({
-      mutate: mockMutate,
+    (useAuth as Mock).mockReturnValue({
+      signupMutation: mockSignupMutation,
       isLoading: false,
     });
   });
-  
-  describe("렌더링 테스트", () => {
+
+  describe("SignupForm 렌더링 테스트", () => {
     it("모든 입력 필드와 제출 버튼이 렌더링되어야 한다", () => {
       render(<SignupForm />);
 
@@ -117,7 +120,7 @@ describe("SignupForm", () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(mockMutate).toHaveBeenCalledWith(
+        expect(mockSignupMutation.mutate).toHaveBeenCalledWith(
           expect.objectContaining({
             nickname: validFormData.nickname,
             email: validFormData.email,
@@ -137,7 +140,7 @@ describe("SignupForm", () => {
         },
       };
 
-      mockMutate.mockImplementation((_, options) => {
+      mockSignupMutation.mutate.mockImplementation((_, options) => {
         options.onError(mockError);
       });
 

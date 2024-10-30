@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { useTodoStore } from "@/store/todoStore";
 import CreateNewTodo from "@/components/CreateNewTodo";
-import useModal from "@/hook/useModal";
+import useModal from "@/hooks/useModal";
 import { getAllTodos } from "@/api/todoAPI";
 import { TodoType } from "@/type";
 
