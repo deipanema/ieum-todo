@@ -6,9 +6,16 @@ const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
+// 쿠키에서 특정 키의 값을 가져오는 함수
+const getCookieValue = (key: string) => {
+  const cookies = document.cookie.split("; ");
+  const cookie = cookies.find((cookie) => cookie.startsWith(`${key}=`));
+  return cookie ? cookie.split("=")[1] : null;
+};
+
 api.interceptors.request.use(
   (config) => {
-    const token = document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
+    const token = getCookieValue("accessToken"); // getCookieValue 함수를 사용하여 accessToken을 가져옴
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,6 +33,7 @@ api.interceptors.response.use(
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const refreshToken = localStorage.getItem("refreshToken");
+
       if (refreshToken) {
         try {
           const { data } = await axios.post("/auth/tokens", { refreshToken });

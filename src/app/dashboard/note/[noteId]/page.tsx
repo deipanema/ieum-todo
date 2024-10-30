@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ChangeEvent, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import useModal from "@/hook/useModal";
+import useModal from "@/hooks/useModal";
 import { getNote, patchNotes, postNotes } from "@/api/noteAPI";
 import { getTodos } from "@/api/todoAPI";
 import UploadLinkModal from "@/components/UploadLinkModal";
